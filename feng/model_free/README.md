@@ -12,8 +12,9 @@ At each time step, the probability of each action is calculated using the softma
     This document provides a basic infomaiton of impeement RL model free model for advise task.
 ---
 
-⚠️ **Important:** Are the State and aciton correct?
-⚠️ **Important:** Can define the numerate by myself?
+⚠️ **Question:** Are the State and aciton correct?
+
+⚠️ **Question:** Can define the numerate by myself?
 
 ## States
 
@@ -38,7 +39,7 @@ Each state offers three possible actions:
 ---
 
 ## Reward Structure
-⚠️ **Important:** Is the Reward defined Correct? for advise make it -1?
+⚠️ **Question:** Is the Reward defined Correct? for advise make it -1?
 
 Rewards are given based on the outcomes of actions in specific states:
 
@@ -57,8 +58,9 @@ Rewards are given based on the outcomes of actions in specific states:
 
 ## Parameters
 
-⚠️ **Important:** Should invese tempare be part of parameters?
-⚠️ **Important:** If yes, it will only be using after softmax during simpling?
+⚠️ **Question:** Should invese tempare be part of parameters?
+
+⚠️ **Question:** If yes, it will only be using after softmax during simpling?
 
 ### 1. **Discount Factor (λ)**  
    - Controls the weight of future rewards relative to immediate rewards.
@@ -124,6 +126,8 @@ A softmax function is applied to the Q-values of the current state to determine 
 5. **Next State**: Move Agent to next State, if win or lose state, start next trial
 
 
-⚠️ **Important:** How to simulataion
-⚠️ **Important:** Is the Q table random seed need to be fixed?
-⚠️ **Important:** Why the SPM is needed during the fit process?
+⚠️ **Question:** How to simulataion
+
+⚠️ **Question:** Is the Q table random seed need to be fixed?
+
+⚠️ **Question:** Why the SPM is needed during the fit process?
