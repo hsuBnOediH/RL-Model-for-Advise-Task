@@ -1,6 +1,7 @@
 /spm/
 /inputs/
 /results/
+/Active-Inference-Tutorial-Scripts-main/
 
-/.DS_Store
+.DS_Store
 *.asv

@@ -7,7 +7,7 @@ rng('default');
 clear all;
 
 % When runnng on cluster, read this var will be not empty
-ON_CLUSTER = getenv('ON_CLUSTER')
+ON_CLUSTER = getenv('ON_CLUSTER');
 % Detect the system
 % 'pc' for Windows, 'mac' for local Mac, 'cluster' for running on VM cluster
 env_sys = '';
@@ -63,17 +63,17 @@ end
 % RES_PATH:
 % If RES_PATH is not assigned (i.e., empty), it will be auto-generated relative to ROOT.
 % If RES_PATH is a relative path, it will be appended to the ROOT path.
-RES_PATH = '/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/results/model_comparison/';
+RES_PATH = '../../results/model_free/debug/';
 if ON_CLUSTER
     RES_PATH = getenv('RES_PATH');
-elseif ~isAbsolutePath(INPUT_PATH)
+elseif ~isAbsolutePath(RES_PATH)
     RES_PATH = fullfile(ROOT, RES_PATH);
 end
 
 % INPUT_PATH:
 % The folder path where the subject file is located. If INPUT_PATH is a relative path,
 % it will be appended to the ROOT path.
-INPUT_PATH = '/mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice';
+INPUT_PATH = '../../inputs/';
 if ON_CLUSTER
     INPUT_PATH = getenv('INPUT_PATH');
 elseif ~isAbsolutePath(INPUT_PATH)
@@ -111,9 +111,9 @@ if strcmp(env_sys, 'pc')
     tutorialPath = 'L:/rsmith/lab-members/cgoldman/Active-Inference-Tutorial-Scripts-main';
    
 elseif strcmp(env_sys, 'mac')
-    spmPath =  [ROOT '/spm/'];
-    spmDemPath = [ROOT '/spm/toolbox/DEM/'];
-    tutorialPath = [ROOT '/Active-Inference-Tutorial-Scripts-main'];
+    spmPath =  [ROOT '/../../spm/'];
+    spmDemPath = [ROOT '/../../spm/toolbox/DEM/'];
+    tutorialPath = [ROOT '/../../Active-Inference-Tutorial-Scripts-main'];
 
 elseif strcmp(env_sys, 'cluster')
     spmPath = '/mnt/dell_storage/labs/rsmith/all-studies/util/spm12';
@@ -126,13 +126,24 @@ addpath(spmDemPath);
 addpath(tutorialPath);
 
 
-all_params = struct();
+all_params = struct(...
+    'lr', 0.8, ...
+    'inv_temp', 4, ...
+    'discount_factor', 4, ...
+    'l_loss_value', 1);
 
 
 % Define an array of 10 field combinations (cell arrays)
-all_fields = {};
+all_fields = {
+    {'lr', 'inv_temp', 'discount_factor', 'l_loss_value'}, ...
+    {'lr', 'inv_temp', 'discount_factor', 'reward_value', 'l_loss_value'}, ...
 
-all_fixeds = {};
+};
+
+all_fixeds = {
+    {'omega', 0, 'eta', 1, 'state_exploration', 1, 'parameter_exploration', 0}, ...
+    {'eta', 1, 'state_exploration', 1, 'parameter_exploration', 0}, ...
+};
 
 
 field_params = all_fields{IDX_CANDIDATE}; % Retrieve the field for the given candidate
@@ -153,6 +164,15 @@ end
 if FIT && ~SIM
     % If only fitting is required
     disp('Performing fitting only...');
+
+    % data processing
+    preprocessed_data = get_preprocessed_data(FIT_SUBJECT,INPUT_PATH);
+
+    % inite the Q table, R table
+    q_model = init_q_learning_model(params);
+
+    % start update
+    model = model_update(q_model,preprocessed_data);
     
 
 elseif FIT && SIM
