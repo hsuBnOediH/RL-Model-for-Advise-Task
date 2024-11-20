@@ -127,9 +127,9 @@ addpath(tutorialPath);
 
 
 all_params = struct(...
-    'lr', 0.8, ...
-    'inv_temp', 4, ...
-    'discount_factor', 4, ...
+    'lr', 0.5, ...
+    'inv_temp', 1, ...
+    'discount_factor', 0.3, ...
     'l_loss_value', 1);
 
 
@@ -171,10 +171,20 @@ if FIT && ~SIM
     % inite the Q table, R table
     q_model = init_q_learning_model(params);
 
-    % start update
-    model = model_update(q_model,preprocessed_data);
-    
 
+
+    % start update
+    % LL = fitting_model(q_model,preprocessed_data);
+
+    M.L = @(P,M,U,Y)log_likelihood_func(P, M, U, Y);
+    % variance all 0.5 for each fitted parameter, nxn sparse matrix
+    M.pC= q_model.con_var;
+    M.pE = q_model.params; 
+    M.q_table = q_model.q_table;
+    % M.trialinfo = q_model.trialinfo;
+    U = preprocessed_data;
+    Y = preprocessed_data;
+    [Ep, Cp, F] = spm_nlsi_Newton(M, U, Y);
 elseif FIT && SIM
     disp('Performing fitting and simulation');
 

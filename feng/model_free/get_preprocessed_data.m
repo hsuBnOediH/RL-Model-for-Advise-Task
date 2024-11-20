@@ -42,23 +42,43 @@ function res = get_preprocessed_data(subject, input_folder_path)
 
         reward_table = subdat(subdat.event_type == 9 & ~(strcmp(subdat.result, "try left") | strcmp(subdat.result, "try right")), :);
         reward = reward_table.result;
+        reward = cellfun(@str2double, reward, 'UniformOutput', false);
 
         advice_flags = subdat.event_type == 9 & (strcmp(subdat.result, "try left") | strcmp(subdat.result, "try right"));
         advice_idxs = subdat.trial(advice_flags) + 1;
         advices = subdat.result(advice_flags);
 
+
+        party_sizes = reward_table.trial_type;
+        % party_sizes include string like '0.4_0.6_0.9_40', take the last number as the party size, split by '_' and take the last one
+        
+        % Loop through each string in praty_sizes
+        for i = 1:length(party_sizes)
+            % Split the string by '_' and take the last part
+            split_parts = split(party_sizes{i}, '_');
+            % Convert the last part to a number and store it in party_sizes
+            party_sizes{i} = split_parts{end};
+        end
+        % Convert party_sizes to a double array
+        party_sizes = cellfun(@str2double, party_sizes);
+
+        
+
+
         % Initialize 'res' as an empty structure array with the same length as 'response'
         res(length(response)) = struct('states', [], 'actions', []);
 
         % Define mapping for states and actions
-        state_map = struct('start', 0, 'lose', 1, 'win', 2, 'left',3,'right',4, 'advise_lose', 5, 'advise_win', 6);
-        action_map = struct('left', 0, 'right', 1, 'advise', 2);
+        state_map = struct('start', 1, 'lose', 2, 'win', 3, 'left',4,'right',5, 'advise_lose', 6, 'advise_win', 7);
+        action_map = struct('left',1, 'right', 2, 'advise', 3);
 
         % Loop through each trial
         for i = 1:length(response)
             % Initialize states and actions for each trial
             states = [state_map.start];
             actions = [];
+            rewards = [];
+            party_size = party_sizes(i);
             
             % Check if the trial took advice
             if ~ismember(i, advice_idxs)
@@ -68,8 +88,15 @@ function res = get_preprocessed_data(subject, input_folder_path)
                 % Check reward to set the win/lose state
                 if reward{i} > 0
                     states(end+1) = state_map.win;
+                    rewards(end+1) = 40;
                 else
                     states(end+1) = state_map.lose;
+                    % check the dinner size to see if it's large or small, large is -80, small is -40
+                    if party_size == 80
+                        rewards(end+1) = -80;
+                    else
+                        rewards(end+1) = -40;
+                    end
                 end
             else
                 % Advice was taken
@@ -82,14 +109,22 @@ function res = get_preprocessed_data(subject, input_folder_path)
                 % Check reward to set the advised win/lose state
                 if reward{i} > 0
                     states(end+1) = state_map.advise_win;
+                    rewards(end+1) = 20;
                 else
                     states(end+1) = state_map.advise_lose;
+                    % check the dinner size to see if it's large or small, large is -80, small is -40
+                    if party_size == 80
+                        rewards(end+1) = -80;
+                    else
+                        rewards(end+1) = -40;
+                    end
                 end
             end
             
             % Store the results in 'res' for the current trial
             res(i).states = states;
             res(i).actions = actions;
+            res(i).rewards = rewards;
         end
 
     end
