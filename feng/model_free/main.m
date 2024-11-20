@@ -128,21 +128,21 @@ addpath(tutorialPath);
 
 all_params = struct(...
     'lr', 0.5, ...
-    'inv_temp', 1, ...
-    'discount_factor', 0.3, ...
+    'inv_temp', 0.5, ...
+    'discount_factor', 0.1, ...
     'l_loss_value', 1);
 
 
 % Define an array of 10 field combinations (cell arrays)
 all_fields = {
-    {'lr', 'inv_temp', 'discount_factor', 'l_loss_value'}, ...
-    {'lr', 'inv_temp', 'discount_factor', 'reward_value', 'l_loss_value'}, ...
+    {'lr', 'inv_temp', 'discount_factor'}, ...
+    {'lr', 'inv_temp', 'discount_factor', 'reward_value'}, ...
 
 };
 
 all_fixeds = {
-    {'omega', 0, 'eta', 1, 'state_exploration', 1, 'parameter_exploration', 0}, ...
-    {'eta', 1, 'state_exploration', 1, 'parameter_exploration', 0}, ...
+    {}, ...
+    {}, ...
 };
 
 
@@ -185,6 +185,22 @@ if FIT && ~SIM
     U = preprocessed_data;
     Y = preprocessed_data;
     [Ep, Cp, F] = spm_nlsi_Newton(M, U, Y);
+
+    % transfor eP into valid range
+    fields = fieldnames(Ep);
+    for i = 1:length(fields)
+         % for lr and discount_factor range 0-1
+         field = fields{i};
+
+         if ismember(field, {'lr','lr_advice','lr_self','lr_left','lr_right','lr_win','lr_loss','discount_factor'})
+            Ep.(field) = 1/(1+exp(-Ep.(field)));
+        
+        elseif ismember(field, {'inv_temp'})
+            Ep.(field) = log(1+exp(Ep.(field)));
+        end
+    end
+
+    
 elseif FIT && SIM
     disp('Performing fitting and simulation');
 

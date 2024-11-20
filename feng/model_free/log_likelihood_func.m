@@ -8,57 +8,73 @@ function L = log_likelihood_func(P, M, U, Y),
     % Y is response, action and reward
     params = struct();
 
+    % check and transform the range of the parameters
+    % get the fields of the P
+    fields = fieldnames(P);
+    for i = 1:length(fields)
+         % for lr and discount_factor range 0-1
+         field = fields{i};
+
+         if ismember(field, {'lr','lr_advice','lr_self','lr_left','lr_right','lr_win','lr_loss','discount_factor'})
+            P.(field) = 1/(1+exp(-P.(field)));
+        
+        elseif ismember(field, {'inv_temp'})
+            P.(field) = log(1+exp(P.(field)));
+        end
+    end
+
+
     for i = 1:length(fields)
         if strcmp(fields{i},'lr')
             % with advie 
-            params.lr_advice_left_win = M.pE.lr;
-            params.lr_advice_left_loss = M.pE.lr;
-            params.lr_advice_right_win = M.pE.lr;
-            params.lr_advice_right_loss = M.pE.lr;
+            params.lr_advice_left_win = P.lr;
+            params.lr_advice_left_loss = P.lr;
+            params.lr_advice_right_win = P.lr;
+            params.lr_advice_right_loss = P.lr;
             % without advice
-            params.lr_self_left_win = M.pE.lr;
-            params.lr_self_left_loss = M.pE.lr;
-            params.lr_self_right_win = M.pE.lr;
-            params.lr_self_right_loss = M.pE.lr;
+            params.lr_self_left_win = P.lr;
+            params.lr_self_left_loss = P.lr;
+            params.lr_self_right_win = P.lr;
+            params.lr_self_right_loss = P.lr;
             single_lr = 1;
         elseif strcmp(fields{i},'lr_advie')
-            params.lr_advice_left_win = M.pE.lr_advice;
-            params.lr_advice_left_loss = M.pE.lr_advice;
-            params.lr_advice_right_win = M.pE.lr_advice;
-            params.lr_advice_right_loss = M.pE.lr_advice;
+            params.lr_advice_left_win = P.lr_advice;
+            params.lr_advice_left_loss = P.lr_advice;
+            params.lr_advice_right_win = P.lr_advice;
+            params.lr_advice_right_loss = P.lr_advice;
             single_lr_advice = 1;
 
         elseif strcmp(fields{i},'lr_self')
-            params.lr_self_left_win = M.pE.lr_self;
-            params.lr_self_left_loss = M.pE.lr_self;
-            params.lr_self_right_win = M.pE.lr_self;
-            params.lr_self_right_loss = M.pE.lr_self;
+            params.lr_self_left_win = P.lr_self;
+            params.lr_self_left_loss = P.lr_self;
+            params.lr_self_right_win = P.lr_self;
+            params.lr_self_right_loss = P.lr_self;
         elseif strcmp(fields{i},'lr_left')
-            params.lr_advice_left_win = M.pE.lr_left;
-            params.lr_advice_left_loss = M.pE.lr_left;
-            params.lr_self_left_win = M.pE.lr_left;
-            params.lr_self_left_loss = M.pE.lr_left;
+            params.lr_advice_left_win = P.lr_left;
+            params.lr_advice_left_loss = P.lr_left;
+            params.lr_self_left_win = P.lr_left;
+            params.lr_self_left_loss = P.lr_left;
             single_lr_left = 1;
         elseif strcmp(fields{i},'lr_right')
-            params.lr_advice_right_win = M.pE.lr_right;
-            params.lr_advice_right_loss = M.pE.lr_right;
-            params.lr_self_right_win = M.pE.lr_right;
-            params.lr_self_right_loss = M.pE.lr_right;
+            params.lr_advice_right_win = P.lr_right;
+            params.lr_advice_right_loss = P.lr_right;
+            params.lr_self_right_win = P.lr_right;
+            params.lr_self_right_loss = P.lr_right;
         elseif strcmp(fields{i},'lr_win')
-            params.lr_advice_left_win = M.pE.lr_win;
-            params.lr_advice_right_win = M.pE.lr_win;
-            params.lr_self_left_win = M.pE.lr_win;
-            params.lr_self_right_win = M.pE.lr_win;
+            params.lr_advice_left_win = P.lr_win;
+            params.lr_advice_right_win = P.lr_win;
+            params.lr_self_left_win = P.lr_win;
+            params.lr_self_right_win = P.lr_win;
             single_lr_win = 1;
         elseif strcmp(fields{i},'lr_loss')
-            params.lr_advice_left_loss = M.pE.lr_loss;
-            params.lr_advice_right_loss = M.pE.lr_loss;
-            params.lr_self_left_loss = M.pE.lr_loss;
-            params.lr_self_right_loss = M.pE.lr_loss;
+            params.lr_advice_left_loss = P.lr_loss;
+            params.lr_advice_right_loss = P.lr_loss;
+            params.lr_self_left_loss = P.lr_loss;
+            params.lr_self_right_loss = P.lr_loss;
         elseif strcmp(fields{i},'discount_factor')
-            params.discount_factor = M.pE.discount_factor;
+            params.discount_factor = P.discount_factor;
         elseif strcmp(fields{i},'inv_temp')
-            params.inv_temp = M.pE.inv_temp;
+            params.inv_temp = P.inv_temp;
         end
 
     end
@@ -75,10 +91,10 @@ function L = log_likelihood_func(P, M, U, Y),
 
         % for time step 1, generate the decison based the Q table and recorad for parameter fitting
         % get first row of Q table, for state 1 and all actions
-        q_start_row = q_model.q_table(1,:);
+        q_start_row = q_model.q_table(1,:)* params.inv_temp;
         % softmax the Q table and sample the action
         action_prob_t1 = exp(q_start_row)/sum(exp(q_start_row));
-        action_probs(i,1,:) = action_prob_t1* params.inv_temp;
+        action_probs(i,1,:) = action_prob_t1;
 
         % if subject chose advice
         % Q(advise) = Q(advise) + lr(R_advise + discount_factor * max(Q(advise_next)) - Q(advise));
@@ -98,8 +114,8 @@ function L = log_likelihood_func(P, M, U, Y),
                 end
             end
             % update the Q table
-            q_model.q_table(1,3) = q_model.q_table(1,3) + lr*(actual_reward + params.discount_factor * max([q_model.q_table(1,1),q_model.q_table(1,2),q_model.q_table(1,3)]) - q_model.q_table(1,3));
-        elseif actual_actions(1) == 0
+            q_model.q_table(1,3) = q_model.q_table(1,3) + lr*(0 + params.discount_factor * max([q_model.q_table(1,1),q_model.q_table(1,2),q_model.q_table(1,3)]) - q_model.q_table(1,3));
+        elseif actual_actions(1) == 1
         % if the subject chose left
             % determine the which lr to use
             if actual_reward > 0
@@ -131,21 +147,22 @@ function L = log_likelihood_func(P, M, U, Y),
             after_advice_state = actual_states(2);
             % Give the first action is advice, simulate the second action for parameter fitting
             % based on the after_advice_state query the Q table
-            q_after_advice_row = q_model.q_table(after_advice_state,1:2);
+            q_after_advice_row = q_model.q_table(after_advice_state,1:2)* params.inv_temp;
             % softmax the Q table and sample the action
-            action_probs(i,2,1:2) = exp(q_after_advice_row)/sum(exp(q_after_advice_row))* params.inv_temp;
+            action_prob_t2 = exp(q_after_advice_row)/sum(exp(q_after_advice_row));
+            action_probs(i,2,1:2) = action_prob_t2;
             
             
 
             
-            if second_action == 0
+            if second_action == 1
                 % if the subject chose left
                 % Q(left) = Q(left) + lr(R_left + discount_factor * max(Q(left_next)) - Q(left));
                 % determine the which lr to use
                 if actual_reward > 0
                     lr = params.lr_advice_left_win;
                 else
-                    lr = q_model.lr_advice_left_loss;
+                    lr = params.lr_advice_left_loss;
                 end
                 % update the Q table
             
@@ -165,7 +182,12 @@ function L = log_likelihood_func(P, M, U, Y),
         end
 
 
-        
+   
+
+    end 
+    
+
+         
     % Calculate the log likelihood
     for trial_idx = 1:num_trials
         actual_actions = preprocessed_data(trial_idx).actions;
@@ -195,10 +217,5 @@ function L = log_likelihood_func(P, M, U, Y),
     end        
 
     fprintf('LL: %f \n',L)
+end
 
-
-
-end 
-    
-
-    
