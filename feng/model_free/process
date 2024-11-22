@@ -1,0 +1,45 @@
+Fit
+1. inite Q table
+A Q-table is set up with columns representing actions (left, right, advise) and rows
+2. state = start, action = [left,right, advise]
+3. time the inv temp
+4. softmax to get prob of all three action [1/3, 1/3,1/3] 
+5. record the res, vs actual subject(left)--> win(+40)
+40-0
+
+6. compute the eroor between actual reward and  expected reward
+7. use error to update Q value
+
+after all the trails during fitting
+simulation --> F
+sum(log(prob)) 
+SPM based on F to adjust(decent) on the pramas
+
+
+
+[left,right, advise]
+    [1,0,0]
+                    [+40, nan, nan]
+
+
+win /loss/ advice win/advise loss, advise
++40/   -40/                               0 
+
+TDRL: 
+
+set of params
+    run trails one time
+
+    q-> sample-> action VS subject actual action
+    
+    acc and complex eval by SPM as F
+    acc: min diff between [1/3, 1/3,1/3] --> [1,0,0]
+    
+
+
+
+Simulation
+
+        action
+agent: left, rigth, left_advise_left, left_advise_right, right_advise_right,left_advise_right
+                    avg(advise_realted)
