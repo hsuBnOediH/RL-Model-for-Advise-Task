@@ -101,12 +101,11 @@ function L = log_likelihood_func(P, M, U, Y),
         action_prob_t1 = exp(q_start_row)/sum(exp(q_start_row));
         action_probs(i,1,:) = action_prob_t1;
 
-        % if subject chose advice
-        % Q(advise) = Q(advise) + lr(R_advise + discount_factor * max(Q(advise_next)) - Q(advise));
-        if actual_actions(1) == 3 % chose advise
+        % if subject chose advice at time step 1
+        if actual_actions(1) == 3
             % determine the which lr to use
             reward_term = 0;
-        
+            % reward term is the actual reward times the reward sensitivity or loss sensitivity
             if actual_reward > 0
                 reward_term = params.reward_sensitivity * actual_reward;
                 lr = params.with_advice_win_learning_rate;
@@ -118,13 +117,19 @@ function L = log_likelihood_func(P, M, U, Y),
             end
            
             % update the Q table
+    
+            % new choose(State,Action) = old choose(State,Action) + learning_rate*(reward_term +   max of all furure (state,action) - old choose(State,Action))
+            % reward_term is 0 here, because the reward is not known at this time
+            % all future state and action are (given advise left, choose left) and (given advise left, choose right), (given advise right, choose left) and (given advise right, choose right)
             q_model.q_table(1,3) = q_model.q_table(1,3) + lr*(max([q_model.q_table(4,1),q_model.q_table(4,2),q_model.q_table(5,1),q_model.q_table(5,2)]) - q_model.q_table(1,3));
             % forget unchosen actions
+            % new unchoose(State,Action) = old unchoose(State,Action) * (1-forgetting_rate)
             q_model.q_table(1,1) = q_model.q_table(1,1) * (1-fr);
             q_model.q_table(1,2) = q_model.q_table(1,2) * (1-fr);
 
         elseif actual_actions(1) == 1
-        % if the subject chose left
+        % if the subject chose left at time step 1
+
             % determine the which lr to use
             reward_term = 0;
             if actual_reward > 0
@@ -137,13 +142,13 @@ function L = log_likelihood_func(P, M, U, Y),
                 fr = params.without_advice_loss_forgetting_rate;
             end
             % update the Q table
+            % here after subject chose left, the trail is over, there is no future state and action
             q_model.q_table(1,1) = q_model.q_table(1,1) + lr*(reward_term  - q_model.q_table(1,1));
             % forget unchosen actions
             q_model.q_table(1,2) = q_model.q_table(1,2) * (1-fr);
             q_model.q_table(1,3) = q_model.q_table(1,3) * (1-fr);
         else
-            % if the subject chose right
-            % Q(right) = Q(right) + lr(R_right + discount_factor * max(Q(right_next)) - Q(right));
+            % if the subject chose right at time step 1
             % determine the which lr to use
             reward_term = 0;
             if actual_reward > 0
@@ -164,7 +169,7 @@ function L = log_likelihood_func(P, M, U, Y),
 
 
 
-        % for time step 2, check the len of the actual actions, countinue for those who have len > 2
+        % for time step 2, check the len of the actual actions, countinue for those who have len > 1
         if length(actual_actions) > 1
 
             second_action = actual_actions(2);
@@ -178,8 +183,8 @@ function L = log_likelihood_func(P, M, U, Y),
             
 
             if second_action == 1
-                % if the subject chose left
-                % Q(left) = Q(left) + lr(R_left + discount_factor * max(Q(left_next)) - Q(left));
+                % if the subject chose left at time step 2
+             
                 % determine the which lr to use
                 reward_term = 0;
                 if actual_reward > 0
@@ -198,7 +203,7 @@ function L = log_likelihood_func(P, M, U, Y),
                 q_model.q_table(after_advice_state,2) = q_model.q_table(after_advice_state,2) * (1-fr);
             else    
                 % if the subject chose right
-                % Q(right) = Q(right) + lr(R_right + discount_factor * max(Q(right_next)) - Q(right));
+                
                 % determine the which lr to use
                 if actual_reward > 0
                     reward_term = params.reward_sensitivity * actual_reward;

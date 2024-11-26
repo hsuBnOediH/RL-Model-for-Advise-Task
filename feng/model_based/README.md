@@ -10,7 +10,6 @@ The model-based learning agent aims to simulate decision-making processes by upd
 Model-based: In this approach, the agent learns state transition probabilities. Specifically, after selecting "left" or "right" immediately, the agent learns the probability of transitioning to a "win" state or a "loss" state. When the agent consults the advisor and receives a hint to go left or right, it learns the probability of reaching a "win" state or a "loss" state depending on the side chosen. The transition probabilities are updated as follows:
 
 p(win) = p(win) + learning_rate * [binary win/loss - p(win)]  
-p(loss) = p(loss) learning_rate * [binary win/loss - p(loss)]
 
 At each time step, the expected value of each action is calculated by multiplying the probability of being in the win state by the known reward for wins (20 or 40, depending on whether the advisor is chosen) and adding it to the probability of being in the loss state, based on the known reward for losses (either -40 or -80, depending on the game frame).
 
@@ -39,6 +38,17 @@ Start from the state: **Start**
    Result in:  
    - Win State with a probability  
    - Lose State with a probability  
+   
+
+   IF win:
+   p(win|left) = p(win|left) + learning_rate * [1- p(win|left)]
+
+   IF loss:
+   p(win|left) = p(win|left) + learning_rate * [0- p(win|left)]
+
+
+   
+
 
 2. **Choose Right**  
    Result in:  
@@ -111,4 +121,9 @@ E(take advise) = p(win|s=start, a=take advise) * 20 + p(loss|s=start, a=take adv
 
 
 # Parameters
+learning_rate
+reward_sensitivity? this is no reward sensitivity in the update rule
+loss_sensitivity? this is no loss sensitivity in the update rule too
+forgetting_rate
+inv_temp
 
