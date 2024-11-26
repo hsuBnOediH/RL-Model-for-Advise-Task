@@ -1,0 +1,24 @@
+
+init free parameters:
+    start SPM with the free parameters
+    init the model wiht free parameters
+         init the probability table [state=start, advise left, advise right, action= left, right, advise, result=win, lose]
+         for all the trail in the data set
+            time step 1
+                compute the expected value of all the action
+                pick the action with the highest expected value
+                compare with the ground truth action, update the probability table using the update rule
+            if time step 2 exists
+
+                if advise is left
+                    compute the expected value of left and advise action 
+                    compute the expected value of right and advise action 
+                    pick the action with the highest expected value
+                    compare with the ground truth action, update the probability table using the update rule
+                if advise is right
+                    compute the expected value of left and advise action 
+                    compute the expected value of right and advise action 
+                    pick the action with the highest expected value
+                    compare with the ground truth action, update the probability table using the update rule
+         end
+    

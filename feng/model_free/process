@@ -43,3 +43,128 @@ Simulation
         action
 agent: left, rigth, left_advise_left, left_advise_right, right_advise_right,left_advise_right
                     avg(advise_realted)
+
+
+
+
+
+
+parameter
+    inv_temp    (0, +inf)
+    learning rate (0, 1]-> logit transformation(0,1)
+    rewarad sensitivity (0,+inf)
+    forgeting rate [0,1] -> logit transformation(0,1)
+
+candidate model 1
+    free parameters:
+
+        inv_temp = 4
+        (CR) reward sensitivity = 4
+        (CL) loss sensitivity = 4
+    fixed parameters:
+        learning_rate = 1(before logit transformation)
+        fixed forgeting rate = 0
+
+candidate model 2
+    free parameters:
+        inv_temp = 4
+        (CR) reward sensitivity = 4
+        (CL) loss sensitivity = 4
+        forgeting rate = 0.2
+    fixed parameters:
+     learning rate = 1
+
+candidate model 3
+    free parameters:
+        inv_temp = 4
+        (CR) reward sensitivity = 4
+        (CL) loss sensitivity = 4
+        forgeting rate = 0.2
+        learning rate = 0.5
+    no fixed parameters
+
+candidate model 4
+    free parameters:
+        inv_temp = 4
+        (CR) reward sensitivity = 4
+        (CL) loss sensitivity = 4
+        forgeting rate = 0.2
+        learning rate for with advice = 0.5
+        learning rate for without advise = 0.5
+
+candidate model 5
+    free parameters:
+        inv_temp = 4
+        (CR) reward sensitivity = 4
+        (CL) loss sensitivity = 4
+        forgeting rate = 0.2
+        learning rate for with advice = 0.5
+        learning rate for without advise win = 0.5
+        learning rate for without advise win = 0.5
+
+
+candidate model 6
+        free parameters:
+        inv_temp = 4
+        (CR) reward sensitivity = 4
+        (CL) loss sensitivity = 4
+        forgeting rate = 0.2
+        learning rate for with advice win = 0.5
+        learning rate for with advice lsoe = 0.5
+        learning rate for without advise  = 0.5
+
+
+candidate model 7
+        free parameters:
+        inv_temp = 4
+        (CR) reward sensitivity = 4
+        (CL) loss sensitivity = 4
+        forgeting rate with advice win = 0.2
+        forgeting rate with advice lose = 0.2
+        forgeting rate without advise  = 0.2
+        forgeting rate without advise  = 0.2
+        
+        fixed parameters:
+        learning rate for with advice win = 0.5
+        
+
+candidate model 8
+        free parameters:
+        inv_temp = 4
+        (CR) reward sensitivity = 4
+        (CL) loss sensitivity = 4
+        forgeting rate with advice = 0.2
+        forgeting rate without advise win = 0.2
+        forgeting rate without advise lose = 0.2
+
+        fixed parameters:
+        learning rate for with advice = 0.5
+
+candidate model 9
+      free parameters:
+        inv_temp = 4
+        (CR) reward sensitivity = 4
+        (CL) loss sensitivity = 4
+        forgeting rate with advice = 0.2
+        forgeting rate without advise win = 0.2
+        forgeting rate without advise lose = 0.2
+
+        fixed parameters:
+        learning rate  = 0.5
+
+
+candidate model 10
+      free parameters:
+        inv_temp = 4
+        (CR) reward sensitivity = 4
+        (CL) loss sensitivity = 4
+        forgeting rate with advice win = 0.2
+        forgeting rate with advice lose = 0.2
+        forgeting rate without advise win = 0.2
+        forgeting rate without advise lose = 0.2
+        learning rate  = 0.5
+
+        
+        
+
+    
