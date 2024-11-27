@@ -121,11 +121,16 @@ function L = log_likelihood_func(P, M, U, Y),
             % new choose(State,Action) = old choose(State,Action) + learning_rate*(reward_term +   max of all furure (state,action) - old choose(State,Action))
             % reward_term is 0 here, because the reward is not known at this time
             % all future state and action are (given advise left, choose left) and (given advise left, choose right), (given advise right, choose left) and (given advise right, choose right)
+            
+
+            % !!! TODO  forgeting before adding, forget the unchosen actions + chosen action
+
             q_model.q_table(1,3) = q_model.q_table(1,3) + lr*(max([q_model.q_table(4,1),q_model.q_table(4,2),q_model.q_table(5,1),q_model.q_table(5,2)]) - q_model.q_table(1,3));
             % forget unchosen actions
             % new unchoose(State,Action) = old unchoose(State,Action) * (1-forgetting_rate)
             q_model.q_table(1,1) = q_model.q_table(1,1) * (1-fr);
             q_model.q_table(1,2) = q_model.q_table(1,2) * (1-fr);
+            
 
         elseif actual_actions(1) == 1
         % if the subject chose left at time step 1
@@ -203,7 +208,7 @@ function L = log_likelihood_func(P, M, U, Y),
                 q_model.q_table(after_advice_state,2) = q_model.q_table(after_advice_state,2) * (1-fr);
             else    
                 % if the subject chose right
-                
+
                 % determine the which lr to use
                 if actual_reward > 0
                     reward_term = params.reward_sensitivity * actual_reward;

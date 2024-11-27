@@ -21,4 +21,6 @@ init free parameters:
                     pick the action with the highest expected value
                     compare with the ground truth action, update the probability table using the update rule
          end
-    
+
+
+

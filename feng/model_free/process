@@ -125,7 +125,7 @@ candidate model 7
         forgeting rate without advise  = 0.2
         
         fixed parameters:
-        learning rate for with advice win = 0.5
+        learning rate  = 0.5
         
 
 candidate model 8
@@ -138,16 +138,16 @@ candidate model 8
         forgeting rate without advise lose = 0.2
 
         fixed parameters:
-        learning rate for with advice = 0.5
+        learning rate= 0.5
 
 candidate model 9
       free parameters:
         inv_temp = 4
         (CR) reward sensitivity = 4
         (CL) loss sensitivity = 4
-        forgeting rate with advice = 0.2
-        forgeting rate without advise win = 0.2
-        forgeting rate without advise lose = 0.2
+        forgeting rate without advice = 0.2
+        forgeting rate with advise win = 0.2
+        forgeting rate with advise lose = 0.2
 
         fixed parameters:
         learning rate  = 0.5
@@ -167,4 +167,18 @@ candidate model 10
         
         
 
-    
+
+
+
+
+
+left
+
+right
+                        chose left
+        advise_left
+                        chose right
+advice                    
+                        chose left
+        advise_right
+                        chose right
