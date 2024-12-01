@@ -86,6 +86,7 @@ M.pC    = pC;                            % prior variance (parameters)
 M.mode  = DCM.mode;
 M.trialinfo = DCM.trialinfo;
 M.params = DCM.params;
+M.actualrewards =DCM.actualrewards;
 
 % Variational Laplace
 %--------------------------------------------------------------------------
@@ -167,13 +168,16 @@ for idx_block = 1:num_blocks
         actions = Y;
         MDP.o  = outcomes{1};
         MDP.u  = actions{1};
+        MDP.actualreward  = M.actualrewards(1);
     else
         outcomes = U(30*idx_block-29:30*idx_block);
         actions  = Y(30*idx_block-29:30*idx_block);
+        actualreward = M.actualrewards(30*idx_block-29:30*idx_block);
         task.true_p_right = nan(1,30);
         for idx_trial = 1:30
             MDP(idx_trial).o = outcomes{idx_trial};
             MDP(idx_trial).u = actions{idx_trial};
+            MDP(idx_trial).actualreward = actualreward(idx_trial);
             task.true_p_right(idx_trial) = 1-str2double(trialinfo{(idx_block-1)*30+idx_trial,2});
             task.true_p_a(idx_trial) = str2double(trialinfo{(idx_block-1)*30+idx_trial,1});
 

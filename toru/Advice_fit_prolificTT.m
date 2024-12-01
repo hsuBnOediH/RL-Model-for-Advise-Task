@@ -137,13 +137,17 @@ for k = 1:length(index_array)
 % 
 %     end
 
-
-
+   %extract reward
+stringsresult = string(subdat.result);
+numericresult = str2double(stringsresult);
+actualrewards = numericresult(~isnan(numericresult));
+actualrewards = actualrewards(:).'; % Reshape into a row
 
         DCM.trialinfo = trialinfo;
         DCM.field  = field;            % Parameter field
         DCM.U      =  o(:,:);              % trial specification (stimuli)
         DCM.Y      =  u(:,:);              % responses (action)
+        DCM.actualrewards = actualrewards;
         DCM.reaction_times = reaction_times;
 
         DCM.params = params;
@@ -229,12 +233,15 @@ end
                 actions = y;
                 MDP.o  = outcomes{1};
                 MDP.u  = actions{1};
+                MDP.actualreward  = actualrewards(1);
             else
                 outcomes = u(30*idx_block-29:30*idx_block);
                 actions  = y(30*idx_block-29:30*idx_block);
+                actualreward = actualrewards(30*idx_block-29:30*idx_block);
                 for idx_trial = 1:30
                     MDP(idx_trial).o = outcomes{idx_trial};
                     MDP(idx_trial).u = actions{idx_trial};
+                    MDP(idx_trial).actualreward = actualreward(idx_trial);
                     MDP(idx_trial).reaction_times = DCM.reaction_times{idx_trial};
                     task.true_p_right(idx_trial) = 1-str2double(trialinfo{(idx_block-1)*30+idx_trial,2});
                     task.true_p_a(idx_trial) = str2double(trialinfo{(idx_block-1)*30+idx_trial,1});

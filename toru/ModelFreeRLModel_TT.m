@@ -147,8 +147,7 @@ end
 % beta = 4
 
 % Assuming observations.rewards is a vector
-rewardswinlose = observations.rewards; % Copy the original vector
-rewardswinlose(rewardswinlose == 2) = -1; % Replace 2 with -1
+actualreward = [MDP.actualreward]; % Copy the original vector
 
 
 % Initialize a 3x2x30 zero matrix
@@ -162,7 +161,7 @@ exp_values = exp(params.inv_temp * qvalue(:, 1, t));
 action_probs(:, 1, t) = exp_values / sum(exp_values);
 
 if choices(t, 1) == 2 || choices(t, 1) == 3
-  qvalue(choices(t, 1), 1, t+1) = qvalue(choices(t, 1), 1, t) + params.eta * (rewardswinlose(t) - qvalue(choices(t, 1), 1, t));
+  qvalue(choices(t, 1), 1, t+1) = qvalue(choices(t, 1), 1, t) + params.eta * (actualreward(t) - qvalue(choices(t, 1), 1, t));
 
     for i = 1:3
         if i ~= choices(t, 1)
@@ -179,12 +178,12 @@ if choices(t, 1) == 1 %advice
    exp_valuestwo = exp(params.inv_temp * qvalue(2:3, 2, t));
    action_probs(2:3, 2, t) = exp_valuestwo / sum(exp_valuestwo);
 
-   deltaadvise = rewardswinlose(t) + qvalue(choices(t, 2), 2, t) - qvalue(choices(t, 1), 1, t);
+   deltaadvise = actualreward(t) + qvalue(choices(t, 2), 2, t) - qvalue(choices(t, 1), 1, t);
    qvalue(choices(t, 1), 1, t+1) = qvalue(choices(t, 1), 1, t) + params.eta * params.lamgda * deltaadvise;
 
    %Update the original 
-   qvalue(choices(t, 2), 2, t+1) = qvalue(choices(t, 2), 2, t) + params.eta * (rewardswinlose(t) - qvalue(choices(t, 1), 2, t));
-   qvalue(choices(t, 2), 1, t+1) = qvalue(choices(t, 2), 1, t) + params.eta * (rewardswinlose(t) - qvalue(choices(t, 2), 1, t));
+   qvalue(choices(t, 2), 2, t+1) = qvalue(choices(t, 2), 2, t) + params.eta * (actualreward(t) - qvalue(choices(t, 1), 2, t));
+   qvalue(choices(t, 2), 1, t+1) = qvalue(choices(t, 2), 1, t) + params.eta * (actualreward(t) - qvalue(choices(t, 2), 1, t));
 
    for i = 2:3
         if i ~= choices(t, 2)
