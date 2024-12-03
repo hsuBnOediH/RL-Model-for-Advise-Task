@@ -46,8 +46,7 @@ Start from the state: **Start**
    IF loss:
    p(win|left) = p(win|left) + learning_rate * [0- p(win|left)]
 
-
-   
+   p(loss|left) = 1 - p(win|left)
 
 
 2. **Choose Right**  
@@ -60,6 +59,14 @@ Start from the state: **Start**
    - Advise Left State with a probability  
    - Advise Right State with a probability  
 
+   if finally win:
+   p(win|take advise) = p(win|take advise) + learning_rate * [1- p(win|take advise)]
+
+   if finally loss:
+   p(win|take advise) = p(win|take advise) + learning_rate * [0- p(win|take advise)]
+
+
+
 ---
 
 ### Time Step 2
@@ -70,40 +77,62 @@ Start from the state: **Left Advise State**
    - Win State with a probability  
    - Lose State with a probability  
 
+   if win:
+   p(win|left, give left advise) = p(win|left, give left advise) + learning_rate * [1- p(win|left, give left advise)]
+   if loss:
+   p(win|left, give left advise) = p(win|left, give left advise) + learning_rate * [0- p(win|left, give left advise)]
+
 2. **Choose Right**  
    Result in:  
    - Win State with a probability  
    - Lose State with a probability  
 
+Start from the state: **Right Advise State**
+
+1. **Choose Left**  
+   Result in:  
+   - Win State with a probability  
+   - Lose State with a probability
+
+   p(win|left, give right advise)
+
+2. **Choose Right**
+   Result in:  
+   - Win State with a probability  
+   - Lose State with a probability
 ---
 
 ## Probability Table
 Instead of a Q-table, this approach uses a probability table for transitions:
 
 - p(win|s=start, a=left)  
-- p(loss|s=start, a=left)  
+- p(loss|s=start, a=left)
+ 
 - p(win|s=start, a=right)  
 - p(loss|s=start, a=right)  
+
 - p(win|s=start, a=take advise)  
 - p(loss|s=start, a=take advise)  
 
 - p(win|s=advise left, a=left)  
-- p(loss|s=advise left, a=left)  
+- p(loss|s=advise left, a=left) 
+
 - p(win|s=advise left, a=right)  
 - p(loss|s=advise left, a=right)  
 
 - p(win|s=advise right, a=left)  
-- p(loss|s=advise right, a=left)  
+- p(loss|s=advise right, a=left) 
+
 - p(win|s=advise right, a=right)  
 - p(loss|s=advise right, a=right)  
 
 ---
 
 ## Update Rule
-No need for actual action; just update the probability table:  
+update the probability table:  
 
 p(win｜given condition) = p(win｜given condition) + learning_rate * [binary win/loss - p(win｜given condition)]  
-p(loss｜given condition) = p(loss｜given condition) + learning_rate * [binary win/loss - p(loss｜given condition)]  
+
 
 ---
 
@@ -117,11 +146,17 @@ The agent generates action probabilities based on the expected value of each act
 
 ## Determine the Expectation of Taking Advice
 E(take advise) = p(win|s=start, a=take advise) * 20 + p(loss|s=start, a=take advise) * -40
+should the reward sensitity and loss sensitivity be considered in the expectation calculation?
+
+like 
+E(take advise) = p(win|s=start, a=take advise) *( reward_sensitivity * 20) + p(loss|s=start, a=take advise) * (loss_sensitivity * -40) 
 
 
 
 # Parameters
-learning_rate
+learning_rate 4
+
+indirect_lr 
 reward_sensitivity? this is no reward sensitivity in the update rule
 loss_sensitivity? this is no loss sensitivity in the update rule too
 forgetting_rate

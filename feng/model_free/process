@@ -175,10 +175,49 @@ candidate model 10
 left
 
 right
-                        chose left
+
+                        chose left(Q_al_l)
         advise_left
                         chose right
-advice                    
+advice(q_advise)                    
                         chose left
         advise_right
-                        chose right
+                        chose right(Q_ar_r)
+
+
+intit
+Q_ar_r == Q_al_l == q_advise
+
+update
+only make sure
+Q_ar_r == Q_al_l 
+Q_ar_l == Q_al_r 
+
+exclude the assuption that 
+    the advisor possible to give trutful advice on left than right
+    
+
+
+advise, advise left, left, win 
+
+right:
+        direct left
+        advise
+
+left:
+        direct right
+        advise
+
+
+advise left, left:
+        advise left, right
+
+advise left, right:
+        advise left, left
+        
+
+
+
+
+
+

@@ -1,9 +1,9 @@
-function L = log_likelihood_func(P, M, U, Y),
+function L = mb_log_likelihood_func(P, M, U, Y),
     % P is free parameters
     % M is model
-    q_model = M;
-    fields = fieldnames(q_model.pE);
-    fixed_fields = fieldnames(q_model.fixed_params);
+    mb_model = M;
+    fields = fieldnames(mb_model.pE);
+    fixed_fields = fieldnames(mb_model.fixed_params);
     preprocessed_data = U;
     % U is input, states
     % Y is response, action and reward
@@ -15,7 +15,7 @@ function L = log_likelihood_func(P, M, U, Y),
     
     % add the fixed parameters to the params and append the free parameters
     for i = 1:length(fixed_fields)
-        preprocessed_params.(fixed_fields{i}) = q_model.fixed_params.(fixed_fields{i});
+        preprocessed_params.(fixed_fields{i}) = mb_model.fixed_params.(fixed_fields{i});
     end
     % check and transform the range of the parameters
     % get the fields of the P
@@ -96,13 +96,46 @@ function L = log_likelihood_func(P, M, U, Y),
         actual_states = trial.states;
         actual_actions = trial.actions;
         actual_reward = trial.rewards;
+        actual_party_size = trial.party_size;
+        is_win = actual_reward > 0;
 
-        % for time step 1, generate the decison based the Q table and recorad for parameter fitting
-        % get first row of Q table, for state 1 and all actions
-        q_start_row = q_model.q_table(1,:)* params.inv_temp;
-        % softmax the Q table and sample the action
-        action_prob_t1 = exp(q_start_row)/sum(exp(q_start_row));
+        % to get the action probability of first time step
+        action_prob_t1 = zeros(1,3);
+        % 1. query the prob table for the first state
+        prob_start_row = mb_model.prob_table(1,:);
+        prob_left_advice_row= mb_model.prob_table(2,:);
+        prob_right_advice_row = mb_model.prob_table(3,:);
+        % 2. compute the expected reward for each action
+        % 2.1 chose left
+        chose_left_win_prob = prob_start_row(1);
+        chose_left_expected_reward = chose_left_win_prob * 40 + (1-chose_left_win_prob) * (-actual_party_size);
+        action_prob_t1(1) = chose_left_expected_reward;
+        % 2.2 chose right
+        chose_right_win_prob = prob_start_row(2);
+        chose_right_expected_reward = chose_right_win_prob * 40 + (1-chose_right_win_prob) * (-actual_party_size);
+        action_prob_t1(2) = chose_right_expected_reward;
+        % 2.3 take advice
+        take_left_advice_prob = prob_start_row(3);
+        take_right_advice_prob = 1- take_left_advice_prob;
+        take_left_advise_chosen_left_win_prob = prob_left_advice_row(1);
+        take_left_advise_chosen_right_win_prob = prob_left_advice_row(2);
+
+        take_right_advise_chosen_left_win_prob = prob_right_advice_row(1);
+        take_right_advise_chosen_right_win_prob = prob_right_advice_row(2);
+
+        take_left_adivse_expected_reward = take_left_advise_chosen_left_win_prob * 20 + (1-take_left_advise_chosen_left_win_prob) * (-actual_party_size) + take_left_advise_chosen_right_win_prob * 20 + (1-take_left_advise_chosen_right_win_prob) * (-actual_party_size);
+        take_right_advise_expected_reward = take_right_advise_chosen_left_win_prob * 20 + (1-take_right_advise_chosen_left_win_prob) * (-actual_party_size) + take_right_advise_chosen_right_win_prob * 20 + (1-take_right_advise_chosen_right_win_prob) * (-actual_party_size);
+
+        take_advise_expected_reward = take_left_adivse_expected_reward * take_left_advice_prob + take_right_advise_expected_reward * take_right_advice_prob;
+
+        action_prob_t1(3) = take_advise_expected_reward;
+        % 3. time the probs with the inverse temperature
+        action_prob_t1 = action_prob_t1 * params.inv_temp;
+        % 4. softmax the probs to get the action probability
+        action_prob_t1 = exp(action_prob_t1)/sum(exp(action_prob_t1));
         action_probs(i,1,:) = action_prob_t1;
+
+
 
         % if subject chose advice at time step 1
         if actual_actions(1) == 3
@@ -119,20 +152,16 @@ function L = log_likelihood_func(P, M, U, Y),
                 fr = params.with_advice_loss_forgetting_rate;
             end
            
-            % update the Q table
+            % update the mb_model prob table
+            % if the second states is advise left
+            is_left_advice = actual_states(2) == 2;
     
-            % new choose(State,Action) = old choose(State,Action) + learning_rate*(reward_term +   max of all furure (state,action) - old choose(State,Action))
-            % reward_term is 0 here, because the reward is not known at this time
-            % all future state and action are (given advise left, choose left) and (given advise left, choose right), (given advise right, choose left) and (given advise right, choose right)
-            
+            mb_model.prob_table(1,3) = mb_model.prob_table(1,3) + lr*(is_left_advice - mb_model.prob_table(1,3));
 
-            % !!! TODO  forgeting before adding, forget the unchosen actions + chosen action
-
-            q_model.q_table(1,3) = q_model.q_table(1,3) + lr*(max([q_model.q_table(4,1),q_model.q_table(4,2),q_model.q_table(5,1),q_model.q_table(5,2)]) - q_model.q_table(1,3));
-            % forget unchosen actions
+            % forget unchosen actions !!! HOW TO FORGET UNCHOSEN ACTIONS FOR THIS MODEL?
             % new unchoose(State,Action) = old unchoose(State,Action) * (1-forgetting_rate)
-            q_model.q_table(1,1) = q_model.q_table(1,1) * (1-fr);
-            q_model.q_table(1,2) = q_model.q_table(1,2) * (1-fr);
+            mb_model.prob_table(1,1) = mb_model.prob_table(1,1) * (1-fr);
+            mb_model.prob_table(1,2) = mb_model.prob_table(1,2) * (1-fr);
             
 
         elseif actual_actions(1) == 1
@@ -149,14 +178,12 @@ function L = log_likelihood_func(P, M, U, Y),
                 lr = params.without_advice_loss_learning_rate;
                 fr = params.without_advice_loss_forgetting_rate;
             end
-            % update the Q table
-            % here after subject chose left, the trail is over, there is no future state and action
-            q_model.q_table(1,1) = q_model.q_table(1,1) + lr*(reward_term  - q_model.q_table(1,1));
-            % also update the Q table for with advice
-            
+           
+
+            mb_model.prob_table(1,1) = mb_model.prob_table(1,1) + lr*(is_win - mb_model.prob_table(1,1));        
             % forget unchosen actions
-            q_model.q_table(1,2) = q_model.q_table(1,2) * (1-fr);
-            q_model.q_table(1,3) = q_model.q_table(1,3) * (1-fr);
+            mb_model.prob_table(1,2) = mb_model.prob_table(1,2) * (1-fr);
+            mb_model.prob_table(1,3) = mb_model.prob_table(1,3) * (1-fr);
         else
             % if the subject chose right at time step 1
             % determine the which lr to use
@@ -170,11 +197,11 @@ function L = log_likelihood_func(P, M, U, Y),
                 lr = params.without_advice_loss_learning_rate;
                 fr = params.without_advice_loss_forgetting_rate;
             end
-            % update the Q table
-            q_model.q_table(1,2) = q_model.q_table(1,2) + lr*(reward_term - q_model.q_table(1,2));
+
+            mb_model.prob_table(1,2) = mb_model.prob_table(1,2) + lr*(is_win - mb_model.prob_table(1,2));
             % forget unchosen actions
-            q_model.q_table(1,1) = q_model.q_table(1,1) * (1-fr);
-            q_model.q_table(1,3) = q_model.q_table(1,3) * (1-fr);
+            mb_model.prob_table(1,1) = mb_model.prob_table(1,1) * (1-fr);
+            mb_model.prob_table(1,3) = mb_model.prob_table(1,3) * (1-fr);
         end
 
 
@@ -184,11 +211,30 @@ function L = log_likelihood_func(P, M, U, Y),
 
             second_action = actual_actions(2);
             after_advice_state = actual_states(2);
-            % Give the first action is advice, simulate the second action for parameter fitting
-            % based on the after_advice_state query the Q table
-            q_after_advice_row = q_model.q_table(after_advice_state,1:2)* params.inv_temp;
+            
+            if after_advice_state == 2
+                % left advice
+                after_advice_state = 2;
+            else
+                % right advice
+                after_advice_state = 3;
+            end
+
+
+            action_prob_t2 = zeros(1,2);
+            after_advice_prob_row = mb_model.prob_table(after_advice_state,1:2);
+
+            after_advice_chose_left_win_prob = after_advice_prob_row(1);
+            after_advice_chose_right_win_prob = after_advice_prob_row(2);
+
+            expected_reward_left = after_advice_chose_left_win_prob * 20 + (1-after_advice_chose_left_win_prob) * (-actual_party_size);
+            expected_reward_right = after_advice_chose_right_win_prob * 20 + (1-after_advice_chose_right_win_prob) * (-actual_party_size);
+
+            action_prob_t2(1) = expected_reward_left;
+            action_prob_t2(2) = expected_reward_right;
+
             % softmax the Q table and sample the action
-            action_prob_t2 = exp(q_after_advice_row)/sum(exp(q_after_advice_row));
+            action_prob_t2 = exp(action_prob_t2)/sum(exp(action_prob_t2));
             action_probs(i,2,1:2) = action_prob_t2;
             
 
@@ -208,11 +254,11 @@ function L = log_likelihood_func(P, M, U, Y),
                 end
                 % update the Q table
             
-                q_model.q_table(after_advice_state,1) = q_model.q_table(after_advice_state,1) + lr*(reward_term  - q_model.q_table(after_advice_state,1));
+                mb_model.prob_table(after_advice_state,1) = mb_model.prob_table(after_advice_state,1) + lr*(is_win - mb_model.prob_table(after_advice_state,1));
                 % update the without advice Q table based on the with advice Q table
-                q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * lr*(reward_term  - q_model.q_table(1,1));
+                mb_model.prob_table(1,1) = mb_model.prob_table(1,1) + params.discount_factor * lr*(is_win  - mb_model.prob_table(1,1));
                 % forget unchosen actions
-                q_model.q_table(after_advice_state,2) = q_model.q_table(after_advice_state,2) * (1-fr);
+                mb_model.prob_table(after_advice_state,2) = mb_model.prob_table(after_advice_state,2) * (1-fr);
             else    
                 % if the subject chose right
 
@@ -227,11 +273,11 @@ function L = log_likelihood_func(P, M, U, Y),
                     fr = params.without_advice_loss_forgetting_rate;
                 end
                 % update the Q table
-                q_model.q_table(after_advice_state,2) = q_model.q_table(after_advice_state,2) + lr*(reward_term  - q_model.q_table(after_advice_state,2));
+                mb_model.prob_table(after_advice_state,2) = mb_model.prob_table(after_advice_state,2) + lr*(is_win - mb_model.prob_table(after_advice_state,2));
                 % update the without advice Q table based on the with advice Q table
-                q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * lr*(reward_term  - q_model.q_table(1,2));
+                mb_model.prob_table(1,2) = mb_model.prob_table(1,2) + params.discount_factor * lr*(is_win  - mb_model.prob_table(1,2));
                 % forget unchosen actions
-                q_model.q_table(after_advice_state,1) = q_model.q_table(after_advice_state,1) * (1-fr);
+                mb_model.prob_table(after_advice_state,1) = mb_model.prob_table(after_advice_state,1) * (1-fr);
 
             end
         end
