@@ -151,47 +151,46 @@ actualreward = [MDP.actualreward]; % Copy the original vector
 
 
 % Initialize a 3x2x30 zero matrix
-action_probs = zeros(3, 2, trial);
+action_probs = zeros(3, 3, trial);
 
-qvalue = zeros(3, 2, trial);
+qvalue = zeros(3, 3, trial);
 
 for t = 1:trial
 
 exp_values = exp(params.inv_temp * qvalue(:, 1, t));
 action_probs(:, 1, t) = exp_values / sum(exp_values);
 
-if choices(t, 1) == 2 || choices(t, 1) == 3
-  qvalue(choices(t, 1), 1, t+1) = qvalue(choices(t, 1), 1, t) + params.eta * (actualreward(t) - qvalue(choices(t, 1), 1, t));
-
-    for i = 1:3
-        if i ~= choices(t, 1)
-            qvalue(i, 1, t+1) = (1-params.omega)*qvalue(i, 1, t);
-        end
-    end
-
-    qvalue(:, 2, t+1) = (1-params.omega)*qvalue(:, 2, t);
-
+if choices(t, 1) == 2 %immediately left
+  qvalue(choices(t, 1), :, t+1) = qvalue(choices(t, 1), :, t) + params.eta * (actualreward(t) - qvalue(choices(t, 1), :, t));
+  qvalue(3, :, t+1) = qvalue(3, :, t) + params.eta * (-actualreward(t) - qvalue(3, :, t));
+  qvalue(1, 1, t+1) = (1-params.omega)*qvalue(1, 1, t);
 end
 
-if choices(t, 1) == 1 %advice
+if choices(t, 1) == 3 %immediately right
+  qvalue(choices(t, 1), :, t+1) = qvalue(choices(t, 1), :, t) + params.eta * (actualreward(t) - qvalue(choices(t, 1), :, t));
+  qvalue(2, :, t+1) = qvalue(2, :, t) + params.eta * (-actualreward(t) - qvalue(2, :, t));
+  qvalue(1, 1, t+1) = (1-params.omega)*qvalue(1, 1, t);
+end
 
-   exp_valuestwo = exp(params.inv_temp * qvalue(2:3, 2, t));
-   action_probs(2:3, 2, t) = exp_valuestwo / sum(exp_valuestwo);
 
-   deltaadvise = actualreward(t) + qvalue(choices(t, 2), 2, t) - qvalue(choices(t, 1), 1, t);
+if choices(t, 1) == 1  %advice
+
+   exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, observations.hints(t)+1, t));
+   action_probs(2:3, observations.hints(t)+1, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
+
+   deltaadvise = actualreward(t) + qvalue(choices(t, 2), observations.hints(t)+1, t) - qvalue(choices(t, 1), 1, t);
    qvalue(choices(t, 1), 1, t+1) = qvalue(choices(t, 1), 1, t) + params.eta * params.lamgda * deltaadvise;
 
-   %Update the original 
-   qvalue(choices(t, 2), 2, t+1) = qvalue(choices(t, 2), 2, t) + params.eta * (actualreward(t) - qvalue(choices(t, 1), 2, t));
-   qvalue(choices(t, 2), 1, t+1) = qvalue(choices(t, 2), 1, t) + params.eta * (actualreward(t) - qvalue(choices(t, 2), 1, t));
+   %Update all options 
+   if choices(t, 2) == 2
+   qvalue(choices(t, 2), :, t+1) = qvalue(choices(t, 2), :, t) + params.eta * (actualreward(t) - qvalue(choices(t, 2), :, t));
+   qvalue(3, :, t+1) = qvalue(3, :, t) + params.eta * (-actualreward(t) - qvalue(3, :, t));
 
-   for i = 2:3
-        if i ~= choices(t, 2)
-            qvalue(i, 2, t+1) = (1-params.omega)*qvalue(i, 2, t);
-            qvalue(i, 1, t+1) = (1-params.omega)*qvalue(i, 1, t);
-        end
-    end
+   else
+   qvalue(3, :, t+1) = qvalue(3, :, t) + params.eta * (actualreward(t) - qvalue(3, :, t));
+   qvalue(2, :, t+1) = qvalue(2, :, t) + params.eta * (-actualreward(t) - qvalue(2, :, t));
 
+   end
 
 end
 
@@ -204,8 +203,8 @@ end
 % context_floor = 1;
 % 
 % Below is the old active inference code
-for block = 1:task.num_blocks
-     block = 1;
+%for block = 1:task.num_blocks
+%     block = 1;
 %     clear Q
 %     clear epistemic_value
 %     clear pragmatic_value
@@ -393,22 +392,26 @@ for block = 1:task.num_blocks
 %         end
 %     end
 
+
+%for block = 1:task.num_blocks
+%     block = 1;
+
 %results.observations.hints(block,:) = hint_outcomes;
 %results.observations.rewards(block,:) = reward_outcomes;
-results.choices(:,:,block) = choices(:,:);
+results.choices(:,:) = choices(:,:);
 %results.R(:,block) = R(:,block);
 
-if block == 1
+%if block == 1
     results.input.task = task;
     results.input.params = params;
     results.input.observations = observations;
     results.input.choices = choices;
     results.input.sim = sim;
-end
+%end
 
 
-    results.blockwise(block).action_probs = action_probs;
-    results.blockwise(block).actions = choices;
+    results.blockwise.action_probs = action_probs;
+    results.blockwise.actions = choices;
 %    results.blockwise(block).true_context = true_context;
 %    results.blockwise(block).hint_outcomes = hint_outcomes;
 %    results.blockwise(block).hint_outcome_vector = hint_outcome_vector;
