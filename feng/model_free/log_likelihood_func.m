@@ -1,4 +1,4 @@
-function L = log_likelihood_func(P, M, U, Y),
+function L = log_likelihood_func(P, M, U, Y)
     % P is free parameters
     % M is model
     q_model = M;
@@ -21,12 +21,10 @@ function L = log_likelihood_func(P, M, U, Y),
     % get the fields of the P
     fields = fieldnames(preprocessed_params);
     for i = 1:length(fields)
-         % for lr and discount_factor range 0-1
-         field = fields{i};
-
-         if ismember(field, {'learning_rate', 'with_advice_learning_rate', 'without_advice_learning_rate', 'with_advice_win_learning_rate', 'with_advice_loss_learning_rate', 'without_advice_win_learning_rate', 'without_advice_loss_learning_rate', 'forgetting_rate', 'with_advice_forgetting_rate', 'without_advice_forgetting_rate', 'with_advice_win_forgetting_rate', 'with_advice_loss_forgetting_rate', 'without_advice_win_forgetting_rate', 'without_advice_loss_forgetting_rate', })
+        % for lr and discount_factor range 0-1
+        field = fields{i};
+        if ismember(field, {'learning_rate', 'with_advice_learning_rate', 'without_advice_learning_rate', 'with_advice_win_learning_rate', 'with_advice_loss_learning_rate', 'without_advice_win_learning_rate', 'without_advice_loss_learning_rate', 'forgetting_rate', 'with_advice_forgetting_rate', 'without_advice_forgetting_rate', 'with_advice_win_forgetting_rate', 'with_advice_loss_forgetting_rate', 'without_advice_win_forgetting_rate', 'without_advice_loss_forgetting_rate', })
             preprocessed_params.(field) = 1/(1+exp(-preprocessed_params.(field)));
-        
         elseif ismember(field, {'inv_temp', 'reward_sensitivity', 'loss_sensitivity'})
             preprocessed_params.(field) = log(1+exp(preprocessed_params.(field)));
         end
@@ -84,6 +82,10 @@ function L = log_likelihood_func(P, M, U, Y),
         % this discount factor is for with advise result to update without advise result and vice versa
         elseif strcmp(fields{i},'discount_factor')
             params.discount_factor = preprocessed_params.discount_factor;
+        elseif strcmp(fields{i},'left_better')
+            params.left_better = preprocessed_params.left_better;
+        elseif strcmp(fields{i},'advise_truthness')
+            params.advise_truthness = preprocessed_params.advise_truthness;
         end
     end
     % Initialize the log likelihood
@@ -91,15 +93,32 @@ function L = log_likelihood_func(P, M, U, Y),
     num_trials = length(U);
     action_probs = zeros(num_trials,2,3);
 
+    left_better = params.left_better;
+    advise_truthness = params.advise_truthness;
+
     for i = 1:num_trials
         trial = preprocessed_data(i);
+
+        % if the trial could be divided by the number of trials in one block, reinitialize the Q table
+        if mod(i, 30) == 1
+            q_model.q_table = zeros(3,3);
+            q_model.q_table(1, 1) = 40 * left_better;
+            q_model.q_table(1, 2) = 40 * (1-left_better);
+            q_model.q_table(1, 3) = 20 * advise_truthness;
+            q_model.q_table(2, 1) = 20 * left_better;
+            q_model.q_table(2, 2) = 20 * (1-left_better);
+            q_model.q_table(2, 3) = NaN;
+            q_model.q_table(3, 1) = 20 * left_better;
+            q_model.q_table(3, 2) = 20 * (1-left_better);
+            q_model.q_table(3, 3) = NaN;
+        end
         actual_states = trial.states;
         actual_actions = trial.actions;
         actual_reward = trial.rewards;
 
         % for time step 1, generate the decison based the Q table and recorad for parameter fitting
         % get first row of Q table, for state 1 and all actions
-        q_start_row = q_model.q_table(1,:)* params.inv_temp;
+        q_start_row = q_model.q_table(1,:) * params.inv_temp;
         % softmax the Q table and sample the action
         action_prob_t1 = exp(q_start_row)/sum(exp(q_start_row));
         action_probs(i,1,:) = action_prob_t1;
@@ -126,13 +145,11 @@ function L = log_likelihood_func(P, M, U, Y),
             % all future state and action are (given advise left, choose left) and (given advise left, choose right), (given advise right, choose left) and (given advise right, choose right)
             
 
-            % !!! TODO  forgeting before adding, forget the unchosen actions + chosen action
-
-            q_model.q_table(1,3) = q_model.q_table(1,3) + lr*(max([q_model.q_table(4,1),q_model.q_table(4,2),q_model.q_table(5,1),q_model.q_table(5,2)]) - q_model.q_table(1,3));
+            q_model.q_table(1,3) = q_model.q_table(1,3) + lr*(max([q_model.q_table(2,1),q_model.q_table(2,2),q_model.q_table(3,1),q_model.q_table(3,2)]) - q_model.q_table(1,3));
             % forget unchosen actions
             % new unchoose(State,Action) = old unchoose(State,Action) * (1-forgetting_rate)
-            q_model.q_table(1,1) = q_model.q_table(1,1) * (1-fr);
-            q_model.q_table(1,2) = q_model.q_table(1,2) * (1-fr);
+            q_model.q_table(1,1) = q_model.q_table(1,1) + fr * (advise_truthness - q_model.q_table(1,1));
+            q_model.q_table(1,2) = q_model.q_table(1,2) + fr * (advise_truthness - q_model.q_table(1,2));
             
 
         elseif actual_actions(1) == 1
@@ -155,8 +172,8 @@ function L = log_likelihood_func(P, M, U, Y),
             % also update the Q table for with advice
             
             % forget unchosen actions
-            q_model.q_table(1,2) = q_model.q_table(1,2) * (1-fr);
-            q_model.q_table(1,3) = q_model.q_table(1,3) * (1-fr);
+            q_model.q_table(1,2) = q_model.q_table(1,2) + fr * (advise_truthness - q_model.q_table(1,2));
+            q_model.q_table(1,3) = q_model.q_table(1,3) + fr * (advise_truthness - q_model.q_table(1,3));
         else
             % if the subject chose right at time step 1
             % determine the which lr to use
@@ -173,8 +190,8 @@ function L = log_likelihood_func(P, M, U, Y),
             % update the Q table
             q_model.q_table(1,2) = q_model.q_table(1,2) + lr*(reward_term - q_model.q_table(1,2));
             % forget unchosen actions
-            q_model.q_table(1,1) = q_model.q_table(1,1) * (1-fr);
-            q_model.q_table(1,3) = q_model.q_table(1,3) * (1-fr);
+            q_model.q_table(1,1) = q_model.q_table(1,1) + fr * (advise_truthness - q_model.q_table(1,1));
+            q_model.q_table(1,3) = q_model.q_table(1,3) + fr * (advise_truthness - q_model.q_table(1,3));
         end
 
 
@@ -212,8 +229,7 @@ function L = log_likelihood_func(P, M, U, Y),
                 % update the without advice Q table based on the with advice Q table
                 q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * lr*(reward_term  - q_model.q_table(1,1));
                 % forget unchosen actions
-                q_model.q_table(after_advice_state,2) = q_model.q_table(after_advice_state,2) * (1-fr);
-            else    
+                q_model.q_table(after_advice_state,2) = q_model.q_table(after_advice_state,2) + fr * (advise_truthness - q_model.q_table(after_advice_state,2));
                 % if the subject chose right
 
                 % determine the which lr to use
@@ -231,7 +247,7 @@ function L = log_likelihood_func(P, M, U, Y),
                 % update the without advice Q table based on the with advice Q table
                 q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * lr*(reward_term  - q_model.q_table(1,2));
                 % forget unchosen actions
-                q_model.q_table(after_advice_state,1) = q_model.q_table(after_advice_state,1) * (1-fr);
+                q_model.q_table(after_advice_state,1) = q_model.q_table(after_advice_state,1) + fr * (advise_truthness - q_model.q_table(after_advice_state,1));
 
             end
         end

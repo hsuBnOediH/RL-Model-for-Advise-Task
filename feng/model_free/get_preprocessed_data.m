@@ -68,10 +68,10 @@ function res = get_preprocessed_data(subject, input_folder_path)
         % Initialize 'res' as an empty structure array with the same length as 'response'
         res(length(response)) = struct('states', [], 'actions', []);
 
-        % Define mapping for states and actions
-        state_map = struct('start', 1, 'lose', 2, 'win', 3, 'left',4,'right',5, 'advise_lose', 6, 'advise_win', 7);
-        action_map = struct('left',1, 'right', 2, 'advise', 3);
 
+        % Define mapping for states and actions
+        state_map = struct('start', 1,'left',2,'right',3, 'lose', 4,'win', 5,  'advise_lose', 6, 'advise_win', 7);
+        action_map = struct('left',1, 'right', 2, 'advise', 3);
         % Loop through each trial
         for i = 1:length(response)
             % Initialize states and actions for each trial
