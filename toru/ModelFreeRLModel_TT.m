@@ -151,7 +151,7 @@ actualreward = [MDP.actualreward]; % Copy the original vector
 
 
 % Initialize a 3x2x30 zero matrix
-action_probs = zeros(3, 3, trial);
+action_probs = zeros(3, 2, trial);
 
 qvalue = zeros(3, 3, trial);
 
@@ -176,7 +176,7 @@ end
 if choices(t, 1) == 1  %advice
 
    exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, observations.hints(t)+1, t));
-   action_probs(2:3, observations.hints(t)+1, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
+   action_probs(2:3, 2, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
 
    deltaadvise = actualreward(t) + qvalue(choices(t, 2), observations.hints(t)+1, t) - qvalue(choices(t, 1), 1, t);
    qvalue(choices(t, 1), 1, t+1) = qvalue(choices(t, 1), 1, t) + params.eta * params.lamgda * deltaadvise;
