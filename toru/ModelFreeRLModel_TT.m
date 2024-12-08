@@ -37,21 +37,7 @@
 % params.eta = .5;
 % 
 
-% 
-% % win/loss specific params (only used based on commenting out above)
-% 
-% params.omega_a_win = .1; params.eta_a_win = .4;
-% params.omega_a_loss = .3; params.eta_a_loss = .6;
-% 
-% params.omega_d_win = .4; params.eta_d_win = .7;
-% params.omega_d_loss = .5; params.eta_d_loss = .8;
-% 
-% %explore-exploit weights
-% params.reward_value = 1;
-% params.l_loss_value = 1;
-% params.state_exploration = 1;
-% params.parameter_exploration = 1;
-% params.inv_temp = 4;
+
 % 
 % %data
 % observations.hints = [0 2 1;
@@ -141,19 +127,21 @@ end
 
 
 
-%Simple three versions
+%RL model
 
-% alpha = 0.5
-% beta = 4
 
 % Assuming observations.rewards is a vector
-actualreward = [MDP.actualreward]/10; % Copy the original vector
+actualreward = [MDP.actualreward]/10; % Copy the original vector and divided by 10
 
 
-% Initialize a 3x2x30 zero matrix
+% Initialize matrices
 action_probs = zeros(3, 2, trial);
 
 qvalue = zeros(3, 3, trial);
+
+qvalue(:, :, 1) = [2*params.p_a-4*(1-params.p_a), 0, 0;
+                   0, 2*params.p_a-4*(1-params.p_a), 2*(1-params.p_a)-4*params.p_a;
+                   0, 2*(1-params.p_a)-4*params.p_a, 2*params.p_a-4*(1-params.p_a)];
 
 for t = 1:trial
 
@@ -161,15 +149,17 @@ exp_values = exp(params.inv_temp * qvalue(:, 1, t));
 action_probs(:, 1, t) = exp_values / sum(exp_values);
 
 if choices(t, 1) == 2 %immediately left
-  qvalue(choices(t, 1), :, t+1) = qvalue(choices(t, 1), :, t) + params.eta * (actualreward(t) - qvalue(choices(t, 1), :, t));
-  qvalue(3, :, t+1) = qvalue(3, :, t) + params.eta * (-actualreward(t) - qvalue(3, :, t));
-  qvalue(1, 1, t+1) = (1-params.omega)*qvalue(1, 1, t);
+  qvalue(choices(t, 1), 1, t+1) = qvalue(choices(t, 1), 1, t) + params.eta * (actualreward(t) - qvalue(choices(t, 1), 1, t));
+  qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (-actualreward(t) - qvalue(3, 1, t));
+  qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.omega*((2*params.p_a-4*(1-params.p_a))-qvalue(1, 1, t));
+  qvalue(:, 2:3, t+1) = qvalue(:, 2:3, t);
 end
 
 if choices(t, 1) == 3 %immediately right
-  qvalue(choices(t, 1), :, t+1) = qvalue(choices(t, 1), :, t) + params.eta * (actualreward(t) - qvalue(choices(t, 1), :, t));
-  qvalue(2, :, t+1) = qvalue(2, :, t) + params.eta * (-actualreward(t) - qvalue(2, :, t));
-  qvalue(1, 1, t+1) = (1-params.omega)*qvalue(1, 1, t);
+  qvalue(choices(t, 1), 1, t+1) = qvalue(choices(t, 1), 1, t) + params.eta * (actualreward(t) - qvalue(choices(t, 1), 1, t));
+  qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (-actualreward(t) - qvalue(2, 1, t));
+  qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.omega*((2*params.p_a-4*(1-params.p_a))-qvalue(1, 1, t));
+  qvalue(:, 2:3, t+1) = qvalue(:, 2:3, t);
 end
 
 
@@ -178,19 +168,80 @@ if choices(t, 1) == 1  %advice
    exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, observations.hints(t)+1, t));
    action_probs(2:3, 2, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
 
-   deltaadvise = actualreward(t) + qvalue(choices(t, 2), observations.hints(t)+1, t) - qvalue(choices(t, 1), 1, t);
-   qvalue(choices(t, 1), 1, t+1) = qvalue(choices(t, 1), 1, t) + params.eta * params.lamgda * deltaadvise;
+   deltasecond = actualreward(t) - qvalue(choices(t, 2), observations.hints(t)+1, t);
+   deltafirst = qvalue(choices(t, 2), observations.hints(t)+1, t) - qvalue(1, 1, t);
 
-   %Update all options 
+   qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta * deltafirst + params.eta * params.lamgda * deltasecond;
+ 
+if observations.hints(t) == 1   
    if choices(t, 2) == 2
-   qvalue(choices(t, 2), :, t+1) = qvalue(choices(t, 2), :, t) + params.eta * (actualreward(t) - qvalue(choices(t, 2), :, t));
-   qvalue(3, :, t+1) = qvalue(3, :, t) + params.eta * (-actualreward(t) - qvalue(3, :, t));
-
+       if actualreward(t) > 0
+          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (2*actualreward(t) - qvalue(2, 1, t));
+          qvalue(2, 2, t+1) = qvalue(2, 2, t) + params.eta * (actualreward(t) - qvalue(2, 2, t));
+          qvalue(2, 3, t+1) = qvalue(2, 3, t) + params.eta * (-2*actualreward(t) - qvalue(2, 3, t));
+          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (-2*actualreward(t) - qvalue(3, 1, t));
+          qvalue(3, 2, t+1) = qvalue(3, 2, t) + params.eta * (-2*actualreward(t) - qvalue(3, 2, t));
+          qvalue(3, 3, t+1) = qvalue(3, 3, t) + params.eta * (actualreward(t) - qvalue(3, 3, t));
+       else
+          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (actualreward(t) - qvalue(2, 1, t));
+          qvalue(2, 2, t+1) = qvalue(2, 2, t) + params.eta * (actualreward(t) - qvalue(2, 2, t));
+          qvalue(2, 3, t+1) = qvalue(2, 3, t) + params.eta * (-0.5*actualreward(t) - qvalue(2, 3, t));
+          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (-actualreward(t) - qvalue(3, 1, t));
+          qvalue(3, 2, t+1) = qvalue(3, 2, t) + params.eta * (-0.5*actualreward(t) - qvalue(3, 2, t));
+          qvalue(3, 3, t+1) = qvalue(3, 3, t) + params.eta * (actualreward(t) - qvalue(3, 3, t));
+       end
    else
-   qvalue(3, :, t+1) = qvalue(3, :, t) + params.eta * (actualreward(t) - qvalue(3, :, t));
-   qvalue(2, :, t+1) = qvalue(2, :, t) + params.eta * (-actualreward(t) - qvalue(2, :, t));
-
+     if actualreward(t) > 0
+          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (-2*actualreward(t) - qvalue(2, 1, t));
+          qvalue(2, 2, t+1) = qvalue(2, 2, t) + params.eta * (-2*actualreward(t) - qvalue(2, 2, t));
+          qvalue(2, 3, t+1) = qvalue(2, 3, t) + params.eta * (actualreward(t) - qvalue(2, 3, t));
+          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (2*actualreward(t) - qvalue(3, 1, t));
+          qvalue(3, 2, t+1) = qvalue(3, 2, t) + params.eta * (actualreward(t) - qvalue(3, 2, t));
+          qvalue(3, 3, t+1) = qvalue(3, 3, t) + params.eta * (-2*actualreward(t) - qvalue(3, 3, t));
+       else
+          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (-actualreward(t) - qvalue(2, 1, t));
+          qvalue(2, 2, t+1) = qvalue(2, 2, t) + params.eta * (-0.5*actualreward(t) - qvalue(2, 2, t));
+          qvalue(2, 3, t+1) = qvalue(2, 3, t) + params.eta * (actualreward(t) - qvalue(2, 3, t));
+          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (actualreward(t) - qvalue(3, 1, t));
+          qvalue(3, 2, t+1) = qvalue(3, 2, t) + params.eta * (actualreward(t) - qvalue(3, 2, t));
+          qvalue(3, 3, t+1) = qvalue(3, 3, t) + params.eta * (-0.5*actualreward(t) - qvalue(3, 3, t));
+     end
    end
+else
+if choices(t, 2) == 2
+       if actualreward(t) > 0
+          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (2*actualreward(t) - qvalue(2, 1, t));
+          qvalue(2, 2, t+1) = qvalue(2, 2, t) + params.eta * (-2*actualreward(t) - qvalue(2, 2, t));
+          qvalue(2, 3, t+1) = qvalue(2, 3, t) + params.eta * (actualreward(t) - qvalue(2, 3, t));
+          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (-2*actualreward(t) - qvalue(3, 1, t));
+          qvalue(3, 2, t+1) = qvalue(3, 2, t) + params.eta * (actualreward(t) - qvalue(3, 2, t));
+          qvalue(3, 3, t+1) = qvalue(3, 3, t) + params.eta * (-2*actualreward(t) - qvalue(3, 3, t));
+       else
+          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (actualreward(t) - qvalue(2, 1, t));
+          qvalue(2, 2, t+1) = qvalue(2, 2, t) + params.eta * (-0.5*actualreward(t) - qvalue(2, 2, t));
+          qvalue(2, 3, t+1) = qvalue(2, 3, t) + params.eta * (actualreward(t) - qvalue(2, 3, t));
+          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (-actualreward(t) - qvalue(3, 1, t));
+          qvalue(3, 2, t+1) = qvalue(3, 2, t) + params.eta * (actualreward(t) - qvalue(3, 2, t));
+          qvalue(3, 3, t+1) = qvalue(3, 3, t) + params.eta * (-0.5*actualreward(t) - qvalue(3, 3, t));
+       end
+   else
+     if actualreward(t) > 0
+          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (-2*actualreward(t) - qvalue(2, 1, t));
+          qvalue(2, 2, t+1) = qvalue(2, 2, t) + params.eta * (actualreward(t) - qvalue(2, 2, t));
+          qvalue(2, 3, t+1) = qvalue(2, 3, t) + params.eta * (-2*actualreward(t) - qvalue(2, 3, t));
+          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (2*actualreward(t) - qvalue(3, 1, t));
+          qvalue(3, 2, t+1) = qvalue(3, 2, t) + params.eta * (-2*actualreward(t) - qvalue(3, 2, t));
+          qvalue(3, 3, t+1) = qvalue(3, 3, t) + params.eta * (actualreward(t) - qvalue(3, 3, t));
+       else
+          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (-actualreward(t) - qvalue(2, 1, t));
+          qvalue(2, 2, t+1) = qvalue(2, 2, t) + params.eta * (actualreward(t) - qvalue(2, 2, t));
+          qvalue(2, 3, t+1) = qvalue(2, 3, t) + params.eta * (-0.5*actualreward(t) - qvalue(2, 3, t));
+          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (actualreward(t) - qvalue(3, 1, t));
+          qvalue(3, 2, t+1) = qvalue(3, 2, t) + params.eta * (-0.5*actualreward(t) - qvalue(3, 2, t));
+          qvalue(3, 3, t+1) = qvalue(3, 3, t) + params.eta * (actualreward(t) - qvalue(3, 3, t));
+     end
+   end
+end
 
 end
 
