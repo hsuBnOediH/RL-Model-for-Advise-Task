@@ -147,7 +147,7 @@ end
 % beta = 4
 
 % Assuming observations.rewards is a vector
-actualreward = [MDP.actualreward]; % Copy the original vector
+actualreward = [MDP.actualreward]/10; % Copy the original vector
 
 
 % Initialize a 3x2x30 zero matrix
