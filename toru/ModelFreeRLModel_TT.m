@@ -227,6 +227,18 @@ end
 end
 
 
+results.choices(:,:) = choices(:,:);
+
+    results.input.task = task;
+    results.input.params = params;
+    results.input.observations = observations;
+    results.input.choices = choices;
+    results.input.sim = sim;
+
+    results.blockwise.action_probs = action_probs;
+    results.blockwise.actions = choices;
+
+
 % elseif task.block_type == "LL"
 % 
 % qvalue(:, :, 1) = [2*params.p_a-params.l_loss_value*(1-params.p_a), 0, 0;
@@ -528,20 +540,20 @@ end
 
 %results.observations.hints(block,:) = hint_outcomes;
 %results.observations.rewards(block,:) = reward_outcomes;
-results.choices(:,:) = choices(:,:);
-%results.R(:,block) = R(:,block);
-
-%if block == 1
-    results.input.task = task;
-    results.input.params = params;
-    results.input.observations = observations;
-    results.input.choices = choices;
-    results.input.sim = sim;
-%end
-
-
-    results.blockwise.action_probs = action_probs;
-    results.blockwise.actions = choices;
+% results.choices(:,:) = choices(:,:);
+% %results.R(:,block) = R(:,block);
+% 
+% %if block == 1
+%     results.input.task = task;
+%     results.input.params = params;
+%     results.input.observations = observations;
+%     results.input.choices = choices;
+%     results.input.sim = sim;
+% %end
+% 
+% 
+%     results.blockwise.action_probs = action_probs;
+%     results.blockwise.actions = choices;
 %    results.blockwise(block).true_context = true_context;
 %    results.blockwise(block).hint_outcomes = hint_outcomes;
 %    results.blockwise(block).hint_outcome_vector = hint_outcome_vector;
