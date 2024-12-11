@@ -2,7 +2,6 @@
 % 
 % % generative process (from task structure)
 % 
-% task.num_blocks = 2; % number of trials
 % task.num_trials = 30; % number of trials
 % 
 % % whether loss is -40 or -80
@@ -36,24 +35,6 @@
 % %params.omega = .2; 
 % params.eta = .5;
 % 
-
-
-% 
-% %data
-% observations.hints = [0 2 1;
-%                       1 0 1]; %observations.hints(block,trial) 
-% observations.rewards = [1 1 2;
-%                         2 1 1];%observations.rewards(block,trial)
-% choices(:,:,1) = [3 0;
-%                   1 3;
-%                   1 2];
-% choices(:,:,2) = [1 2;
-%                   3 0;
-%                   1 2];
-% if sim == 0
-%     task.num_blocks = size(observations.rewards,1); % number of blocks
-%     task.num_trials = size(observations.rewards,2); % number of trials
-% end
 
 
 function [results] = ModelFreeRLModel_TT(task, MDP, params, sim)
@@ -134,103 +115,216 @@ end
 actualreward = [MDP.actualreward]/10; % Copy the original vector and divided by 10
 
 
+
 % Initialize matrices
 action_probs = zeros(3, 2, trial);
 
 qvalue = zeros(3, 3, trial);
 
-qvalue(:, :, 1) = [2*params.p_a-4*(1-params.p_a), 0, 0;
-                   0, 2*params.p_a-4*(1-params.p_a), 2*(1-params.p_a)-4*params.p_a;
-                   0, 2*(1-params.p_a)-4*params.p_a, 2*params.p_a-4*(1-params.p_a)];
+
+if task.block_type == "SL"
+     loss = 4;
+elseif task.block_type == "LL"
+     loss = params.l_loss_value;
+end
+
+qvalue(:, :, 1) = [2*params.p_a-loss*(1-params.p_a), 0, 0;
+                   2-0.5*loss, 2*params.p_a-loss*(1-params.p_a), 2*(1-params.p_a)-loss*params.p_a;
+                   2-0.5*loss, 2*(1-params.p_a)-loss*params.p_a, 2*params.p_a-loss*(1-params.p_a)];
 
 for t = 1:trial
 
 exp_values = exp(params.inv_temp * qvalue(:, 1, t));
 action_probs(:, 1, t) = exp_values / sum(exp_values);
 
-if choices(t, 1) == 2 %immediately left
-  qvalue(choices(t, 1), 1, t+1) = qvalue(choices(t, 1), 1, t) + params.eta * (actualreward(t)*params.reward_value - qvalue(choices(t, 1), 1, t));
-  qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (-actualreward(t)*params.reward_value - qvalue(3, 1, t));
-  qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.omega*((2*params.p_a-4*(1-params.p_a))-qvalue(1, 1, t));
-  qvalue(:, 2:3, t+1) = qvalue(:, 2:3, t);
+selected = choices(t, 1); % 1 (advice) or 2 (left) or 3 (right)
+
+if actualreward(t) > 0
+
+if selected == 2 || selected == 3
+    % Update for the selected choice
+    qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
+        params.eta_d_win * (actualreward(t) * params.reward_value - qvalue(selected, 1, t));
+    
+    % Update for the opposite choice
+    opposite = 5 - selected; % Maps 2 to 3 and 3 to 2
+    qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
+        params.eta_d_win * (-loss * params.reward_value - qvalue(opposite, 1, t));
+    
+    % Update for qvalue(1, 1)
+    qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
+        params.omega_a_win * ((2 * params.p_a - loss * (1 - params.p_a)) - qvalue(1, 1, t));
+    
+    % Preserve qvalue(:, 2:3)
+    qvalue(:, 2:3, t+1) = qvalue(:, 2:3, t);
+
+
+elseif selected == 1  %advice
+   hint = observations.hints(t)+1;
+
+   exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, hint, t));
+   action_probs(2:3, 2, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
+
+   deltasecond = actualreward(t)*params.reward_value - qvalue(choices(t, 2), hint, t);
+   deltafirst = qvalue(choices(t, 2), hint, t) - qvalue(1, 1, t);
+
+   qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_win * deltafirst + params.eta_a_win * params.lamgda * deltasecond;
+ 
+   secchoice = choices(t, 2);
+          qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_win * (2*actualreward(t)*params.reward_value - qvalue(secchoice, 1, t));
+          qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_d_win * (actualreward(t)*params.reward_value - qvalue(secchoice, hint, t));
+          qvalue(5-secchoice, 1, t+1) = qvalue(5-secchoice, 1, t) + params.eta_d_win * (-loss*params.reward_value - qvalue(5-secchoice, 1, t));
+          qvalue(5-secchoice, hint, t+1) = qvalue(5-secchoice, hint, t) + params.eta_d_win * (-loss*params.reward_value - qvalue(5-secchoice, hint, t));
+          qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
+          qvalue(3, 5-hint, t+1) = qvalue(2, hint, t+1);
 end
 
-if choices(t, 1) == 3 %immediately right
-  qvalue(choices(t, 1), 1, t+1) = qvalue(choices(t, 1), 1, t) + params.eta * (actualreward(t)*params.reward_value - qvalue(choices(t, 1), 1, t));
-  qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (-actualreward(t)*params.reward_value - qvalue(2, 1, t));
-  qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.omega*((2*params.p_a-4*(1-params.p_a))-qvalue(1, 1, t));
-  qvalue(:, 2:3, t+1) = qvalue(:, 2:3, t);
+
+elseif actualreward(t) < 0
+
+if selected == 2 || selected == 3
+    % Update for the selected choice
+    qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
+        params.eta_d_loss * (-loss * params.reward_value - qvalue(selected, 1, t));
+    
+    % Update for the opposite choice
+    opposite = 5 - selected; % Maps 2 to 3 and 3 to 2
+    qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
+        params.eta_d_loss * (4 * params.reward_value - qvalue(opposite, 1, t));
+    
+    % Update for qvalue(1, 1)
+    qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
+        params.omega_a_loss * ((2 * params.p_a - loss * (1 - params.p_a)) - qvalue(1, 1, t));
+    
+    % Preserve qvalue(:, 2:3)
+    qvalue(:, 2:3, t+1) = qvalue(:, 2:3, t);
+
+
+elseif selected == 1  %advice
+   hint = observations.hints(t)+1;
+
+   exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, hint, t));
+   action_probs(2:3, 2, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
+
+   deltasecond = -loss*params.reward_value - qvalue(choices(t, 2), hint, t);
+   deltafirst = qvalue(choices(t, 2), hint, t) - qvalue(1, 1, t);
+
+   qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_loss * deltafirst + params.eta_a_loss * params.lamgda * deltasecond;
+ 
+   secchoice = choices(t, 2);
+          qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_loss * (-loss*params.reward_value - qvalue(secchoice, 1, t));
+          qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_d_loss * (-loss*params.reward_value - qvalue(secchoice, hint, t));
+          qvalue(5-secchoice, 1, t+1) = qvalue(5-secchoice, 1, t) + params.eta_d_loss * (4*params.reward_value - qvalue(5-secchoice, 1, t));
+          qvalue(5-secchoice, hint, t+1) = qvalue(5-secchoice, hint, t) + params.eta_d_loss * (2*params.reward_value - qvalue(5-secchoice, hint, t));
+          qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
+          qvalue(3, 5-hint, t+1) = qvalue(2, hint, t+1);
+
+
 end
 
-% % Common updates for left and right choices
-% selected = choices(t, 1); % 2 (left) or 3 (right)
+end
+
+end
+
+
+% elseif task.block_type == "LL"
+% 
+% qvalue(:, :, 1) = [2*params.p_a-params.l_loss_value*(1-params.p_a), 0, 0;
+%                    2-0.5*params.l_loss_value, 2*params.p_a-params.l_loss_value*(1-params.p_a), 2*(1-params.p_a)-params.l_loss_value*params.p_a;
+%                    2-0.5*params.l_loss_value, 2*(1-params.p_a)-params.l_loss_value*params.p_a, 2*params.p_a-params.l_loss_value*(1-params.p_a)];
+% 
+% for t = 1:trial
+% 
+% exp_values = exp(params.inv_temp * qvalue(:, 1, t));
+% action_probs(:, 1, t) = exp_values / sum(exp_values);
+% 
+% selected = choices(t, 1); % 1 (advice) or 2 (left) or 3 (right)
+% 
+% if actualreward(t) > 0
+% 
 % if selected == 2 || selected == 3
 %     % Update for the selected choice
 %     qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
-%         params.eta * (actualreward(t) * params.reward_value - qvalue(selected, 1, t));
+%         params.eta_d_win * (4 * params.reward_value - qvalue(selected, 1, t));
 %     
 %     % Update for the opposite choice
 %     opposite = 5 - selected; % Maps 2 to 3 and 3 to 2
 %     qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
-%         params.eta * (-actualreward(t) * params.reward_value - qvalue(opposite, 1, t));
+%         params.eta_d_win * (-params.l_loss_value * params.reward_value - qvalue(opposite, 1, t));
 %     
 %     % Update for qvalue(1, 1)
 %     qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
-%         params.omega * ((2 * params.p_a - 4 * (1 - params.p_a)) - qvalue(1, 1, t));
+%         params.omega_a_win * ((2 * params.p_a - params.l_loss_value * (1 - params.p_a)) - qvalue(1, 1, t));
 %     
 %     % Preserve qvalue(:, 2:3)
 %     qvalue(:, 2:3, t+1) = qvalue(:, 2:3, t);
+% 
+% 
+% elseif selected == 1  %advice
+%    hint = observations.hints(t)+1;
+% 
+%    exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, hint, t));
+%    action_probs(2:3, 2, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
+% 
+%    deltasecond = actualreward(t)*params.reward_value - qvalue(choices(t, 2), hint, t);
+%    deltafirst = qvalue(choices(t, 2), hint, t) - qvalue(1, 1, t);
+% 
+%    qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_win * deltafirst + params.eta_a_win * params.lamgda * deltasecond;
+%  
+%    secchoice = choices(t, 2);
+%           qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_win * (4*params.reward_value - qvalue(secchoice, 1, t));
+%           qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_d_win * (2*params.reward_value - qvalue(secchoice, hint, t));
+%           qvalue(5-secchoice, 1, t+1) = qvalue(5-secchoice, 1, t) + params.eta_d_win * (-params.l_loss_value*params.reward_value - qvalue(5-secchoice, 1, t));
+%           qvalue(5-secchoice, hint, t+1) = qvalue(5-secchoice, hint, t) + params.eta_d_win * (-params.l_loss_value*params.reward_value - qvalue(5-secchoice, hint, t));
+%           qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
+%           qvalue(3, 5-hint, t+1) = qvalue(2, hint, t+1);
 % end
-
-
-if choices(t, 1) == 1  %advice
-
-   exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, observations.hints(t)+1, t));
-   action_probs(2:3, 2, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
-
-   deltasecond = actualreward(t)*params.reward_value - qvalue(choices(t, 2), observations.hints(t)+1, t);
-   deltafirst = qvalue(choices(t, 2), observations.hints(t)+1, t) - qvalue(1, 1, t);
-
-   qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta * deltafirst + params.eta * params.lamgda * deltasecond;
- 
-   if choices(t, 2) == 2
-       if actualreward(t) > 0
-          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (2*actualreward(t)*params.reward_value - qvalue(2, 1, t));
-          qvalue(2, observations.hints(t)+1, t+1) = qvalue(2, observations.hints(t)+1, t) + params.eta * (actualreward(t)*params.reward_value - qvalue(2, observations.hints(t)+1, t));
-          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (-2*actualreward(t)*params.reward_value - qvalue(3, 1, t));
-          qvalue(3, observations.hints(t)+1, t+1) = qvalue(3, observations.hints(t)+1, t) + params.eta * (-2*actualreward(t)*params.reward_value - qvalue(3, observations.hints(t)+1, t));
-          qvalue(2, 4-observations.hints(t), t+1) = qvalue(3, observations.hints(t)+1, t+1);
-          qvalue(3, 4-observations.hints(t), t+1) = qvalue(2, observations.hints(t)+1, t+1);
-       else
-          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (actualreward(t)*params.reward_value - qvalue(2, 1, t));
-          qvalue(2, observations.hints(t)+1, t+1) = qvalue(2, observations.hints(t)+1, t) + params.eta * (actualreward(t)*params.reward_value - qvalue(2, observations.hints(t)+1, t));
-          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (-actualreward(t)*params.reward_value - qvalue(3, 1, t));
-          qvalue(3, observations.hints(t)+1, t+1) = qvalue(3, observations.hints(t)+1, t) + params.eta * (-0.5*actualreward(t)*params.reward_value - qvalue(3, observations.hints(t)+1, t));
-          qvalue(2, 4-observations.hints(t), t+1) = qvalue(3, observations.hints(t)+1, t+1);
-          qvalue(3, 4-observations.hints(t), t+1) = qvalue(2, observations.hints(t)+1, t+1);
-       end
-   else
-     if actualreward(t) > 0
-          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (-2*actualreward(t)*params.reward_value - qvalue(2, 1, t));
-          qvalue(2, observations.hints(t)+1, t+1) = qvalue(2, observations.hints(t)+1, t) + params.eta * (-2*actualreward(t)*params.reward_value - qvalue(2, observations.hints(t)+1, t));
-          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (2*actualreward(t)*params.reward_value - qvalue(3, 1, t));
-          qvalue(3, observations.hints(t)+1, t+1) = qvalue(3, observations.hints(t)+1, t) + params.eta * (actualreward(t)*params.reward_value - qvalue(3, observations.hints(t)+1, t));
-          qvalue(2, 4-observations.hints(t), t+1) = qvalue(3, observations.hints(t)+1, t+1);
-          qvalue(3, 4-observations.hints(t), t+1) = qvalue(2, observations.hints(t)+1, t+1);
-       else
-          qvalue(2, 1, t+1) = qvalue(2, 1, t) + params.eta * (-actualreward(t)*params.reward_value - qvalue(2, 1, t));
-          qvalue(2, observations.hints(t)+1, t+1) = qvalue(2, observations.hints(t)+1, t) + params.eta * (-0.5*actualreward(t)*params.reward_value - qvalue(2, observations.hints(t)+1, t));
-          qvalue(3, 1, t+1) = qvalue(3, 1, t) + params.eta * (actualreward(t)*params.reward_value - qvalue(3, 1, t));
-          qvalue(3, observations.hints(t)+1, t+1) = qvalue(3, observations.hints(t)+1, t) + params.eta * (actualreward(t)*params.reward_value - qvalue(3, observations.hints(t)+1, t));
-          qvalue(2, 4-observations.hints(t), t+1) = qvalue(3, observations.hints(t)+1, t+1);
-          qvalue(3, 4-observations.hints(t), t+1) = qvalue(2, observations.hints(t)+1, t+1);
-     end
-   end
-
-
-end
-
-end
+% 
+% elseif actualreward(t) < 0
+% 
+% if selected == 2 || selected == 3
+%     % Update for the selected choice
+%     qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
+%         params.eta_d_loss * (-params.l_loss_value * params.reward_value - qvalue(selected, 1, t));
+%     
+%     % Update for the opposite choice
+%     opposite = 5 - selected; % Maps 2 to 3 and 3 to 2
+%     qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
+%         params.eta_d_loss * (4 * params.reward_value - qvalue(opposite, 1, t));
+%     
+%     % Update for qvalue(1, 1)
+%     qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
+%         params.omega_a_loss * ((2 * params.p_a - params.l_loss_value * (1 - params.p_a)) - qvalue(1, 1, t));
+%     
+%     % Preserve qvalue(:, 2:3)
+%     qvalue(:, 2:3, t+1) = qvalue(:, 2:3, t);
+% 
+% 
+% elseif selected == 1  %advice
+%    hint = observations.hints(t)+1;
+% 
+%    exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, hint, t));
+%    action_probs(2:3, 2, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
+% 
+%    deltasecond = -params.l_loss_value*params.reward_value - qvalue(choices(t, 2), hint, t);
+%    deltafirst = qvalue(choices(t, 2), hint, t) - qvalue(1, 1, t);
+% 
+%    qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_loss * deltafirst + params.eta_a_loss * params.lamgda * deltasecond;
+%  
+%    secchoice = choices(t, 2);
+%           qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_loss * (-params.l_loss_value*params.reward_value - qvalue(secchoice, 1, t));
+%           qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_d_loss * (-params.l_loss_value*params.reward_value - qvalue(secchoice, hint, t));
+%           qvalue(5-secchoice, 1, t+1) = qvalue(5-secchoice, 1, t) + params.eta_d_loss * (4*params.reward_value - qvalue(5-secchoice, 1, t));
+%           qvalue(5-secchoice, hint, t+1) = qvalue(5-secchoice, hint, t) + params.eta_d_loss * (2*params.reward_value - qvalue(5-secchoice, hint, t));
+%           qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
+%           qvalue(3, 5-hint, t+1) = qvalue(2, hint, t+1);
+% 
+% 
+% end
+% 
+% end
+% 
+% end
 
 
 
@@ -461,16 +555,5 @@ results.choices(:,:) = choices(:,:);
 %    results.blockwise(block).norm_posteriors_d_final = ppp_context;
 %    results.blockwise(block).trust_priors_a = a{1};
 %    results.blockwise(block).norm_trust_priors_a = A{1};
-
-
-
-
-end
-
- 
- 
-
-
-
 
 

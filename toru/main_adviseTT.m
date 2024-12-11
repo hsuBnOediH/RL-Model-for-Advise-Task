@@ -42,7 +42,8 @@ addpath([root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask']);
 params.p_a = .8;
 params.inv_temp = 4;
 params.reward_value = 4;
-params.l_loss_value = -8;
+%params.l_loss_value = 4; %for Active inference
+params.l_loss_value = 8; %for RL
 params.omega = .2;
 % params.omega_d_win = .2;
 % params.omega_d_loss = .2;
