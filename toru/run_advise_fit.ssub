@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+#SBATCH --partition=c3
+#SBATCH --ntasks=1
+#SBATCH --mem=3000
+#SBATCH --nodes=1
+#SBATCH --begin=now
+#SBATCH --chdir=/media/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/RLmodel/toru
+
+#
+#################################################
+
+SUBJECT=$1
+export SUBJECT
+
+INPUT_DIRECTORY=$2
+export INPUT_DIRECTORY
+
+RESULTS=$3
+export RESULTS
+
+module load matlab/2022a
+run_file='/media/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/RLmodel/toru/main_adviseTT.m'
+matlab -nodisplay -nosplash < ${run_file}

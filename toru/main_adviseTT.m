@@ -39,19 +39,21 @@ addpath([root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask']);
 
 % Define all parameters passed into the model; specify which ones to fit in
 % field
-params.p_a = .8;
+params.p_a = .75;
 params.inv_temp = 4;
 params.reward_value = 4;
 %params.l_loss_value = 4; %for Active inference
 params.l_loss_value = 8; %for RL
-params.omega = .2;
+%params.omega = .2; %As prior
+params.omega = 0;
 % params.omega_d_win = .2;
 % params.omega_d_loss = .2;
 % params.omega_a_win = .2;
 % params.omega_a_loss = .2;
 %params.omega_d = .2;
 %params.omega_a = .2;
-params.eta = .5;
+%params.eta = .5; %As prior
+params.eta = 1;
 %params.eta_d = .5;
 %params.eta_d_win = .5;
 %params.eta_d_loss = .5;
@@ -62,7 +64,7 @@ params.state_exploration = 1;
 params.parameter_exploration = 0;
 params.lamgda = 0.5;
 
-field = {'p_a','inv_temp','reward_value','l_loss_value','omega','eta', 'lamgda'}; %those are fitted
+field = {'p_a','inv_temp','reward_value','l_loss_value','lamgda'}; %those are fitted
 
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
