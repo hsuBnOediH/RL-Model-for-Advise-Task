@@ -11,26 +11,6 @@ function model = init_q_learning_model(params,all_params)
 
     % Initialize Q-table with zeros, and set NaNs for unreachable pairs as needed
     q_table = zeros(length(states), length(actions));
-    % q_table(1, 1) = 40 * left_better;
-    % q_table(1, 2) = 40 * (1-left_better);
-    % q_table(1, 3) = 20 * advise_truthness;
-    % q_table(2, 1) = 20 * left_better;
-    % q_table(2, 2) = 20 * (1-left_better);
-    % q_table(2, 3) = NaN;
-    % q_table(3, 1) = 20 * left_better;
-    % q_table(3, 2) = 20 * (1-left_better);
-    % q_table(3, 3) = NaN;
-
-
-    % q_table(1,1) = 40* left_better +(-60)* (1-left_better);
-    % q_table(1,2) = 40* (1-left_better) +(-60)* left_better;
-    % q_table(1,3) = 20* advise_truthness +(-60)* (1-advise_truthness);
-    % q_table(2,1) = 20* left_better +(-60)* (1-left_better);
-    % q_table(2,2) = 20* (1-left_better) +(-60)* left_better;
-    % q_table(2,3) = NaN;
-    % q_table(3,1) = 20* left_better +(-60)* (1-left_better);
-    % q_table(3,2) = 20* (1-left_better) +(-60)* left_better;
-    % q_table(3,3) = NaN;
     
     % Store states, actions, and Q-table in the model structure
     model.states = states;
