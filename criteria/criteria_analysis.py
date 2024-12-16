@@ -101,13 +101,85 @@ print(f"finished criteria2")
 criteria3 = {}
 for subject, df in subject_data.items():
     reaction_times = []
-    for index, row in df.iterrows():
-        if row['event_type'] == 8:
-            start_time = row['absolute_time']
-        elif row['event_type'] == 5:
-            end_time = row['absolute_time']
-            reaction_times.append(end_time - start_time)
-    criteria3[subject] = {'average_reaction_time': sum(reaction_times)/len(reaction_times), 'reaction_times': reaction_times}
+    total_reaction_time = 0
+    for i in range(360):
+       # group by trial
+        temp_df = df[df['trial'] == i]
+        if len(temp_df) == 0:
+            continue
+        # check if took advice by how many times event_type 5, 1 times means not took advice,2 times means took advice
+        if len(temp_df[temp_df['event_type'] == 5]) == 1:
+            #  evnt_type 8 absolute time - event_type 5 absolute time
+            for index, row in temp_df.iterrows():
+                if row['event_type'] == 5:
+                    first_stim = row['absolute_time']
+                elif row['event_type'] == 8:
+                    first_action = row['absolute_time']
+            reaction_times.append(first_action - first_stim)
+            total_reaction_time += first_action - first_stim
+        else:
+            reaction_time = 0
+            find_first_stim = False
+            first_stim,first_stim,second_stim,second_action = None,None,None,None
+            for index, row in temp_df.iterrows():
+                if row['event_type'] == 5 and not find_first_stim:
+                    first_stim = row['absolute_time']
+                    find_first_stim = True
+                elif row['event_type'] == 6:
+                    first_action = row['absolute_time']
+                elif row['event_type'] == 8:
+                    second_action = row['absolute_time']
+                elif row['event_type'] == 5 and find_first_stim:
+                    second_stim = row['absolute_time']
+                   
+            if first_stim is None or first_action is None or second_stim is None or second_action is None:
+                print(temp_df)
+                print(f"first_stim: {first_stim}, first_action: {first_action}, second_stim: {second_stim}, second_action: {second_action}")
+                break
+            else:
+                total_reaction_time += (first_action - first_stim) + (second_action - second_stim)
+                reaction_times.append(((first_action - first_stim), (second_action - second_stim)))
+    criteria3[subject] = {'average_reaction_time': total_reaction_time/len(reaction_times), 'reaction_times': reaction_times}
+
 print(f"finished criteria3")
-for subject, data in criteria3.items():
-    print(subject, data['average_reaction_time'])
+
+
+
+# check criteria 4
+# for each subject, calculate the number of trials that took advice
+criteria4 = {}
+for subject, df in subject_data.items():
+    took_advice = 0
+    for i in range(360):
+        temp_df = df[df['trial'] == i]
+        if len(temp_df) == 0:
+            continue
+        if len(temp_df[temp_df['event_type'] == 5]) == 2:
+            took_advice += 1
+    criteria4[subject] = took_advice
+print(f"finished criteria4")
+
+
+
+# check criteria 5
+# for each subject, check the longest reaction time
+criteria5 = {}
+for subject in criteria3:
+    max_rt = float('-inf')
+    for rt in criteria3[subject]['reaction_times']:
+        # if rt is a tuple
+        if isinstance(rt, tuple):
+            if rt[0] > max_rt:
+                max_rt = rt[0]
+            if rt[1] > max_rt:
+                max_rt = rt[1]
+        else:
+            if rt > max_rt:
+                max_rt = rt
+    criteria5[subject] = max_rt
+print(f"finished criteria5")
+       
+# save all the criteria as pickle file
+import pickle
+with open('criteria.pkl', 'wb') as outfile:
+    pickle.dump({'criteria1': criteria1, 'criteria2': criteria2, 'criteria3': criteria3, 'criteria4': criteria4, 'criteria5': criteria5}, outfile)
