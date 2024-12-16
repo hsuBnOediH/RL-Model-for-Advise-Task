@@ -26,6 +26,7 @@ for subject in subjects:
     if len(temp_list) == 1:
         subject_files[subject] = temp_list[0]
     elif len(temp_list) > 1:
+        print('--'*20)
         print('Multiple files for subject:', subject)
         # sort the files by date
         temp_list.sort()
@@ -69,13 +70,28 @@ for subject, df in subject_data.items():
     incorrect = 0
     for index, row in df.iterrows():
         if row['event_type'] == 9:
-            if row['result'] == 'positive':
+            if row['result'] > 0:
                 correct += 1
-            elif row['result'] == 'negative':
+            elif row['result'] < 0:
                 incorrect += 1
     criteria1[subject] = {'correct': correct, 'incorrect': incorrect}
 print(criteria1)
 
 
 
+# check criteria 2
+# for each subject, check event_type is 8, the 'response' is left or right
+# left means left, right means right, count the number of left and right
+criteria2 = {}
+for subject, df in subject_data.items():
+    left = 0
+    right = 0
+    for index, row in df.iterrows():
+        if row['event_type'] == 8:
+            if row['response'] == 'left':
+                left += 1
+            elif row['response'] == 'right':
+                right += 1
+    criteria2[subject] = {'left': left, 'right': right}
+print(criteria2)
 
