@@ -70,9 +70,9 @@ for subject, df in subject_data.items():
     incorrect = 0
     for index, row in df.iterrows():
         if row['event_type'] == 9:
-            if row['result'] > 0:
+            if int(row['result']) > 0:
                 correct += 1
-            elif row['result'] < 0:
+            else:
                 incorrect += 1
     criteria1[subject] = {'correct': correct, 'incorrect': incorrect}
 print(criteria1)
