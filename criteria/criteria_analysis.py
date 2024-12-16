@@ -1,6 +1,7 @@
 # read all the file from path: /mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice
 
 import os
+import pandas as pd
 files = os.listdir('/mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice')
 
 # read csv file contain all the subject ids
@@ -25,8 +26,18 @@ for subject in subjects:
     if len(temp_list) == 1:
         subject_files[subject] = temp_list[0]
     elif len(temp_list) > 1:
-        # find the latest file and complete file
-        pass
+        print('Multiple files for subject:', subject)
+        # sort the files by date
+        temp_list.sort()
+        print('Files:', temp_list)
+        for current_file in temp_list:
+            # read as pd dataframe
+            cur_pd = pd.read_csv('/mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice/'+current_file)
+            # check if the file is complete by end row trail is 359
+            if cur_pd.iloc[-1]['trial'] == 359:
+                subject_files[subject] = current_file
+            else:
+                print('File is not complete:', current_file)
     else:
         print('No file for subject:', subject)
 
