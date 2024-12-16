@@ -1,6 +1,7 @@
 # read all the file from path: /mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice
 
 import os
+import pandas as pd
 files = os.listdir('/mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice')
 
 # read csv file contain all the subject ids
@@ -31,19 +32,49 @@ for subject in subjects:
         print('Files:', temp_list)
         for current_file in temp_list:
             # check if the file is complete by last row of file is start with 359 or not
-            with open('/mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice/'+current_file) as infile:
-                lines = infile.readlines()
-                if lines[-1].startswith('359'):
-                    subject_files[subject] = current_file
-                else:
-                    print('File is not complete:', current_file)
-                    print('Last line:', lines[-1])
-                    print('Last line start with 359:', lines[-1].startswith('359'))
+            df = pd.read_csv('/mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice/'+current_file)
+            if df.iloc[-1, 0] == 359:
+                subject_files[subject] = current_file
+                print(f"Selecting file {current_file} for subject {subject}")
+                break
+            else:
+                print(f"File {current_file} for subject {subject} is incomplete")
+
     else:
         print('No file for subject:', subject)
 
 print(f"Read {len(subject_files)} files")
 
+
+# check for each subject, read as dataframe and save in dictionary
+subject_data = {}
+for subject, file in subject_files.items():
+    df = pd.read_csv('/mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice/'+file)
+    subject_data[subject] = df
+print(f"Read {len(subject_data)} dataframes")
+
+# for each dataframe, find the last row whose trial_type is MAIN, and remove rows before that, including that row
+for subject, df in subject_data.items():
+    last_main_row = df[df['trial_type'] == 'MAIN'].index[-1]
+    subject_data[subject] = df.iloc[last_main_row+1:]
+
+
+
+# check criteria 1
+# for each subject, check event_type is 9, the 'result' is positive or negative
+# postive means correct, negative means incorrect, count the number of correct and incorrect
+criteria1 = {}
+for subject, df in subject_data.items():
+    correct = 0
+    incorrect = 0
+    for index, row in df.iterrows():
+        if row['event_type'] == 9:
+            if row['result'] == 'positive':
+                correct += 1
+            elif row['result'] == 'negative':
+                incorrect += 1
+    criteria1[subject] = {'correct': correct, 'incorrect': incorrect}
+print(criteria1)
 
 
 
