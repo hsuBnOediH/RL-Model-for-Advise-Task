@@ -1,7 +1,6 @@
 # read all the file from path: /mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice
 
 import os
-import pandas as pd
 files = os.listdir('/mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice')
 
 # read csv file contain all the subject ids
@@ -31,13 +30,15 @@ for subject in subjects:
         temp_list.sort()
         print('Files:', temp_list)
         for current_file in temp_list:
-            # read as pd dataframe
-            cur_pd = pd.read_csv('/mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice/'+current_file)
-            # check if the file is complete by end row trail is 359
-            if cur_pd.iloc[-1]['trial'] == 359:
-                subject_files[subject] = current_file
-            else:
-                print('File is not complete:', current_file)
+            # check if the file is complete by last row of file is start with 359 or not
+            with open('/mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice/'+current_file) as infile:
+                lines = infile.readlines()
+                if lines[-1].startswith('359'):
+                    subject_files[subject] = current_file
+                else:
+                    print('File is not complete:', current_file)
+                    print('Last line:', lines[-1])
+                    print('Last line start with 359:', lines[-1].startswith('359'))
     else:
         print('No file for subject:', subject)
 
