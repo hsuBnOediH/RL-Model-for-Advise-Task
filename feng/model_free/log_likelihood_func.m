@@ -415,6 +415,7 @@ function L = log_likelihood_func(P, M, U, Y)
                 % warning
                 fprintf('The advise state is not 2 or 3\n')
             end
+        end
     end
          
     % Calculate the log likelihood using the action probabilities
