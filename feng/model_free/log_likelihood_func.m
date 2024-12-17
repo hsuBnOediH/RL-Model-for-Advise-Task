@@ -35,8 +35,6 @@ function L = log_likelihood_func(P, M, U, Y)
             preprocessed_params.(field) = 1/(1+exp(-preprocessed_params.(field)));
         elseif ismember(field, positive_fields)
             preprocessed_params.(field) = log(1+exp(preprocessed_params.(field)));
-        else
-            fprintf('The field %s is not in the transformation list\n',field)
         end
     end
 
@@ -96,6 +94,8 @@ function L = log_likelihood_func(P, M, U, Y)
             params.left_better = preprocessed_params.left_better;
         elseif strcmp(fields{i},'advise_truthness')
             params.advise_truthness = preprocessed_params.advise_truthness;
+        elseif strcmp(fields{i},'reaction_time_threshold')
+            params.reaction_time_threshold = preprocessed_params.reaction_time_threshold;
         end
     end
     % Initialize the log likelihood
@@ -277,16 +277,19 @@ function L = log_likelihood_func(P, M, U, Y)
                     if actual_reward > 0
                         lr = params.with_advice_win_learning_rate;
                         fr = params.without_advice_win_forgetting_rate;
+                        wo_advise_lr = params.without_advice_win_learning_rate;
                     else
                         lr = params.with_advice_loss_learning_rate;
                         fr = params.without_advice_loss_forgetting_rate;
+                        wo_advise_lr = params.without_advice_loss_learning_rate;
                     end
                     % learn update
                     % (advise_left,left) = (advise_left,left) + lr * (reward_term - (advise_left,left))
                     q_model.q_table(2,1) = q_model.q_table(after_advice_state,1) + lr*(reward_term  - q_model.q_table(after_advice_state,1));
                     % learning for without advice
                     % (start,left) = (start,left) + discount_factor * lr * (reward_term - (start,left))
-                    q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * lr*(reward_term  - q_model.q_table(1,1));
+                    % discount_factor is (with_advice learning ) will affect the without advice learning
+                    q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,1));
                     % (advise_rigth,right) = (advise_right,right) + lr * (reward_term - (advise_right,right))
                     q_model.q_table(3,2) = q_model.q_table(3,2) + lr*(reward_term  - q_model.q_table(3,2));
 
@@ -309,16 +312,18 @@ function L = log_likelihood_func(P, M, U, Y)
                     if actual_reward > 0
                         lr = params.with_advice_win_learning_rate;
                         fr = params.without_advice_win_forgetting_rate;
+                        wo_advise_lr = params.without_advice_win_learning_rate;
                     else
                         lr = params.with_advice_loss_learning_rate;
                         fr = params.without_advice_loss_forgetting_rate;
+                        wo_advise_lr = params.without_advice_loss_learning_rate;
                     end
                     % learn update
                     % (advise_left,right) = (advise_left,right) + lr * (reward_term - (advise_left,right))
                     q_model.q_table(2,2) = q_model.q_table(after_advice_state,2) + lr*(reward_term  - q_model.q_table(after_advice_state,2));
                     % learning for without advice
                     % (start,right) = (start,right) + discount_factor * lr * (reward_term - (start,right))
-                    q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * lr*(reward_term  - q_model.q_table(1,2));
+                    q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,2));
                     % (advise_rigth,left) = (advise_right,left) + lr * (reward_term - (advise_right,left))
                     q_model.q_table(3,1) = q_model.q_table(3,1) + lr*(reward_term  - q_model.q_table(3,1));
 
@@ -348,16 +353,18 @@ function L = log_likelihood_func(P, M, U, Y)
                     if actual_reward > 0
                         lr = params.with_advice_win_learning_rate;
                         fr = params.without_advice_win_forgetting_rate;
+                        wo_advise_lr = params.without_advice_win_learning_rate;
                     else
                         lr = params.with_advice_loss_learning_rate;
                         fr = params.without_advice_loss_forgetting_rate;
+                        wo_advise_lr = params.without_advice_loss_learning_rate;
                     end
                     % learn update
                     % (advise_right,left) = (advise_right,left) + lr * (reward_term - (advise_right,left))
                     q_model.q_table(3,1) = q_model.q_table(after_advice_state,1) + lr*(reward_term  - q_model.q_table(after_advice_state,1));
                     % learning for without advice
                     % (start,left) = (start,left) + discount_factor * lr * (reward_term - (start,left))
-                    q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * lr*(reward_term  - q_model.q_table(1,1));
+                    q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,1));
                     % (advise_left,right) = (advise_left,right) + lr * (reward_term - (advise_left,right))
                     q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(reward_term  - q_model.q_table(2,2));
 
@@ -380,16 +387,18 @@ function L = log_likelihood_func(P, M, U, Y)
                     if actual_reward > 0
                         lr = params.with_advice_win_learning_rate;
                         fr = params.without_advice_win_forgetting_rate;
+                        wo_advise_lr = params.without_advice_win_learning_rate;
                     else
                         lr = params.with_advice_loss_learning_rate;
                         fr = params.without_advice_loss_forgetting_rate;
+                        wo_advise_lr = params.without_advice_loss_learning_rate;
                     end
                     % learn update
                     % (advise_right,right) = (advise_right,right) + lr * (reward_term - (advise_right,right))
                     q_model.q_table(3,2) = q_model.q_table(after_advice_state,2) + lr*(reward_term  - q_model.q_table(after_advice_state,2));
                     % learning for without advice
                     % (start,right) = (start,right) + discount_factor * lr * (reward_term - (start,right))
-                    q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * lr*(reward_term  - q_model.q_table(1,2));
+                    q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,2));
                     % (advise_left,left) = (advise_left,left) = lr * (reward_term - (advise_left,left))
                     q_model.q_table(2,1) = q_model.q_table(2,1) + lr*(reward_term  - q_model.q_table(2,1));
 
@@ -420,6 +429,7 @@ function L = log_likelihood_func(P, M, U, Y)
          
     % Calculate the log likelihood using the action probabilities
     for trial_idx = 1:num_trials
+        reaction_times = preprocessed_data(trial_idx).reaction_time;
         actual_actions = preprocessed_data(trial_idx).actions;
         action_prob_t1 = action_probs(trial_idx,1,:);
         action_prob_t2 = action_probs(trial_idx,2,:);
@@ -427,25 +437,38 @@ function L = log_likelihood_func(P, M, U, Y)
         if length(actual_actions) >1
             actual_action_t1 = actual_actions(1);
             actual_action_t2 = actual_actions(2);
+            
+            reaction_time_t1 = reaction_times(1);
+            reaction_time_t2 = reaction_times(2);
         else
             actual_action_t1 = actual_actions(1);
             actual_action_t2 = 0;
+            reaction_time_t1 = 0;
+            reaction_time_t2 = reaction_times(1);
         end
-        % compute the log likelihood for each action at time step 1 
-        if actual_action_t1 == 1
-            L = L + log(action_prob_t1(1)+eps);
-        elseif actual_action_t1 == 2
-            L = L + log(action_prob_t1(2)+eps);
-        else
-            L = L + log(action_prob_t1(3)+eps);
+
+        % skip the log likelihood computation if the reaction time is larger than N seconds
+       
+        if reaction_time_t1 < params.reaction_time_threshold
+            % compute the log likelihood for each action at time step 1 
+            if actual_action_t1 == 1
+                L = L + log(action_prob_t1(1)+eps);
+            elseif actual_action_t1 == 2
+                L = L + log(action_prob_t1(2)+eps);
+            else
+                L = L + log(action_prob_t1(3)+eps);
+            end
         end
         % compute the log likelihood for each action at time step 2
-        if actual_action_t2 == 0
-            continue
-        elseif actual_action_t2 == 1
-            L = L + log(action_prob_t2(1)+eps);
-        elseif actual_action_t2 == 2
-            L = L + log(action_prob_t2(2)+eps);
+        if reaction_time_t2 < params.reaction_time_threshold
+                
+            if actual_action_t2 == 0
+                continue
+            elseif actual_action_t2 == 1
+                L = L + log(action_prob_t2(1)+eps);
+            elseif actual_action_t2 == 2
+                L = L + log(action_prob_t2(2)+eps);
+            end
         end
     end        
 
