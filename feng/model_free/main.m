@@ -124,6 +124,7 @@ elseif strcmp(env_sys, 'cluster')
     spmPath = '/mnt/dell_storage/labs/rsmith/all-studies/util/spm12';
     spmDemPath = '/mnt/dell_storage/labs/rsmith/all-studies/util/spm12/toolbox/DEM';
     tutorialPath = '/mnt/dell_storage/labs/rsmith/lab-members/cgoldman/Active-Inference-Tutorial-Scripts-main';
+    addpath('/media/labs/rsmith/lab-members/fli/advise_task/RL-Model-for-Advise-Task/feng/model_free/')
 end
 
 addpath(spmPath);
