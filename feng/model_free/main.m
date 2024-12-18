@@ -91,6 +91,7 @@ end
 IS_CONNECTED = false;
 if ON_CLUSTER
     IS_CONNECTED = getenv('IS_CONNECTED');
+    IS_CONNECTED = strcmp(IS_CONNECTED, 'True');
 end
 
 
