@@ -60,7 +60,7 @@ end
 % RES_PATH:
 % If RES_PATH is not assigned (i.e., empty), it will be auto-generated relative to ROOT.
 % If RES_PATH is a relative path, it will be appended to the ROOT path.
-RES_PATH = '../../results/model_free/debug/';
+RES_PATH = '../../outputs/model_free/debug/';
 if ON_CLUSTER
     RES_PATH = getenv('RES_PATH');
 elseif ~isAbsolutePath(RES_PATH)
@@ -88,7 +88,7 @@ end
 
 % IS_CONNECTED:
 % This will define if the left option change will connectely change the right option 
-IS_CONNECTED = true;
+IS_CONNECTED = false;
 if ON_CLUSTER
     IS_CONNECTED = getenv('IS_CONNECTED');
 end
@@ -271,7 +271,42 @@ if FIT && ~SIM
         end
     end
 
-    
+    % ouput a file into a csv file with subject identifier and candidate index and is connected or not
+    is_connedted_str = '_disconnected';
+    if IS_CONNECTED
+        is_connedted_str = '_connected';
+    end
+    output_file = fullfile(RES_PATH, [FIT_SUBJECT, '_candidate_', num2str(IDX_CANDIDATE), is_connedted_str, '.csv']);
+    table_content = struct();
+    table_content.subject = FIT_SUBJECT;
+    table_content.candidate = IDX_CANDIDATE;
+    if IS_CONNECTED
+        table_content.is_connected = 'connected';
+    else
+        table_content.is_connected = 'disconnected';
+    end
+    free_fields = fit_fields{IDX_CANDIDATE};
+    for i = 1:length(free_fields)
+       field_name = free_fields{i};
+       % adding prior fields into front of fields
+       prior_field_name = ['prior_',field_name];
+       table_content.(prior_field_name) = all_params.(free_fields{i});
+       post_field_name = ['post_',field_name];
+       table_content.(post_field_name) = Ep.(free_fields{i});
+    end
+
+    for i = 1:length(fix_fields{IDX_CANDIDATE})
+        field_name = fix_fields{IDX_CANDIDATE}{i};
+        table_content.(field_name) = all_params.(field_name);
+    end
+
+    table_content.free_energy = F;
+    T = struct2table(table_content);
+    writetable(T, output_file);
+    disp(['Fitting done for ', FIT_SUBJECT, ' with candidate ', num2str(IDX_CANDIDATE)]);
+    disp(['Output file: ', output_file]);
+
+
 elseif FIT && SIM
     disp('Performing fitting and simulation');
 
