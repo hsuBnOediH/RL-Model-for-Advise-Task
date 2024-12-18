@@ -1,6 +1,7 @@
 import sys, os, re, subprocess
 import argparse
 subject_list_path = '/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/subject_id/advise_subject_IDs_prolific_wo_uncomplete.csv'
+debug_subject_list_path = '/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/subject_id/debug_subjects.csv'
 # use current time generate a folder to save the results
 import datetime
 folder_name = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")+ '_run'
@@ -34,11 +35,15 @@ parser = argparse.ArgumentParser(description="Process a list of numbers or range
 parser.add_argument("range", type=str, help="Specify numbers as a single number (e.g., '1') or a range (e.g., '1-4').",default='1-10')
 # need a arg for connected version or not, use -c or --connected, default is False
 parser.add_argument("-c", "--connected", action="store_true", help="Use connected version of the model.", default=False)
-
+# need a arg for if the debug subject list is used, use -d or --debug, default is False
+parser.add_argument("-d", "--debug", action="store_true", help="Use debug subject list.", default=False)
 
 args = parser.parse_args()
 range_str = args.range
 is_connected = args.connected
+
+if args.debug:
+    subject_list_path = debug_subject_list_path
 number_list = []
 if '-' in range_str:
     start, end = map(int, range_str.split('-'))
@@ -55,6 +60,12 @@ with open(subject_list_path) as infile:
             subjects.append(line.strip())
 
 ssub_path = '/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/RL-Model-for-Advise-Task/feng/model_free/cluster_script/run_model_free.ssub'
+
+print(f"subject_file_path: {subject_list_path}")
+print(f"temp_res_path: {temp_res_path}")
+print(f"idx_candidate: {number_list}")
+print(f"is_connected: {is_connected}")
+
 
 for idx_candidate in number_list:
     for subject in subjects:

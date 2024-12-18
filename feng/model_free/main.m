@@ -63,8 +63,6 @@ end
 RES_PATH = '../../outputs/model_free/debug/';
 if ON_CLUSTER
     RES_PATH = getenv('RES_PATH');
-elseif ~isAbsolutePath(RES_PATH)
-    RES_PATH = fullfile(ROOT, RES_PATH);
 end
 
 % INPUT_PATH:
@@ -73,8 +71,6 @@ end
 INPUT_PATH = '../../inputs/';
 if ON_CLUSTER
     INPUT_PATH = getenv('INPUT_PATH');
-elseif ~isAbsolutePath(INPUT_PATH)
-    INPUT_PATH = fullfile(ROOT, INPUT_PATH);
 end
 
 % IDX_CANDIDATE:
@@ -319,16 +315,3 @@ else
     % If neither fitting nor simulation is enabled
     disp('No fitting or simulation to perform.');
 end
-
-
-% Define the isAbsolutePath function
-function isAbs = isAbsolutePath(givenPath)
-    if ispc
-        isAbs = length(givenPath) >= 2 && givenPath(2) == ':';
-    elseif isunix || ismac
-        isAbs = strncmp(givenPath, '/', 1);
-    else
-        error('Unknown operating system.');
-    end
-end
-

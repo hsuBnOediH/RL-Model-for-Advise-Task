@@ -2,7 +2,7 @@
 /inputs/
 /results/
 /Active-Inference-Tutorial-Scripts-main/
-/outputs/
+/outputs
 
 .DS_Store
 *.asv
