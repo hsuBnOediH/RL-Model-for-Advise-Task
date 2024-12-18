@@ -82,3 +82,11 @@ if is_connected == 'Both':
                 jobname = f'rl-advise-comparison-{subject}-{idx_candidate}-{is_connected}'
                 os.system(f"sbatch -J {jobname} -o {stdout_name} -e {stderr_name} {ssub_path} {SIM} {FIT} {subject} {temp_res_path} {idx_candidate} {is_connected} {PLOT}")
                 print(f"SUBMITTED JOB [{jobname}]")
+else:
+    for idx_candidate in number_list:
+        for subject in subjects:
+            stdout_name = f"{log_res_path}/{subject}-{idx_candidate}-{is_connected}-%J.stdout"
+            stderr_name = f"{log_res_path}/{subject}-{idx_candidate}-{is_connected}-%J.stderr"
+            jobname = f'rl-advise-comparison-{subject}-{idx_candidate}-{is_connected}'
+            os.system(f"sbatch -J {jobname} -o {stdout_name} -e {stderr_name} {ssub_path} {SIM} {FIT} {subject} {temp_res_path} {idx_candidate} {is_connected} {PLOT}")
+            print(f"SUBMITTED JOB [{jobname}]")
