@@ -27,11 +27,15 @@ end
 SIM = false;
 if ON_CLUSTER
     SIM = getenv('SIM');
+    % tanform the char to logical
+    SIM = strcmp(SIM, 'True');
 end 
 % True -> Fit the behavior data into the model
 FIT = true;
 if ON_CLUSTER
     FIT = getenv('FIT');
+    % tanform the char to logical
+    FIT = strcmp(FIT, 'True');
 end 
 
 % True -> TODO
@@ -231,6 +235,7 @@ end
 % Check conditions and perform actions based on FIT and SIM settings
 if FIT && ~SIM
     % data processing from the raw subject csv file
+    
     preprocessed_data = get_preprocessed_data(FIT_SUBJECT,INPUT_PATH);
     % if there is no valid data for this subject, end the script
     if isempty(preprocessed_data)

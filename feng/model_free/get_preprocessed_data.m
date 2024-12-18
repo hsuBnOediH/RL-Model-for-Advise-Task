@@ -127,20 +127,20 @@ function res = get_preprocessed_data(subject, input_folder_path)
             end
 
 
-            if ~ismember(i+1, advice_idxs)
-                first_stim = subdat.absolute_time(subdat.trial == i & subdat.event_type == 5);
-                first_action = subdat.absolute_time(subdat.trial == i & subdat.event_type == 8);
+            if ~ismember(i, advice_idxs)
+                first_stim = subdat.absolute_time(subdat.trial == i-1 & subdat.event_type == 5);
+                first_action = subdat.absolute_time(subdat.trial == i-1 & subdat.event_type == 8);
                 reaction_time = [nan, first_action - first_stim];
             else
-                first_stim_idx = find(subdat.trial == i & subdat.event_type == 5, 1);
+                first_stim_idx = find(subdat.trial == i-1& subdat.event_type == 5, 1);
                 first_stim = subdat.absolute_time(first_stim_idx);
-                first_action_idx = find(subdat.trial == i & subdat.event_type == 6, 1);
+                first_action_idx = find(subdat.trial == i-1 & subdat.event_type == 6, 1);
                 first_action = subdat.absolute_time(first_action_idx);
-                stims_idxs = find(subdat.trial == i & subdat.event_type == 5);
+                stims_idxs = find(subdat.trial == i-1 & subdat.event_type == 5);
                 second_stim = subdat.absolute_time(stims_idxs(2));
-                second_action_idx = find(subdat.trial == i & subdat.event_type == 8, 1);
+                second_action_idx = find(subdat.trial == i-1 & subdat.event_type == 8, 1);
                 second_action = subdat.absolute_time(second_action_idx);
-                 reaction_time = [first_action - first_stim, second_action - second_stim];
+                reaction_time = [first_action - first_stim, second_action - second_stim];
             end
             
             % Store the results in 'res' for the current trial
