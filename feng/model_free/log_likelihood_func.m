@@ -21,9 +21,9 @@ function L = log_likelihood_func(P, M, U, Y)
     end
 
     % define the fields that need to be transformed
-    zero_one_fields = {'left_better','advise_truthness','learning_rate','with_advice_learning_rate','without_advice_learning_rate','with_advice_win_learning_rate','with_advice_loss_learning_rate',...
-        'without_advice_win_learning_rate','without_advice_loss_learning_rate','forgetting_rate','with_advice_forgetting_rate','without_advice_forgetting_rate',...
-        'with_advice_win_forgetting_rate','with_advice_loss_forgetting_rate','without_advice_win_forgetting_rate','without_advice_loss_forgetting_rate','discount_factor'};
+    zero_one_fields = {'left_better','advise_truthness','learning_rate','with_advise_learning_rate','without_advise_learning_rate','with_advise_win_learning_rate','with_advise_loss_learning_rate',...
+        'without_advise_win_learning_rate','without_advise_loss_learning_rate','forgetting_rate','with_advise_forgetting_rate','without_advise_forgetting_rate',...
+        'with_advise_win_forgetting_rate','with_advise_loss_forgetting_rate','without_advise_win_forgetting_rate','without_advise_loss_forgetting_rate','discount_factor'};
     positive_fields = {'inv_temp','outcome_sensitivity',...
         };
 
@@ -44,43 +44,43 @@ function L = log_likelihood_func(P, M, U, Y)
     for i = 1:length(fields)
         if strcmp(fields{i},'learning_rate')
             % with advie 
-            params.with_advice_win_learning_rate = preprocessed_params.learning_rate;
-            params.with_advice_loss_learning_rate = preprocessed_params.learning_rate;
-            params.without_advice_win_learning_rate = preprocessed_params.learning_rate;
-            params.without_advice_loss_learning_rate = preprocessed_params.learning_rate;
-        elseif strcmp(fields{i},'with_advice_learning_rate')
-            params.with_advice_win_learning_rate = preprocessed_params.with_advice_learning_rate;
-            params.with_advice_loss_learning_rate = preprocessed_params.with_advice_learning_rate;
-        elseif strcmp(fields{i},'without_advice_learning_rate')
-            params.without_advice_win_learning_rate = preprocessed_params.without_advice_learning_rate;
-            params.without_advice_loss_learning_rate = preprocessed_params.without_advice_learning_rate;
-        elseif strcmp(fields{i},'with_advice_win_learning_rate')
-            params.with_advice_win_learning_rate = preprocessed_params.with_advice_win_learning_rate;
-        elseif strcmp(fields{i},'with_advice_loss_learning_rate')
-            params.with_advice_loss_learning_rate = preprocessed_params.with_advice_loss_learning_rate;
-        elseif strcmp(fields{i},'without_advice_win_learning_rate')
-            params.without_advice_win_learning_rate = preprocessed_params.without_advice_win_learning_rate;
-        elseif strcmp(fields{i},'without_advice_loss_learning_rate')
-            params.without_advice_loss_learning_rate = preprocessed_params.without_advice_loss_learning_rate;
+            params.with_advise_win_learning_rate = preprocessed_params.learning_rate;
+            params.with_advise_loss_learning_rate = preprocessed_params.learning_rate;
+            params.without_advise_win_learning_rate = preprocessed_params.learning_rate;
+            params.without_advise_loss_learning_rate = preprocessed_params.learning_rate;
+        elseif strcmp(fields{i},'with_advise_learning_rate')
+            params.with_advise_win_learning_rate = preprocessed_params.with_advise_learning_rate;
+            params.with_advise_loss_learning_rate = preprocessed_params.with_advise_learning_rate;
+        elseif strcmp(fields{i},'without_advise_learning_rate')
+            params.without_advise_win_learning_rate = preprocessed_params.without_advise_learning_rate;
+            params.without_advise_loss_learning_rate = preprocessed_params.without_advise_learning_rate;
+        elseif strcmp(fields{i},'with_advise_win_learning_rate')
+            params.with_advise_win_learning_rate = preprocessed_params.with_advise_win_learning_rate;
+        elseif strcmp(fields{i},'with_advise_loss_learning_rate')
+            params.with_advise_loss_learning_rate = preprocessed_params.with_advise_loss_learning_rate;
+        elseif strcmp(fields{i},'without_advise_win_learning_rate')
+            params.without_advise_win_learning_rate = preprocessed_params.without_advise_win_learning_rate;
+        elseif strcmp(fields{i},'without_advise_loss_learning_rate')
+            params.without_advise_loss_learning_rate = preprocessed_params.without_advise_loss_learning_rate;
         elseif strcmp(fields{i},'forgetting_rate')
-            params.with_advice_win_forgetting_rate = preprocessed_params.forgetting_rate;
-            params.with_advice_loss_forgetting_rate = preprocessed_params.forgetting_rate;
-            params.without_advice_win_forgetting_rate = preprocessed_params.forgetting_rate;
-            params.without_advice_loss_forgetting_rate = preprocessed_params.forgetting_rate;
-        elseif strcmp(fields{i},'with_advice_forgetting_rate')
-            params.with_advice_win_forgetting_rate = preprocessed_params.with_advice_forgetting_rate;
-            params.with_advice_loss_forgetting_rate = preprocessed_params.with_advice_forgetting_rate;
-        elseif strcmp(fields{i},'without_advice_forgetting_rate')
-            params.without_advice_win_forgetting_rate = preprocessed_params.without_advice_forgetting_rate;
-            params.without_advice_loss_forgetting_rate = preprocessed_params.without_advice_forgetting_rate;
-        elseif strcmp(fields{i},'with_advice_win_forgetting_rate')
-            params.with_advice_win_forgetting_rate = preprocessed_params.with_advice_win_forgetting_rate;
-        elseif strcmp(fields{i},'with_advice_loss_forgetting_rate')
-            params.with_advice_loss_forgetting_rate = preprocessed_params.with_advice_loss_forgetting_rate;
-        elseif strcmp(fields{i},'without_advice_win_forgetting_rate')
-            params.without_advice_win_forgetting_rate = preprocessed_params.without_advice_win_forgetting_rate;
-        elseif strcmp(fields{i},'without_advice_loss_forgetting_rate')
-            params.without_advice_loss_forgetting_rate = preprocessed_params.without_advice_loss_forgetting_rate;
+            params.with_advise_win_forgetting_rate = preprocessed_params.forgetting_rate;
+            params.with_advise_loss_forgetting_rate = preprocessed_params.forgetting_rate;
+            params.without_advise_win_forgetting_rate = preprocessed_params.forgetting_rate;
+            params.without_advise_loss_forgetting_rate = preprocessed_params.forgetting_rate;
+        elseif strcmp(fields{i},'with_advise_forgetting_rate')
+            params.with_advise_win_forgetting_rate = preprocessed_params.with_advise_forgetting_rate;
+            params.with_advise_loss_forgetting_rate = preprocessed_params.with_advise_forgetting_rate;
+        elseif strcmp(fields{i},'without_advise_forgetting_rate')
+            params.without_advise_win_forgetting_rate = preprocessed_params.without_advise_forgetting_rate;
+            params.without_advise_loss_forgetting_rate = preprocessed_params.without_advise_forgetting_rate;
+        elseif strcmp(fields{i},'with_advise_win_forgetting_rate')
+            params.with_advise_win_forgetting_rate = preprocessed_params.with_advise_win_forgetting_rate;
+        elseif strcmp(fields{i},'with_advise_loss_forgetting_rate')
+            params.with_advise_loss_forgetting_rate = preprocessed_params.with_advise_loss_forgetting_rate;
+        elseif strcmp(fields{i},'without_advise_win_forgetting_rate')
+            params.without_advise_win_forgetting_rate = preprocessed_params.without_advise_win_forgetting_rate;
+        elseif strcmp(fields{i},'without_advise_loss_forgetting_rate')
+            params.without_advise_loss_forgetting_rate = preprocessed_params.without_advise_loss_forgetting_rate;
         elseif strcmp(fields{i},'inv_temp')
             params.inv_temp = preprocessed_params.inv_temp;
         elseif strcmp(fields{i},'outcome_sensitivity')
@@ -158,7 +158,7 @@ function L = log_likelihood_func(P, M, U, Y)
         action_prob_t1 = exp(q_start_row)/sum(exp(q_start_row));
         action_probs(i,1,:) = action_prob_t1;
 
-        % if subject chose advice at time step 1
+        % if subject chose advise at time step 1
         if actual_actions(1) == 3
             % determine the which lr, fr to use
             reward_term = 0;
@@ -166,12 +166,12 @@ function L = log_likelihood_func(P, M, U, Y)
             % current reward sensitivity and loss sensitivity fixed to 1
             if actual_reward > 0
                 reward_term = params.outcome_sensitivity * actual_reward;
-                lr = params.with_advice_win_learning_rate;
-                fr = params.with_advice_win_forgetting_rate;
+                lr = params.with_advise_win_learning_rate;
+                fr = params.with_advise_win_forgetting_rate;
             else
                 reward_term = params.outcome_sensitivity * actual_reward;
-                lr = params.with_advice_loss_learning_rate;
-                fr = params.with_advice_loss_forgetting_rate;
+                lr = params.with_advise_loss_learning_rate;
+                fr = params.with_advise_loss_forgetting_rate;
             end
             % update the Q value for the (start,advise) pair
             % max_future_q = max of (advise_left,left) (advise_left,right) (advise_right,left) (advise_right,right)
@@ -189,12 +189,12 @@ function L = log_likelihood_func(P, M, U, Y)
             reward_term = 0;
             if actual_reward > 0
                 reward_term = params.outcome_sensitivity * actual_reward;
-                lr = params.without_advice_win_learning_rate;
-                fr = params.without_advice_win_forgetting_rate;
+                lr = params.without_advise_win_learning_rate;
+                fr = params.without_advise_win_forgetting_rate;
             else
                 reward_term = params.outcome_sensitivity * actual_reward;
-                lr = params.without_advice_loss_learning_rate;
-                fr = params.without_advice_loss_forgetting_rate;
+                lr = params.without_advise_loss_learning_rate;
+                fr = params.without_advise_loss_forgetting_rate;
             end
             % update the Q value for the (start,left) pair
             q_model.q_table(1,1) = q_model.q_table(1,1) + lr*(reward_term  - q_model.q_table(1,1));
@@ -218,12 +218,12 @@ function L = log_likelihood_func(P, M, U, Y)
             reward_term = 0;
             if actual_reward > 0
                 reward_term = params.outcome_sensitivity * actual_reward;
-                lr = params.without_advice_win_learning_rate;
-                fr = params.without_advice_win_forgetting_rate;
+                lr = params.without_advise_win_learning_rate;
+                fr = params.without_advise_win_forgetting_rate;
             else
                 reward_term = params.outcome_sensitivity * actual_reward;
-                lr = params.without_advice_loss_learning_rate;
-                fr = params.without_advice_loss_forgetting_rate;
+                lr = params.without_advise_loss_learning_rate;
+                fr = params.without_advise_loss_forgetting_rate;
             end
             % update the Q value for the (start,right) pair
             q_model.q_table(1,2) = q_model.q_table(1,2) + lr*(reward_term - q_model.q_table(1,2));
@@ -240,14 +240,14 @@ function L = log_likelihood_func(P, M, U, Y)
             end
         end
 
-        % if for this trial, the subject chose advice and the trial has more than 1 action, update the Q table for the second action and action probability as well
+        % if for this trial, the subject chose advise and the trial has more than 1 action, update the Q table for the second action and action probability as well
         if length(actual_actions) > 1
             second_action = actual_actions(2);
-            after_advice_state = actual_states(2);
+            after_advise_state = actual_states(2);
             % read out the q values for each action at time step 2, time the inv_temp
-            q_after_advice_row = q_model.q_table(after_advice_state,1:2)* params.inv_temp;
+            q_after_advise_row = q_model.q_table(after_advise_state,1:2)* params.inv_temp;
             % softmax the Q table and store the action probability
-            action_prob_t2 = exp(q_after_advice_row)/sum(exp(q_after_advice_row));
+            action_prob_t2 = exp(q_after_advise_row)/sum(exp(q_after_advise_row));
             action_probs(i,2,1:2) = action_prob_t2;
 
 
@@ -269,26 +269,26 @@ function L = log_likelihood_func(P, M, U, Y)
             %  forget unchosen actions, in connected case, not needed
 
             % advise given is left
-            if after_advice_state == 2
+            if after_advise_state == 2
                 % second action is left
                 if second_action == 1
                     % determine the which lr, fr to use
                     reward_term = params.outcome_sensitivity * actual_reward;
                     if actual_reward > 0
-                        lr = params.with_advice_win_learning_rate;
-                        fr = params.without_advice_win_forgetting_rate;
-                        wo_advise_lr = params.without_advice_win_learning_rate;
+                        lr = params.with_advise_win_learning_rate;
+                        fr = params.without_advise_win_forgetting_rate;
+                        wo_advise_lr = params.without_advise_win_learning_rate;
                     else
-                        lr = params.with_advice_loss_learning_rate;
-                        fr = params.without_advice_loss_forgetting_rate;
-                        wo_advise_lr = params.without_advice_loss_learning_rate;
+                        lr = params.with_advise_loss_learning_rate;
+                        fr = params.without_advise_loss_forgetting_rate;
+                        wo_advise_lr = params.without_advise_loss_learning_rate;
                     end
                     % learn update
                     % (advise_left,left) = (advise_left,left) + lr * (reward_term - (advise_left,left))
-                    q_model.q_table(2,1) = q_model.q_table(after_advice_state,1) + lr*(reward_term  - q_model.q_table(after_advice_state,1));
-                    % learning for without advice
+                    q_model.q_table(2,1) = q_model.q_table(after_advise_state,1) + lr*(reward_term  - q_model.q_table(after_advise_state,1));
+                    % learning for without advise
                     % (start,left) = (start,left) + discount_factor * lr * (reward_term - (start,left))
-                    % discount_factor is (with_advice learning ) will affect the without advice learning
+                    % discount_factor is (with_advise learning ) will affect the without advise learning
                     q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,1));
                     % (advise_rigth,right) = (advise_right,right) + lr * (reward_term - (advise_right,right))
                     q_model.q_table(3,2) = q_model.q_table(3,2) + lr*(reward_term  - q_model.q_table(3,2));
@@ -299,7 +299,7 @@ function L = log_likelihood_func(P, M, U, Y)
                     else
                         %  forget unchosen actions, in not connected case
                         %  (advise_left,right) = (advise_left,right) + fr * (init_value - (advise_left,right))
-                        q_model.q_table(2,2) = q_model.q_table(after_advice_state,2) + fr * (advise_left_right_init_q - q_model.q_table(after_advice_state,2));
+                        q_model.q_table(2,2) = q_model.q_table(after_advise_state,2) + fr * (advise_left_right_init_q - q_model.q_table(after_advise_state,2));
                         %  (advise_right,left) = (advise_right,left) + fr * (init_value - (advise_right,left))
                         q_model.q_table(3,1) = q_model.q_table(3,1) + fr * (advise_right_left_init_q - q_model.q_table(3,1));
                         %  (start,right) = (start,right) + fr * (init_value - (start,right))
@@ -310,18 +310,18 @@ function L = log_likelihood_func(P, M, U, Y)
                     % determine the which lr, fr to use
                     reward_term = params.outcome_sensitivity * actual_reward;
                     if actual_reward > 0
-                        lr = params.with_advice_win_learning_rate;
-                        fr = params.without_advice_win_forgetting_rate;
-                        wo_advise_lr = params.without_advice_win_learning_rate;
+                        lr = params.with_advise_win_learning_rate;
+                        fr = params.without_advise_win_forgetting_rate;
+                        wo_advise_lr = params.without_advise_win_learning_rate;
                     else
-                        lr = params.with_advice_loss_learning_rate;
-                        fr = params.without_advice_loss_forgetting_rate;
-                        wo_advise_lr = params.without_advice_loss_learning_rate;
+                        lr = params.with_advise_loss_learning_rate;
+                        fr = params.without_advise_loss_forgetting_rate;
+                        wo_advise_lr = params.without_advise_loss_learning_rate;
                     end
                     % learn update
                     % (advise_left,right) = (advise_left,right) + lr * (reward_term - (advise_left,right))
-                    q_model.q_table(2,2) = q_model.q_table(after_advice_state,2) + lr*(reward_term  - q_model.q_table(after_advice_state,2));
-                    % learning for without advice
+                    q_model.q_table(2,2) = q_model.q_table(after_advise_state,2) + lr*(reward_term  - q_model.q_table(after_advise_state,2));
+                    % learning for without advise
                     % (start,right) = (start,right) + discount_factor * lr * (reward_term - (start,right))
                     q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,2));
                     % (advise_rigth,left) = (advise_right,left) + lr * (reward_term - (advise_right,left))
@@ -333,7 +333,7 @@ function L = log_likelihood_func(P, M, U, Y)
                     else
                         %  forget unchosen actions, in not connected case
                         %  (advise_left,left) = (advise_left,left) + fr * (init_value - (advise_left,left))
-                        q_model.q_table(2,1) = q_model.q_table(after_advice_state,1) + fr * (advise_left_left_init_q - q_model.q_table(after_advice_state,1));
+                        q_model.q_table(2,1) = q_model.q_table(after_advise_state,1) + fr * (advise_left_left_init_q - q_model.q_table(after_advise_state,1));
                         %  (advise_right,right) = (advise_right,right) + fr * (init_value - (advise_right,right))
                         q_model.q_table(3,2) = q_model.q_table(3,2) + fr * (advise_right_right_init_q - q_model.q_table(3,2));
                         %  (start,left) = (start,left) + fr * (init_value - (start,left))
@@ -346,23 +346,23 @@ function L = log_likelihood_func(P, M, U, Y)
 
                 end
             % advise given is right
-            elseif after_advice_state == 3
+            elseif after_advise_state == 3
                 if second_action == 1
                     % determine the which lr, fr to use
                     reward_term = params.outcome_sensitivity * actual_reward;
                     if actual_reward > 0
-                        lr = params.with_advice_win_learning_rate;
-                        fr = params.without_advice_win_forgetting_rate;
-                        wo_advise_lr = params.without_advice_win_learning_rate;
+                        lr = params.with_advise_win_learning_rate;
+                        fr = params.without_advise_win_forgetting_rate;
+                        wo_advise_lr = params.without_advise_win_learning_rate;
                     else
-                        lr = params.with_advice_loss_learning_rate;
-                        fr = params.without_advice_loss_forgetting_rate;
-                        wo_advise_lr = params.without_advice_loss_learning_rate;
+                        lr = params.with_advise_loss_learning_rate;
+                        fr = params.without_advise_loss_forgetting_rate;
+                        wo_advise_lr = params.without_advise_loss_learning_rate;
                     end
                     % learn update
                     % (advise_right,left) = (advise_right,left) + lr * (reward_term - (advise_right,left))
-                    q_model.q_table(3,1) = q_model.q_table(after_advice_state,1) + lr*(reward_term  - q_model.q_table(after_advice_state,1));
-                    % learning for without advice
+                    q_model.q_table(3,1) = q_model.q_table(after_advise_state,1) + lr*(reward_term  - q_model.q_table(after_advise_state,1));
+                    % learning for without advise
                     % (start,left) = (start,left) + discount_factor * lr * (reward_term - (start,left))
                     q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,1));
                     % (advise_left,right) = (advise_left,right) + lr * (reward_term - (advise_left,right))
@@ -374,7 +374,7 @@ function L = log_likelihood_func(P, M, U, Y)
                     else
                         %  forget unchosen actions, in not connected case
                         %  (advise_right,right) = (advise_right,right) + fr * (init_value - (advise_right,right))
-                        q_model.q_table(3,2) = q_model.q_table(after_advice_state,2) + fr * (advise_right_right_init_q - q_model.q_table(after_advice_state,2));
+                        q_model.q_table(3,2) = q_model.q_table(after_advise_state,2) + fr * (advise_right_right_init_q - q_model.q_table(after_advise_state,2));
                         %  (advise_left,left) = (advise_left,left) = fr * (init_value - (advise_left,left))
                         q_model.q_table(2,1) = q_model.q_table(2,1) + fr * (advise_left_left_init_q - q_model.q_table(2,1));
                         %  (start,right) = (start,right) = fr * (init_value - (start,right))
@@ -385,18 +385,18 @@ function L = log_likelihood_func(P, M, U, Y)
                     % determine the which lr, fr to use
                     reward_term = params.outcome_sensitivity * actual_reward;
                     if actual_reward > 0
-                        lr = params.with_advice_win_learning_rate;
-                        fr = params.without_advice_win_forgetting_rate;
-                        wo_advise_lr = params.without_advice_win_learning_rate;
+                        lr = params.with_advise_win_learning_rate;
+                        fr = params.without_advise_win_forgetting_rate;
+                        wo_advise_lr = params.without_advise_win_learning_rate;
                     else
-                        lr = params.with_advice_loss_learning_rate;
-                        fr = params.without_advice_loss_forgetting_rate;
-                        wo_advise_lr = params.without_advice_loss_learning_rate;
+                        lr = params.with_advise_loss_learning_rate;
+                        fr = params.without_advise_loss_forgetting_rate;
+                        wo_advise_lr = params.without_advise_loss_learning_rate;
                     end
                     % learn update
                     % (advise_right,right) = (advise_right,right) + lr * (reward_term - (advise_right,right))
-                    q_model.q_table(3,2) = q_model.q_table(after_advice_state,2) + lr*(reward_term  - q_model.q_table(after_advice_state,2));
-                    % learning for without advice
+                    q_model.q_table(3,2) = q_model.q_table(after_advise_state,2) + lr*(reward_term  - q_model.q_table(after_advise_state,2));
+                    % learning for without advise
                     % (start,right) = (start,right) + discount_factor * lr * (reward_term - (start,right))
                     q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,2));
                     % (advise_left,left) = (advise_left,left) = lr * (reward_term - (advise_left,left))
@@ -408,7 +408,7 @@ function L = log_likelihood_func(P, M, U, Y)
                     else
                         %  forget unchosen actions, in not connected case
                         %  (advise_right,left) = (advise_right,left) = fr * (init_value - (advise_right,left))
-                        q_model.q_table(3,1) = q_model.q_table(after_advice_state,1) + fr * (advise_right_left_init_q - q_model.q_table(after_advice_state,1));
+                        q_model.q_table(3,1) = q_model.q_table(after_advise_state,1) + fr * (advise_right_left_init_q - q_model.q_table(after_advise_state,1));
                         %  (advise_left,right) = (advise_left,right) = fr * (init_value - (advise_left,right))
                         q_model.q_table(2,2) = q_model.q_table(2,2) + fr * (advise_left_right_init_q - q_model.q_table(2,2));
                         %  (start,left) = (start,left) = fr * (init_value - (start,left))
