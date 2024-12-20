@@ -37,7 +37,7 @@
 % 
 
 
-function [results] = ModelFreeRLModel_TT(task, MDP, params, sim)
+function [results] = ModelFreeRLModelconnect_TT(task, MDP, params, sim)
 
 % observations.hints = 0 is no hint, 1 is left hint, 2 is right hint
 % observations.rewards(trial) 1 is win, 2 is loss
@@ -128,7 +128,7 @@ elseif task.block_type == "LL"
      loss = params.l_loss_value;
 end
 
-%Initialization of q table
+%Initialization of q table (column: stage 1, advised left, advised left right; row: take advice, left, right)
 qvalue(:, :, 1) = [(2*params.p_a-loss*(1-params.p_a))*params.reward_value, 0, 0;
                    (4*(1-params.p_right)-params.p_right*loss)*params.reward_value, (2*params.p_a-loss*(1-params.p_a))*params.reward_value, (2*(1-params.p_a)-loss*params.p_a)*params.reward_value;
                    (4*params.p_right-(1-params.p_right)*loss)*params.reward_value, (2*(1-params.p_a)-loss*params.p_a)*params.reward_value, (2*params.p_a-loss*(1-params.p_a))*params.reward_value];

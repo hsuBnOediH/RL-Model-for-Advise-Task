@@ -196,8 +196,8 @@ for idx_block = 1:num_blocks
     %MDP  = spm_MDP_VB_X_advice(MDP);
     %MDP  = spm_MDP_VB_X_advice_no_message_passing_faster(MDP);
     task.field = fields;
-%    MDP  = Simple_Advice_Model_TT(task, MDP,params, 0);
-    MDP  = ModelFreeRLModel_TT(task, MDP,params, 0);
+    %MDP  = Simple_Advice_Model_TT(task, MDP,params, 0);
+    MDP  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
 
     for j = 1:block_size
         if actions{j}(2,1) ~= 2
