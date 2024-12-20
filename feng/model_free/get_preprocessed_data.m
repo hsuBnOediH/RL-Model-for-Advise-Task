@@ -48,10 +48,10 @@ function res = get_preprocessed_data(subject, input_folder_path)
         reward = reward_table.result;
         reward = cellfun(@str2double, reward, 'UniformOutput', false);
 
-        % read all the advices from the file
-        advice_flags = subdat.event_type == 9 & (strcmp(subdat.result, "try left") | strcmp(subdat.result, "try right"));
-        advice_idxs = subdat.trial(advice_flags) + 1;
-        advices = subdat.result(advice_flags);
+        % read all the advises from the file
+        advise_flags = subdat.event_type == 9 & (strcmp(subdat.result, "try left") | strcmp(subdat.result, "try right"));
+        advise_idxs = subdat.trial(advise_flags) + 1;
+        advises = subdat.result(advise_flags);
 
 
         party_sizes = reward_table.trial_type;
@@ -85,9 +85,9 @@ function res = get_preprocessed_data(subject, input_folder_path)
             rewards = [];
             party_size = party_sizes(i);
             
-            % Check if the trial took advice
-            if ~ismember(i, advice_idxs)
-                % No advice taken, so use response only
+            % Check if the trial took advise
+            if ~ismember(i, advise_idxs)
+                % No advise taken, so use response only
                 actions(end+1) = action_map.(lower(response{i}));
                 
                 % Check reward to set the win/lose state
@@ -104,12 +104,12 @@ function res = get_preprocessed_data(subject, input_folder_path)
                     end
                 end
             else
-                % Advice was taken
-                actions(end+1) = action_map.advise;  % Add advice action first
+                % advise was taken
+                actions(end+1) = action_map.advise;  % Add advise action first
                 actions(end+1) = action_map.(lower(response{i}));  % Then add the actual response
 
-                idx = find(advice_idxs == i);
-                states(end+1) = state_map.(strrep(advices{idx}, 'try ', ''));
+                idx = find(advise_idxs == i);
+                states(end+1) = state_map.(strrep(advises{idx}, 'try ', ''));
 
                 % Check reward to set the advised win/lose state
                 if reward{i} > 0
@@ -125,8 +125,26 @@ function res = get_preprocessed_data(subject, input_folder_path)
                     end
                 end
             end
+
+
+            if ~ismember(i, advise_idxs)
+                first_stim = subdat.absolute_time(subdat.trial == i-1 & subdat.event_type == 5);
+                first_action = subdat.absolute_time(subdat.trial == i-1 & subdat.event_type == 8);
+                reaction_time = [nan, first_action - first_stim];
+            else
+                first_stim_idx = find(subdat.trial == i-1& subdat.event_type == 5, 1);
+                first_stim = subdat.absolute_time(first_stim_idx);
+                first_action_idx = find(subdat.trial == i-1 & subdat.event_type == 6, 1);
+                first_action = subdat.absolute_time(first_action_idx);
+                stims_idxs = find(subdat.trial == i-1 & subdat.event_type == 5);
+                second_stim = subdat.absolute_time(stims_idxs(2));
+                second_action_idx = find(subdat.trial == i-1 & subdat.event_type == 8, 1);
+                second_action = subdat.absolute_time(second_action_idx);
+                reaction_time = [first_action - first_stim, second_action - second_stim];
+            end
             
             % Store the results in 'res' for the current trial
+            res(i).reaction_time = reaction_time;
             res(i).states = states;
             res(i).actions = actions;
             res(i).rewards = rewards;

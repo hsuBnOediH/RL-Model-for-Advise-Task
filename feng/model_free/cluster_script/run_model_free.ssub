@@ -16,17 +16,20 @@ export SIM
 FIT=$2
 export FIT
 
-PLOT=$3
-export PLOT
-
-FIT_SUBJECT=$4
+FIT_SUBJECT=$3
 export FIT_SUBJECT
 
-RES_PATH=$5
+RES_PATH=$4
 export RES_PATH
 
-IDX_CANDIDATE=$3
+IDX_CANDIDATE=$5
 export IDX_CANDIDATE
+
+IS_CONNECTED=$6
+export IS_CONNECTED
+
+PLOT=$7
+export PLOT
 
 ON_CLUSTER=true
 export ON_CLUSTER
@@ -36,5 +39,5 @@ export INPUT_PATH
 
 
 module load matlab/2022a
-run_file='/media/labs/rsmith/lab-members/fli/advise_task/Active-Inference-Model-for-Advise-Task/main_advise.m'
+run_file='/media/labs/rsmith/lab-members/fli/advise_task/RL-Model-for-Advise-Task/feng/model_free/main.m'
 matlab -nodisplay -nosplash < ${run_file}

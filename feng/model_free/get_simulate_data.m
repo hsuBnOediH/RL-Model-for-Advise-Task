@@ -74,7 +74,7 @@ function  data = get_simulate_data(q_model, preprocessed_data)
             actions(end+1) = second_action;
         end
         
-        % Determine if advice was used
+        % Determine if advise was used
         with_advise = (length(actions) == 2);
 
         % Determine the final action and reward states based on ground truth
