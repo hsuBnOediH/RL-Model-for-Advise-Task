@@ -80,7 +80,7 @@ end
 % IDX_CANDIDATE:
 % This will define which candidate (set of parameters) is currently in use
 % Modify this value to switch between different candidates (1 to 10 in this case)
-IDX_CANDIDATE = 10; % Default to candidate 1, can be changed dynamically
+IDX_CANDIDATE = 2; % Default to candidate 1, can be changed dynamically
 if ON_CLUSTER
     env_value = getenv('IDX_CANDIDATE');
     IDX_CANDIDATE = str2double(env_value);
