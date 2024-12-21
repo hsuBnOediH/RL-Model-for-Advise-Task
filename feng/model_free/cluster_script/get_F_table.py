@@ -1,22 +1,26 @@
 import os
-
+import argparse
 # find the path of all the csv files in the folder
+parent_folder = '/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/rl_results/RL/model_free'
 
-folder_path = '/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/rl_results/RL/model_free/2024-12-19-11-43-17_run/temp_res'
+parser = argparse.ArgumentParser(description="Process a list of numbers or ranges.")
+parser.add_argument("run_folder_idx", type=int, help="Specify the index of the run folder.", default=1)
+parser.add_argument("active_inference_idx", type=int, help="Specify the index of the active inference model.", default=0)
+args = parser.parse_args()
+run_folder_idx = args.run_folder_idx
+active_inference_idx = args.active_inference_idx
 
+# list all the folders in the parent folder and sort them by name, all the folders are named in format like 2024-12-19-11-43-17_run
+folders = [f.path for f in os.scandir(parent_folder) if f.is_dir()]
+folders.sort()
+folder_path = folders[-run_folder_idx] + '/temp_res'
+
+# folder_path = '/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/rl_results/RL/model_free/2024-12-19-11-43-17_run/temp_res'
 run_name = folder_path.split('/')[-2]
-
 files = os.listdir(folder_path)
-
-
-
 print(len(files))
 
-
-
 res_dict = {}
-
-
 
 for file in files:
 
@@ -47,7 +51,6 @@ for file in files:
 
 
 # write the value of dict into a 2 D array, each row is a subject, each column is a model
-
 
 
 res_table = []
@@ -117,46 +120,37 @@ for subject in subjects:
 
 
 # append Active Inference model result into the table
+a_inf_parent_path = '/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/ai_results/'
+a_inf_subfolders = os.listdir(a_inf_parent_path)
+a_inf_subfolders.sort()
+if active_inference_idx == 0:
+    a_inf_path = None
+else:
+    a_inf_path = os.listdir(a_inf_parent_path)[-active_inference_idx] + '/temp_res'
 
-a_inf_path = '/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/results/model_comparison/final_res/output_f_values_comparison.csv'
 
-# read the file from the second row, the first cloumn is the subject id, each cloumn is the f value of a model
+if a_inf_path is not None:
 
-a_inf_table = []
+    # add all the model idx and subject id into the table header
+    for model_idx in range(1, 11):
+        header.append(f"active_inference_{model_idx}")
+    res_table[0] = header
 
-with open(a_inf_path) as infile:
-
-    for line_idx, line in enumerate(infile):
-
-        if line_idx == 0:
-
-            res_table[0].extend(line.strip().split(',')[1:])
-
-        else:
-
-            row = line.strip().split(',')
-
-            a_inf_subject = row[0]
-
-            if a_inf_subject == res_table[line_idx][0]:
-
-                res_table[line_idx].extend(row[1:])
-
-                print(f"subject {a_inf_subject} added to the table, row {line_idx},progress {line_idx/len(res_dict)}")
-
+    a_inf_files = os.listdir(a_inf_path)
+    # for loop the model idx and subject id to find all the F value
+    for model_idx in range(1, 11):
+        for subject in subjects:
+            # the file name need to change to 
+            file = subject + '_candidate_' + str(model_idx) + '.csv'
+            if file in a_inf_files:
+                with open(os.path.join(a_inf_path, file)) as infile:
+                    for line in infile:
+                        pass
+                    last_line = line.strip()
+                    f_value = float(last_line.split(',')[-1])
+                res_table[subjects.index(subject)+1].append(f_value)
             else:
-
-                print(f"subject {a_inf_subject} not in the model free table")
-
-                break
-
-
-
-
-
-
-
-
+                res_table[subjects.index(subject)+1].append(None)
 
 # write the table into a csv file
 
