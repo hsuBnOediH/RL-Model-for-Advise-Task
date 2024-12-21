@@ -37,7 +37,7 @@
 % 
 
 
-function [results] = ModelFreeRLModelconnect_TT(task, MDP, params, sim)
+function [results] = ModelFreeRLModeldisconnect_TT(task, MDP, params, sim)
 
 % observations.hints = 0 is no hint, 1 is left hint, 2 is right hint
 % observations.rewards(trial) 1 is win, 2 is loss
@@ -146,13 +146,13 @@ if selected == 2 || selected == 3
     % Update for the selected choice
     qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
         params.eta_d_win * (actualreward(t) * params.reward_value - qvalue(selected, 1, t));
-    
-    % Update for the opposite choice
-    opposite = 5 - selected; % Maps 2 to 3 and 3 to 2
-    qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
-        params.eta_d_win * (-loss * params.reward_value - qvalue(opposite, 1, t));
 
-   % Forget qvalue(1, 1)
+    % Forget the opposite choice
+    opposite = 5 - selected; % If selected is 2, opposite is 3; if selected is 3, opposite is 2
+    qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
+        params.omega_d_win * (qvalue(opposite, 1, 1) - qvalue(opposite, 1, t));
+
+    % Forget qvalue(1, 1)
     qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
         params.omega_a_win * (qvalue(1, 1, 1) - qvalue(1, 1, t));
 
@@ -163,19 +163,6 @@ if selected == 2 || selected == 3
         params.omega_a_win * (qvalue(3, 2, 1) - qvalue(3, 2, t));
     qvalue(2, 3, t+1) = qvalue(3, 2, t+1);
     qvalue(3, 3, t+1) = qvalue(2, 2, t+1);
-
-
-%     % Forget qvalue(1, 1)
-%     qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
-%         params.omega_a_win * ((2*params.p_a-loss*(1-params.p_a))*params.reward_value - qvalue(1, 1, t));
-% 
-%     % Forget choices after advice
-%     qvalue(2, 2, t+1) = qvalue(2, 2, t) + ...
-%         params.omega_a_win * ((2*params.p_a-loss*(1-params.p_a))*params.reward_value - qvalue(2, 2, t));
-%     qvalue(3, 2, t+1) = qvalue(3, 2, t) + ...
-%         params.omega_a_win * ((2*(1-params.p_a)-loss*params.p_a)*params.reward_value - qvalue(3, 2, t));
-%     qvalue(2, 3, t+1) = qvalue(3, 2, t+1);
-%     qvalue(3, 3, t+1) = qvalue(2, 2, t+1);
 
 
 
@@ -193,10 +180,29 @@ elseif selected == 1  %advice
    secchoice = choices(t, 2);
           qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_win * (2*actualreward(t)*params.reward_value - qvalue(secchoice, 1, t));
           qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_a_win * (actualreward(t)*params.reward_value - qvalue(secchoice, hint, t));
-          qvalue(5-secchoice, 1, t+1) = qvalue(5-secchoice, 1, t) + params.eta_d_win * (-loss*params.reward_value - qvalue(5-secchoice, 1, t));
-          qvalue(5-secchoice, hint, t+1) = qvalue(5-secchoice, hint, t) + params.eta_a_win * (-loss*params.reward_value - qvalue(5-secchoice, hint, t));
+          
+          % Forget the opposite choice
+          secopposite = 5 - secchoice;
+          
+          initialchoice1value = 4 * (secopposite == 3) * params.p_right + ...
+                         4 * (secopposite == 2) * (1 - params.p_right) - ...
+                         (secopposite == 3) * (1 - params.p_right) * loss - ...
+                         (secopposite == 2) * params.p_right * loss;
+          
+          qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t) + params.omega_d_win * (initialchoice1value*params.reward_value - qvalue(secopposite, 1, t));
+         
+          initialchoice2value = 2 * (secopposite == hint) * params.p_a + ...
+                         2 * (secopposite ~= hint) * (1 - params.p_a) - ...
+                         (secopposite == hint) * (1 - params.p_a) * loss - ...
+                         (secopposite ~= hint) * params.p_a * loss;
+          
+          qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_win * (initialchoice2value*params.reward_value - qvalue(secopposite, hint, t));
+          
+          %Same updates about the other room (advice)
           qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
           qvalue(3, 5-hint, t+1) = qvalue(2, hint, t+1);
+          
+          
 end
 
 
@@ -207,11 +213,10 @@ if selected == 2 || selected == 3
     qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
         params.eta_d_loss * (-loss * params.reward_value - qvalue(selected, 1, t));
     
-    % Update for the opposite choice
-    opposite = 5 - selected; % Maps 2 to 3 and 3 to 2
+    % Forget the opposite choice
+    opposite = 5 - selected; % If selected is 2, opposite is 3; if selected is 3, opposite is 2
     qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
-        params.eta_d_loss * (4 * params.reward_value - qvalue(opposite, 1, t));
-    
+        params.omega_d_loss * (qvalue(opposite, 1, 1) - qvalue(opposite, 1, t));
 
      % Forget qvalue(1, 1)
     qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
@@ -224,19 +229,6 @@ if selected == 2 || selected == 3
         params.omega_a_loss * (qvalue(3, 2, 1) - qvalue(3, 2, t));
     qvalue(2, 3, t+1) = qvalue(3, 2, t+1);
     qvalue(3, 3, t+1) = qvalue(2, 2, t+1);
-
-
-%     % Forget qvalue(1, 1)
-%     qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
-%         params.omega_a_loss * ((2*params.p_a-loss*(1-params.p_a))*params.reward_value - qvalue(1, 1, t));
-%     
-%     %Forget advice related choices
-%     qvalue(2, 2, t+1) = qvalue(2, 2, t) + ...
-%         params.omega_a_loss * ((2*params.p_a-loss*(1-params.p_a))*params.reward_value - qvalue(2, 2, t));
-%     qvalue(3, 2, t+1) = qvalue(3, 2, t) + ...
-%         params.omega_a_loss * ((2*(1-params.p_a)-loss*params.p_a)*params.reward_value - qvalue(3, 2, t));
-%     qvalue(2, 3, t+1) = qvalue(3, 2, t+1);
-%     qvalue(3, 3, t+1) = qvalue(2, 2, t+1);
 
 
 elseif selected == 1  %advice

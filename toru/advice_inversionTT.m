@@ -198,6 +198,8 @@ for idx_block = 1:num_blocks
     task.field = fields;
     %MDP  = Simple_Advice_Model_TT(task, MDP,params, 0);
     MDP  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
+    %MDP  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+
 
     for j = 1:block_size
         if actions{j}(2,1) ~= 2
