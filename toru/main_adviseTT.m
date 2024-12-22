@@ -86,7 +86,7 @@ if FIT
             [fit_results, DCM] = Advice_fit(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot);
         end
         
-        model_free_results = advise_mf(fit_results.file);
+        model_free_results = advise_mf_TT(fit_results.file);
         
         
         mf_fields = fieldnames(model_free_results);

@@ -262,8 +262,8 @@ end
              
              %task.field = fields;
              %MDPs  = Simple_Advice_Model_TT(task, MDP, params, 0);
-             MDPs  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
-             %MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+             %MDPs  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
+             MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
 
              % bandit was chosen
              for j = 1:numel(actions)
