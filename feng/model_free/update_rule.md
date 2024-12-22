@@ -76,11 +76,11 @@
 ### 2. Disconneted Version
 #### 2.1. Update
 - (advise_left,left) = (advise_left,left) + lr * (reward - (advise_left,left))
-- (advise_right,left) = (advise_right,left) + lr * (reward - (advise_right,left))
+- (advise_right,right) = (advise_right,right) + lr * (reward - (advise_right,right))
 - (start,left) = (start,left) + without_advise_lr * (reward - (start,left))
 #### 2.2. Forget
 - (advise_left,right) = (advise_left,right) + fr * (advise_left_right_intit_vale - (advise_left,right))
-- (advise_right,right) = (advise_right,right) + fr * (advise_right_right_intit_vale - (advise_right,right))
+- (advise_right,left) = (advise_right,left) + fr * (advise_right_left_intit_vale - (advise_right,left))
 - (start,right) = (start,right) + without_advise_fr * (start_right_intit_vale - (start,right))
 
 ## (advise_left,right)
