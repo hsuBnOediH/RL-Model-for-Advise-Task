@@ -89,7 +89,7 @@ elseif task.block_type == "LL"
      loss = params.l_loss_value;
 end
 
-%Initialization of q table (column: stage 1, advised left, advised left right; row: take advice, left, right)
+%Initialization of q table (column: start, advised left, advised right; row: take advice, left, right)
 qvalue(:, :, 1) = [(2*params.p_a-loss*(1-params.p_a))*params.reward_value, 0, 0;
                    (4*(1-params.p_right)-params.p_right*loss)*params.reward_value, (2*params.p_a-loss*(1-params.p_a))*params.reward_value, (2*(1-params.p_a)-loss*params.p_a)*params.reward_value;
                    (4*params.p_right-(1-params.p_right)*loss)*params.reward_value, (2*(1-params.p_a)-loss*params.p_a)*params.reward_value, (2*params.p_a-loss*(1-params.p_a))*params.reward_value];
@@ -99,7 +99,7 @@ for t = 1:trial
 exp_values = exp(params.inv_temp * qvalue(:, 1, t));
 action_probs(:, 1, t) = exp_values / sum(exp_values);
 
-selected = choices(t, 1); % 1 (advice) or 2 (left) or 3 (right)
+selected = choices(t, 1); % 1 (ask advice) or 2 (left) or 3 (right)
 
 if actualreward(t) > 0
 
