@@ -205,8 +205,9 @@ function L = log_likelihood_func(P, M, U, Y)
             %       forget update: (start,right), (advise_left,left), (advise_left,right), (advise_right,left), (advise_right,right), (start,advise)
             if is_connected
                 % learn update
+                opposite_reward = -reward_term;
                 q_model.q_table(1,1) = q_model.q_table(1,1) + lr*(reward_term  - q_model.q_table(1,1));
-                q_model.q_table(1,2) = q_model.q_table(1,2) + lr*(reward_term  - q_model.q_table(1,2));
+                q_model.q_table(1,2) = q_model.q_table(1,2) + lr*(opposite_reward  - q_model.q_table(1,2));
                 % forget update
                 q_model.q_table(2,1) = q_model.q_table(2,1) + fr * (advise_left_left_init_q - q_model.q_table(2,1));
                 q_model.q_table(2,2) = q_model.q_table(2,2) + fr * (advise_left_right_init_q - q_model.q_table(2,2));
@@ -248,8 +249,9 @@ function L = log_likelihood_func(P, M, U, Y)
 
             if is_connected
                 % learn update
+                opposite_reward = - reward_term;
                 q_model.q_table(1,2) = q_model.q_table(1,2) + lr*(reward_term  - q_model.q_table(1,2));
-                q_model.q_table(1,1) = q_model.q_table(1,1) + lr*(reward_term  - q_model.q_table(1,1));
+                q_model.q_table(1,1) = q_model.q_table(1,1) + lr*(opposite_reward  - q_model.q_table(1,1));
                 % forget update
                 q_model.q_table(2,1) = q_model.q_table(2,1) + fr * (advise_left_left_init_q - q_model.q_table(2,1));
                 q_model.q_table(2,2) = q_model.q_table(2,2) + fr * (advise_left_right_init_q - q_model.q_table(2,2));
@@ -278,16 +280,41 @@ function L = log_likelihood_func(P, M, U, Y)
             action_prob_t2 = exp(q_after_advise_row)/sum(exp(q_after_advise_row));
             action_probs(i,2,1:2) = action_prob_t2;
 
+            if actual_reward > 0
+                if party_size == 40
+                    reward_term = actual_reward  * params.outcome_sensitivity;
+                    opposite_reward = actual_reward * -2 * params.outcome_sensitivity;
+                    without_advise_actual_reward = actual_reward * 2 * params.outcome_sensitivity;
+                    without_advise_opposite_reward = actual_reward * -2 * params.outcome_sensitivity;
+                else
+                    reward_term = actual_reward  * params.outcome_sensitivity;
+                    opposite_reward = actual_reward * -4 * params.outcome_sensitivity;
+                    without_advise_actual_reward = actual_reward * 2 * params.outcome_sensitivity;
+                    without_advise_opposite_reward = actual_reward * -4 * params.outcome_sensitivity;
+                end
+            else
+                if party_size == 40
+                    reward_term = actual_reward  * params.outcome_sensitivity;
+                    opposite_reward = actual_reward * (-0.5) * params.outcome_sensitivity;
+                    without_advise_actual_reward = actual_reward * params.outcome_sensitivity;
+                    without_advise_opposite_reward = actual_reward * (-1) * params.outcome_sensitivity;
+                else
+                    reward_term = actual_reward  * params.outcome_sensitivity;
+                    opposite_reward = actual_reward * (-0.25) * params.outcome_sensitivity;
+                    without_advise_actual_reward = actual_reward  * params.outcome_sensitivity;
+                    without_advise_opposite_reward = actual_reward * (-0.5) * params.outcome_sensitivity;
+                end
+            end
+
 
             if after_advise_state == 2
                 % second action is left
                 if second_action == 1
                    % determine the which lr, fr to use
-                    reward_term = params.outcome_sensitivity * actual_reward;
                     if actual_reward > 0
                         lr = params.with_advise_win_learning_rate;
                         fr = params.without_advise_win_forgetting_rate;
-                        wo_advise_lr = params.without_advise_win_learning_rate;
+                        wo_advise_lr = params.without_advise_win_learning_rate;             
                     else
                         lr = params.with_advise_loss_learning_rate;
                         fr = params.without_advise_loss_forgetting_rate;
@@ -309,17 +336,17 @@ function L = log_likelihood_func(P, M, U, Y)
                         q_model.q_table(2,1) = q_model.q_table(after_advise_state,1) + lr*(reward_term  - q_model.q_table(after_advise_state,1));
                         q_model.q_table(3,2) = q_model.q_table(3,2) + lr*(reward_term  - q_model.q_table(3,2));
 
-                        q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(reward_term  - q_model.q_table(2,2));
-                        q_model.q_table(3,1) = q_model.q_table(3,1) + lr*(reward_term  - q_model.q_table(3,1));
+                        q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(opposite_reward  - q_model.q_table(2,2));
+                        q_model.q_table(3,1) = q_model.q_table(3,1) + lr*(opposite_reward  - q_model.q_table(3,1));
 
-                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,1));
-                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,2));
+                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(without_advise_actual_reward  - q_model.q_table(1,1));
+                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(without_advise_opposite_reward  - q_model.q_table(1,2));
                         % forget update None
                     else
                         q_model.q_table(2,1) = q_model.q_table(after_advise_state,1) + lr*(reward_term  - q_model.q_table(after_advise_state,1));
                         q_model.q_table(3,2) = q_model.q_table(3,2) + lr*(reward_term  - q_model.q_table(3,2));
 
-                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,1));
+                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(without_advise_actual_reward  - q_model.q_table(1,1));
 
                         % forget update
                         q_model.q_table(2,2) = q_model.q_table(2,2) + fr * (advise_left_right_init_q - q_model.q_table(2,2));
@@ -352,17 +379,17 @@ function L = log_likelihood_func(P, M, U, Y)
                         q_model.q_table(2,2) = q_model.q_table(after_advise_state,2) + lr*(reward_term  - q_model.q_table(after_advise_state,2));
                         q_model.q_table(3,1) = q_model.q_table(3,1) + lr*(reward_term  - q_model.q_table(3,1));
 
-                        q_model.q_table(2,1) = q_model.q_table(2,1) + lr*(reward_term  - q_model.q_table(2,1));
-                        q_model.q_table(3,2) = q_model.q_table(3,2) + lr*(reward_term  - q_model.q_table(3,2));
+                        q_model.q_table(2,1) = q_model.q_table(2,1) + lr*(opposite_reward  - q_model.q_table(2,1));
+                        q_model.q_table(3,2) = q_model.q_table(3,2) + lr*(opposite_reward  - q_model.q_table(3,2));
 
-                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,2));
-                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,1));
+                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(without_advise_actual_reward  - q_model.q_table(1,2));
+                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(without_advise_opposite_reward  - q_model.q_table(1,1));
                         % forget update None
                     else
                         q_model.q_table(2,2) = q_model.q_table(after_advise_state,2) + lr*(reward_term  - q_model.q_table(after_advise_state,2));
                         q_model.q_table(3,1) = q_model.q_table(3,1) + lr*(reward_term  - q_model.q_table(3,1));
 
-                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,2));
+                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(without_advise_actual_reward  - q_model.q_table(1,2));
 
                         % forget update
                         q_model.q_table(2,1) = q_model.q_table(2,1) + fr * (advise_left_left_init_q - q_model.q_table(2,1));
@@ -400,17 +427,17 @@ function L = log_likelihood_func(P, M, U, Y)
                         q_model.q_table(3,1) = q_model.q_table(after_advise_state,1) + lr*(reward_term  - q_model.q_table(after_advise_state,1));
                         q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(reward_term  - q_model.q_table(2,2));
 
-                        q_model.q_table(3,2) = q_model.q_table(3,2) + lr*(reward_term  - q_model.q_table(3,2));
-                        q_model.q_table(2,1) = q_model.q_table(2,1) + lr*(reward_term  - q_model.q_table(2,1));
+                        q_model.q_table(3,2) = q_model.q_table(3,2) + lr*(opposite_reward  - q_model.q_table(3,2));
+                        q_model.q_table(2,1) = q_model.q_table(2,1) + lr*(opposite_reward  - q_model.q_table(2,1));
 
-                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,1));
-                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,2));
+                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(without_advise_actual_reward  - q_model.q_table(1,1));
+                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(without_advise_opposite_reward  - q_model.q_table(1,2));
                         % forget update None
                     else
                         q_model.q_table(3,1) = q_model.q_table(after_advise_state,1) + lr*(reward_term  - q_model.q_table(after_advise_state,1));
                         q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(reward_term  - q_model.q_table(2,2));
 
-                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,1));
+                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(without_advise_actual_reward  - q_model.q_table(1,1));
 
                         % forget update
                         q_model.q_table(3,2) = q_model.q_table(3,2) + fr * (advise_right_right_init_q - q_model.q_table(3,2));
@@ -418,8 +445,6 @@ function L = log_likelihood_func(P, M, U, Y)
                         q_model.q_table(1,2) = q_model.q_table(1,2) + fr * (start_right_init_q - q_model.q_table(1,2));
                     end
                 elseif second_action == 2
-                    % determine the which lr, fr to use
-                    reward_term = params.outcome_sensitivity * actual_reward;
                     if actual_reward > 0
                         lr = params.with_advise_win_learning_rate;
                         fr = params.without_advise_win_forgetting_rate;
@@ -441,18 +466,18 @@ function L = log_likelihood_func(P, M, U, Y)
                     if is_connected
                         q_model.q_table(3,2) = q_model.q_table(after_advise_state,2) + lr*(reward_term  - q_model.q_table(after_advise_state,2));
                         q_model.q_table(2,1) = q_model.q_table(2,1) + lr*(reward_term  - q_model.q_table(2,1));
-                        q_model.q_table(3,1) = q_model.q_table(3,1) + lr*(reward_term  - q_model.q_table(3,1));
-                        q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(reward_term  - q_model.q_table(2,2));
+                        q_model.q_table(3,1) = q_model.q_table(3,1) + lr*(opposite_reward  - q_model.q_table(3,1));
+                        q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(opposite_reward  - q_model.q_table(2,2));
 
-                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,2));
-                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,1));
+                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(without_advise_actual_reward  - q_model.q_table(1,2));
+                        q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(without_advise_opposite_reward  - q_model.q_table(1,1));
 
                         % forget update None
                     else
                         q_model.q_table(3,2) = q_model.q_table(after_advise_state,2) + lr*(reward_term  - q_model.q_table(after_advise_state,2));
                         q_model.q_table(2,1) = q_model.q_table(2,1) + lr*(reward_term  - q_model.q_table(2,1));
                         
-                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(reward_term  - q_model.q_table(1,2));
+                        q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(without_advise_actual_reward  - q_model.q_table(1,2));
                         % forget update
                         q_model.q_table(3,1) = q_model.q_table(3,1) + fr * (advise_right_left_init_q - q_model.q_table(3,1));
                         q_model.q_table(2,2) = q_model.q_table(2,2) + fr * (advise_left_right_init_q - q_model.q_table(2,2));
