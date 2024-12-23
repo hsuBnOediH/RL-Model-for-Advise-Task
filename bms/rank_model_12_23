@@ -1,0 +1,123 @@
+5_connect
+6_connect
+6_disconnect
+4_connect
+5_disconnect
+10_connect
+3_connect
+7_connect
+2_connect
+9_connect
+8_connect
+1_connect
+4_disconnect
+10_disconnect
+3_disconnect
+9_disconnect
+8_disconnect
+7_disconnect
+2_disconnect
+1_disconnect
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Conneted            Disconneted
+5
+6
+                    6
+4
+                    5
+10
+3
+7
+2
+9
+8
+1
+                    4
+                    10
+                    3
+                    9
+                    8
+                    7
+                    2
+                    1 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Conneted            Disconneted
+5
+6
+                    6
+4
+                    5
+10
+3
+7(fix lr)
+2(fix lr)
+9(fix lr)
+8(fix lr)
+1(fix lr)
+                    4
+                    10
+                    3
+                    9(fix lr)
+                    8(fix lr)
+                    7(fix lr)
+                    2(fix lr)
+                    1(fix lr)
+

@@ -24,8 +24,8 @@
 ## (start,right)
 ### 1. Conneted Version
 #### 1.1. Update
-- (start,left) = (start,left) + lr * (actual_reward - (start,left))
-- (start,right) = (start,right) + lr * (opposite_reward - (start,right))
+- (start,left) = (start,left) + lr * (opposite_reward - (start,left))
+- (start,right) = (start,right) + lr * (actual_reward - (start,right))
 #### 1.2. Forget
 - (start,advise) = (start,advise) + f r (start_advise_intit_vale - (start,advise))
 - (advise_left,left) = (advise_left,left) + fr * (advise_left_left_intit_vale - (advise_left,left))
