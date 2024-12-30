@@ -1,6 +1,6 @@
 % Samuel Taylor and Ryan Smith, 2021
 % Model inversion script
-function [DCM] = advice_inversionTT(DCM)
+function [DCM] = advice_inversionTT(DCM, model)
 
 % MDP inversion using Variational Bayes
 % FORMAT [DCM] = spm_dcm_mdp(DCM)
@@ -79,6 +79,7 @@ pC      = spm_cat(pC);
 
 % model specification
 %--------------------------------------------------------------------------
+M.model = model;
 M.L     = @(P,M,U,Y)spm_mdp_L(P,M,U,Y);  % log-likelihood function
 M.pE    = pE;                            % prior means (parameters)
 M.pC    = pC;                            % prior variance (parameters)
@@ -196,9 +197,14 @@ for idx_block = 1:num_blocks
     %MDP  = spm_MDP_VB_X_advice(MDP);
     %MDP  = spm_MDP_VB_X_advice_no_message_passing_faster(MDP);
     task.field = fields;
-    %MDP  = Simple_Advice_Model_TT(task, MDP,params, 0);
-    %MDP  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
-    MDP  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+
+    if M.model == 1
+     MDP  = Simple_Advice_Model_TT(task, MDP,params, 0);
+    elseif M.model == 2
+     MDP  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
+    elseif M.model == 3
+     MDP  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+    end
 
 
     for j = 1:block_size

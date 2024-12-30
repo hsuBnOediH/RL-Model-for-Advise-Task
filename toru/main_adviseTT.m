@@ -14,7 +14,7 @@ local = false;
 if ispc
     root = 'L:';
     results_dir = 'L:/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/ATresults';
-    FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88' ; % 6544b95b7a6b86a8cd8feb88 6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)
+    FIT_SUBJECT = 'TORUTEST' ; % 6544b95b7a6b86a8cd8feb88 6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)
     %INPUT_DIRECTORY = [root '/rsmith/wellbeing/tasks/AdviceTask/behavioral_files_2-6-24'];  % Where the subject file is located
     INPUT_DIRECTORY = [root '/NPC/DataSink/StimTool_Online/WB_Advice'];  % Where the subject file is located
 
@@ -37,14 +37,15 @@ addpath([root '/rsmith/all-studies/util/spm12/toolbox/DEM/']);
 addpath([root '/rsmith/lab-members/cgoldman/Active-Inference-Tutorial-Scripts-main']);
 addpath([root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask']);
 
+
 % Define all parameters passed into the model; specify which ones to fit in
 % field
 params.p_a = .8;
 params.inv_temp = 1;
-%params.reward_value = 4; %for Active inference
-params.reward_value = 1; %for RL
-%params.l_loss_value = 4; %for Active inference
-params.l_loss_value = 8; %for RL
+params.reward_value = 4; %for Active inference
+%params.reward_value = 1; %for RL
+params.l_loss_value = 4; %for Active inference
+%params.l_loss_value = 8; %for RL
 %params.omega = 0; %As fixed param
 %params.omega = .2; %As prior
 %params.omega_d = .2;
@@ -65,8 +66,10 @@ params.lamgda = .5;
 params.state_exploration = 1;
 params.parameter_exploration = 0;
 
-field = {'p_a','inv_temp','reward_value','l_loss_value','omega_a_win','omega_a_loss','eta','lamgda'}; %those are fitted
 
+field = {'p_a','inv_temp','reward_value','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','lamgda'}; %those are fitted
+
+model = 1; %Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
@@ -81,9 +84,9 @@ if FIT
     else
     
         if ~local
-            [fit_results, DCM] = Advice_fit_prolificTT(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot);
+            [fit_results, DCM] = Advice_fit_prolificTT(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot, model);
         else
-            [fit_results, DCM] = Advice_fit(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot);
+            [fit_results, DCM] = Advice_fit(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot, model);
         end
         
         model_free_results = advise_mf_TT(fit_results.file);
@@ -93,6 +96,7 @@ if FIT
         for i=1:length(mf_fields)
             fit_results.(mf_fields{i}) = model_free_results.(mf_fields{i});      
         end
+        fit_results.F = DCM.F;
         currentDateTimeString = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
         writetable(struct2table(fit_results), [results_dir '/advise_task-' FIT_SUBJECT '_' currentDateTimeString '_fits.csv']);
     end

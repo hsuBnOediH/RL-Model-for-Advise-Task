@@ -78,9 +78,9 @@ actualreward = [MDP.actualreward]/10; % Copy the original vector and divided by 
 
 
 % Initialize matrices
-action_probs = zeros(3, 2, trial);
+action_probs = zeros(3, 2, task.num_trials);
 
-qvalue = zeros(3, 3, trial);
+qvalue = zeros(3, 3, task.num_trials);
 
 
 if task.block_type == "SL"
@@ -94,16 +94,16 @@ qvalue(:, :, 1) = [(2*params.p_a-loss*(1-params.p_a))*params.reward_value, 0, 0;
                    (4*(1-params.p_right)-params.p_right*loss)*params.reward_value, (2*params.p_a-loss*(1-params.p_a))*params.reward_value, (2*(1-params.p_a)-loss*params.p_a)*params.reward_value;
                    (4*params.p_right-(1-params.p_right)*loss)*params.reward_value, (2*(1-params.p_a)-loss*params.p_a)*params.reward_value, (2*params.p_a-loss*(1-params.p_a))*params.reward_value];
 
-for t = 1:trial
+for t = 1:task.num_trials
 
-exp_values = exp(params.inv_temp * qvalue(:, 1, t));
-action_probs(:, 1, t) = exp_values / sum(exp_values);
+  exp_values = exp(params.inv_temp * qvalue(:, 1, t));
+  action_probs(:, 1, t) = exp_values / sum(exp_values);
 
-selected = choices(t, 1); % 1 (ask advice) or 2 (left) or 3 (right)
+  selected = choices(t, 1); % 1 (ask advice) or 2 (left) or 3 (right)
 
-if actualreward(t) > 0
+  if actualreward(t) > 0
 
-if selected == 2 || selected == 3
+   if selected == 2 || selected == 3
     % Update for the selected choice
     qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
         params.eta_d_win * (actualreward(t) * params.reward_value - qvalue(selected, 1, t));
@@ -126,7 +126,7 @@ if selected == 2 || selected == 3
     qvalue(3, 3, t+1) = qvalue(2, 2, t+1);
 
 
-elseif selected == 1  %advice
+   elseif selected == 1  %advice
    hint = observations.hints(t)+1;
 
    exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, hint, t));
@@ -144,12 +144,12 @@ elseif selected == 1  %advice
           qvalue(5-secchoice, hint, t+1) = qvalue(5-secchoice, hint, t) + params.eta_a_win * (-loss*params.reward_value - qvalue(5-secchoice, hint, t));
           qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
           qvalue(3, 5-hint, t+1) = qvalue(2, hint, t+1);
-end
+   end
 
 
-elseif actualreward(t) < 0
+  elseif actualreward(t) < 0
 
-if selected == 2 || selected == 3
+   if selected == 2 || selected == 3
     % Update for the selected choice
     qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
         params.eta_d_loss * (-loss * params.reward_value - qvalue(selected, 1, t));
@@ -173,7 +173,7 @@ if selected == 2 || selected == 3
     qvalue(3, 3, t+1) = qvalue(2, 2, t+1);
 
 
-elseif selected == 1  %advice
+   elseif selected == 1  %advice
    hint = observations.hints(t)+1;
 
    exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, hint, t));
@@ -193,9 +193,9 @@ elseif selected == 1  %advice
           qvalue(3, 5-hint, t+1) = qvalue(2, hint, t+1);
 
 
-end
+    end
 
-end
+  end
 
 end
 

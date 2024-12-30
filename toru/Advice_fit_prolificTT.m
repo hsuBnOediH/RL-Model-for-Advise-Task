@@ -1,4 +1,4 @@
-function [fit_results, DCM] = Advice_fit_prolificTT(subject,folder,params,field, plot)
+function [fit_results, DCM] = Advice_fit_prolificTT(subject,folder,params,field, plot, model)
 % initialize has_practice_effects to false, tracking if this participant's
 % first complete behavioral file came after they played the task a little
 % bit
@@ -168,7 +168,7 @@ actualrewards = actualrewards(:).'; % Reshape into a row
 
 
 
-        DCM        = advice_inversionTT(DCM);   % Invert the model
+        DCM        = advice_inversionTT(DCM, model);   % Invert the model
         break;
 end
      %% 6.3 Check deviation of prior and posterior means & posterior covariance:
@@ -195,8 +195,8 @@ end
 
 
 
-        % Simulate beliefs using fitted values to get avg action prob
         all_MDPs = [];
+        %all_MDPs_simmed = [];
 
         % Simulate beliefs using fitted values
         act_prob_time1=[];
@@ -261,9 +261,15 @@ end
              % MDPs  = spm_MDP_VB_X_advice_no_message_passing_faster(MDP); 
              
              %task.field = fields;
-             %MDPs  = Simple_Advice_Model_TT(task, MDP, params, 0);
-             %MDPs  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
-             MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+             if model == 1
+              MDPs  = Simple_Advice_Model_TT(task, MDP, params, 0);
+             elseif model == 2
+              MDPs  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
+             elseif model == 3
+              MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+             end
+
+             %MDPs_simmed  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 1);
 
              % bandit was chosen
              for j = 1:numel(actions)
@@ -320,10 +326,15 @@ end
              end
             % Save block of MDPs to list of all MDPs
              all_MDPs = [all_MDPs; MDPs'];
+            %all_MDPs_simmed = [all_MDPs_simmed; MDPs_simmed'];
 
             clear MDPs
 
         end
+
+        %FinalResults = advise_sim_fitTT(all_MDPs_simmed, field, priors)
+
+
         % plotting
         if plot
             % for each trial
