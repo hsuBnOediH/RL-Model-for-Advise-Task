@@ -4,8 +4,8 @@ dbstop if error
 rng('default');
 cd(fileparts(mfilename('fullpath')));
 
-SIM = false; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
-FIT = true; % Fit example subject data 'BBBBB' or fit simulated behavior (if SIM == true)
+SIM = true; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
+FIT = false; % Fit example subject data 'BBBBB' or fit simulated behavior (if SIM == true)
 plot = true;
 %indicate if prolific or local
 local = false;
@@ -75,12 +75,12 @@ model = 1; %Specify model 1 = active inference, 2 = RL connected, 3 = RL disconn
 % weight to 0
 
 if SIM
-    [gen_data] = advise_simTT(params, plot);
+    [gen_data] = advise_simTT(params, plot, model);
 end
     
 if FIT
     if SIM
-        fit_results = advise_sim_fitTT(gen_data, field, priors);
+        fit_results = advise_sim_fitTT(gen_data, field, priors, model);
     else
     
         if ~local

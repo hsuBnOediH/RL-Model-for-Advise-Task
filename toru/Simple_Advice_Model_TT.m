@@ -86,7 +86,8 @@ observations.hints = nan(1,task.num_trials);
 observations.rewards = nan(1,task.num_trials);
 choices = nan(task.num_trials,2);
 
-for trial=1:task.num_trials
+if sim == 0
+ for trial=1:task.num_trials
     trial_info = MDP(trial);
     observations.hints(trial) = trial_info.o(1,2)-1;
     % if selected advisor
@@ -100,6 +101,7 @@ for trial=1:task.num_trials
         choices(trial,2) = 0;
     end
     
+ end
 end
 
 params.p_right = .5;
