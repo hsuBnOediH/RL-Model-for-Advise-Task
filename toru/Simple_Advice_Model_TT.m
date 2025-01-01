@@ -306,6 +306,17 @@ context_floor = 1;
              elseif actions(trial,tp) == 3 && reward_outcomes(trial) == 2
                 ppp_context(:,trial) = [1 0]';
              end
+            
+           % make actualrewards for simulation
+             if reward_outcomes(trial) == 1
+                actualreward(trial) = 40;
+             elseif reward_outcomes(trial) == 2
+                 if task.block_type == "SL"
+                    actualreward(trial) = -40;
+                 elseif task.block_type == "LL"
+                    actualreward(trial) = -80;
+                 end
+             end
 
         % if first action was choosing advisor, update likelihood matrices
         % before picking pandit
@@ -369,9 +380,21 @@ context_floor = 1;
              elseif actions(trial,tp) == 3 && reward_outcomes(trial) == 2
                 ppp_context(:,trial) = [1 0]';
              end  
-    
-        end   
+             
+             % make actualrewards for simulation
+             if reward_outcomes(trial) == 1
+                actualreward(trial) = 20;
+             elseif reward_outcomes(trial) == 2
+                 if task.block_type == "SL"
+                    actualreward(trial) = -40;
+                 elseif task.block_type == "LL"
+                    actualreward(trial) = -80;
+                 end
+             end
 
+        end   
+             
+            
         if reward_outcomes(trial) == 1
             if actions(trial,1) == 1 
                 % forgetting part
@@ -432,6 +455,7 @@ end
     results.blockwise(block).norm_posteriors_d_final = ppp_context;
     results.blockwise(block).trust_priors_a = a{1};
     results.blockwise(block).norm_trust_priors_a = A{1};
+    results.blockwise(block).actualreward = actualreward;
 
 
 

@@ -76,6 +76,17 @@ for i = 1:numel(all_MDPs)
     merged_rewards = [merged_rewards blockrewards];
 end
 
+merged_actualrewards = [];
+
+% Loop through each element in all_MDPs
+for i = 1:numel(all_MDPs)
+    % Extract the blockwise.actions field
+    blockactualrewards = all_MDPs(i).blockwise.actualreward;
+    
+    % Concatenate
+    merged_actualrewards = [merged_actualrewards blockactualrewards];
+end
+
 
 for n = 1:length(merged_rewards)
         pt = 4 - merged_rewards(n);
@@ -101,6 +112,7 @@ end
 gen_data = struct(                ...
     'observations', {o}',       ...
     'responses', {u}',           ...
+    'actualrewards', {merged_actualrewards}',           ...
     'trialinfo', {trialinfo_forty_eighty}'  ...
 );
 

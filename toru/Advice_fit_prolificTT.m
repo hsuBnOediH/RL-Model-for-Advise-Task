@@ -258,7 +258,7 @@ end
 
              %MDPs  = spm_MDP_VB_X_advice(MDP); 
              %MDPs  = spm_MDP_VB_X_advice_no_message_passing(MDP); 
-             % MDPs  = spm_MDP_VB_X_advice_no_message_passing_faster(MDP); 
+             %MDPs  = spm_MDP_VB_X_advice_no_message_passing_faster(MDP); 
              
              %task.field = fields;
              if model == 1

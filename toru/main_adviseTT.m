@@ -4,8 +4,8 @@ dbstop if error
 rng('default');
 cd(fileparts(mfilename('fullpath')));
 
-SIM = true; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
-FIT = false; % Fit example subject data 'BBBBB' or fit simulated behavior (if SIM == true)
+SIM = false; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
+FIT = true; % Fit example subject data 'BBBBB' or fit simulated behavior (if SIM == true)
 plot = true;
 %indicate if prolific or local
 local = false;
@@ -17,12 +17,14 @@ if ispc
     FIT_SUBJECT = 'TORUTEST' ; % 6544b95b7a6b86a8cd8feb88 6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)
     %INPUT_DIRECTORY = [root '/rsmith/wellbeing/tasks/AdviceTask/behavioral_files_2-6-24'];  % Where the subject file is located
     INPUT_DIRECTORY = [root '/NPC/DataSink/StimTool_Online/WB_Advice'];  % Where the subject file is located
+    INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels'];  % Where the subject file is located
 
 else
     root = '/media/labs';
     FIT_SUBJECT = getenv('SUBJECT');
     results_dir = getenv('RESULTS');
     INPUT_DIRECTORY = getenv('INPUT_DIRECTORY');
+    INPUT_DIRECTORYforSIM = getenv('INPUT_DIRECTORYforSIM');;  % Where the subject file is located
 
 end
 
@@ -40,6 +42,23 @@ addpath([root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask']);
 
 % Define all parameters passed into the model; specify which ones to fit in
 % field
+
+field = {'p_a','inv_temp','reward_value','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','lamgda'}; %those are fitted
+
+params.state_exploration = 1;
+params.parameter_exploration = 0;
+
+model = 1; %Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected
+
+% fit reward value and loss value, fix explore weight to 1, fix novelty
+% weight to 0
+
+if SIM
+    [gen_data] = advise_simTT(params, plot, model);
+end
+    
+if FIT
+    
 params.p_a = .8;
 params.inv_temp = 1;
 params.reward_value = 4; %for Active inference
@@ -63,24 +82,10 @@ params.eta = .5; %As prior
 %params.eta_a_win = .5;
 %params.eta_a_loss = .5;
 params.lamgda = .5;
-params.state_exploration = 1;
-params.parameter_exploration = 0;
 
 
-field = {'p_a','inv_temp','reward_value','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','lamgda'}; %those are fitted
-
-model = 1; %Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected
-
-% fit reward value and loss value, fix explore weight to 1, fix novelty
-% weight to 0
-
-if SIM
-    [gen_data] = advise_simTT(params, plot, model);
-end
-    
-if FIT
     if SIM
-        fit_results = advise_sim_fitTT(gen_data, field, priors, model);
+        [fit_results, DCM] = advise_sim_fitTT(gen_data, field, params, plot, model);
     else
     
         if ~local
@@ -96,17 +101,17 @@ if FIT
         for i=1:length(mf_fields)
             fit_results.(mf_fields{i}) = model_free_results.(mf_fields{i});      
         end
-        fit_results.F = DCM.F;
-        currentDateTimeString = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
-        writetable(struct2table(fit_results), [results_dir '/advise_task-' FIT_SUBJECT '_' currentDateTimeString '_fits.csv']);
+        
     end
 
     
 end
+ 
+ fit_results.F = DCM.F;
+      
+ currentDateTimeString = datestr(now, 'yyyy-mm-dd_HH-MM-SS');  
 
-    
-    
-
+ writetable(struct2table(fit_results), [results_dir '/advise_task-' FIT_SUBJECT '_' currentDateTimeString '_fits.csv']); 
  saveas(gcf,[results_dir '/' FIT_SUBJECT '_' currentDateTimeString '_fit_plot.png']);
  save(fullfile([results_dir '/fit_results_' FIT_SUBJECT '_' currentDateTimeString '.mat']), 'DCM');
                             
