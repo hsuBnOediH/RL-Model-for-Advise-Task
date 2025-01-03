@@ -1,7 +1,7 @@
 % Samuel Taylor and Ryan Smith, 2021
 
 
-function [fit_results, DCM] = advise_sim_fitTT(sim_data, field, params, plot, model)
+function [fit_results, DCM] = advise_sim_fitTT(subject, folder, sim_data, field, params, plot, model)
 %      load('trialinfo.mat');
 %      num_trials = size(sim_data,1);
 %      trialinfo = trialinfo(1:num_trials,:);
@@ -215,9 +215,9 @@ function [fit_results, DCM] = advise_sim_fitTT(sim_data, field, params, plot, mo
         end
          
          
-        %fit_results.id = subject;
+        fit_results.idsim = subject;
         %fit_results.has_practice_effects = has_practice_effects;
-        %fit_results.file = file;
+        fit_results.foldersim = folder;
         % assign priors/posteriors/fixed params to fit_results
         param_names = fieldnames(params);
         for i = 1:length(param_names)
