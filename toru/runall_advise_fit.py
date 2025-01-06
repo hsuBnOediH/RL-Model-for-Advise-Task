@@ -30,5 +30,5 @@ for subject in subjects:
     print(f"SUBMITTED JOB [{jobname}]")
 
 
-    ###python3 /media/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/RLmodel/toru/runall_advise_fit.py /media/labs/NPC/DataSink/StimTool_Online/WB_Advice /media/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/model_30
+    ###python3 /media/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/RLmodel/toru/runall_advise_fit.py /media/labs/NPC/DataSink/StimTool_Online/WB_Advice /media/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/Activeinference
     #squeue -o "%.18i %.9P %.100j %.8u %.2t %.10M %.6D %R"

@@ -9,7 +9,8 @@ observations.hints = nan(1,task.num_trials);
 observations.rewards = nan(1,task.num_trials);
 choices = nan(task.num_trials,2);
 
-for trial=1:task.num_trials
+if sim == 0
+  for trial=1:task.num_trials
     trial_info = MDP(trial);
     observations.hints(trial) = trial_info.o(1,2)-1;
     % if selected advisor
@@ -23,6 +24,7 @@ for trial=1:task.num_trials
         choices(trial,2) = 0;
     end
     
+  end
 end
 
 params.p_right = .5;
@@ -66,15 +68,38 @@ for i = 1:length(field)
     end
 end
 
+p_win = 1;
 
+hint_outcomes(1,1:task.num_trials) = 0;
+actions = zeros(task.num_trials,2);
+
+    for trial = 1:task.num_trials
+        hint_outcome_vector(:,trial) = [0 0]';
+        true_context(:,:,trial) = zeros(2,1);
+        true_A{1}(:,:,trial) = zeros(2,2);
+        A{2}(:,:,trial) = zeros(2,2);
+        p_o_win(:,:,trial) = zeros(2,3);
+        if sim == 1
+            true_context_vector(trial) = find(rand < cumsum([1-task.true_p_right(trial) task.true_p_right(trial)]'),1)-1;
+        end
+    end
+
+%left better
+        A{2}(:,:,1) = [p_win   1-p_win; % win
+                       1-p_win p_win];  % lose
+        
+%right better
+        A{2}(:,:,2) = [1-p_win p_win;   % win
+                       p_win   1-p_win];% lose
 
 
 %RL model
 
 
 % Assuming observations.rewards is a vector
+if sim == 0
 actualreward = [MDP.actualreward]/10; % Copy the original vector and divided by 10
-
+end
 
 
 % Initialize matrices
@@ -96,14 +121,53 @@ qvalue(:, :, 1) = [(2*params.p_a-loss*(1-params.p_a))*params.reward_value, 0, 0;
 
 for t = 1:task.num_trials
 
-  exp_values = exp(params.inv_temp * qvalue(:, 1, t));
-  action_probs(:, 1, t) = exp_values / sum(exp_values);
+%  exp_values = exp(params.inv_temp * qvalue(:, 1, t));
 
-  selected = choices(t, 1); % 1 (ask advice) or 2 (left) or 3 (right)
+%  exp_values = exp(params.inv_temp * (qvalue(:, 1, t) - max(qvalue(:, 1, t))));
+%  action_probs(:, 1, t) = exp_values / sum(exp_values);
 
-  if actualreward(t) > 0
+ action_probs(:, 1, t) = spm_softmax(params.inv_temp*qvalue(:,1,t))';
+  
+  if sim == 1
+     true_context(:,:,t) = [1-true_context_vector(t) true_context_vector(t)]';
+     true_A{1}(:,:,t) =  [task.true_p_a(t)   1-task.true_p_a(t); % "try left"
+                          1-task.true_p_a(t) task.true_p_a(t)];  % "try right"
+     true_p_o_hint(:,t) = true_A{1}(:,:,1)*true_context(:,:,t);
+     true_p_o_win(:,2,t) = A{2}(:,:,1)*true_context(:,:,t);
+     true_p_o_win(:,3,t) = A{2}(:,:,2)*true_context(:,:,t);
 
-   if selected == 2 || selected == 3
+     actions(t, 1) = find(rand < cumsum(action_probs(:, 1, t)'), 1);
+
+  elseif sim == 0
+     actions(t, 1) = choices(t, 1);
+
+  end
+
+  selected = actions(t, 1); % 1 (ask advice) or 2 (left) or 3 (right)
+
+
+ if selected ~= 1
+
+       if sim == 1
+                hint_outcomes(t) = 0;
+
+                reward_outcomes(t) = find(rand < cumsum(true_p_o_win(:,actions(t,1),t)'),1);
+                % make actualrewards for simulation
+                if reward_outcomes(t) == 1
+                   actualreward(t) = 4;
+                elseif reward_outcomes(t) == 2
+                  if task.block_type == "SL"
+                    actualreward(t) = -4;
+                  elseif task.block_type == "LL"
+                    actualreward(t) = -8;
+                  end
+                end
+       else
+           reward_outcomes(t) = observations.rewards(t);
+       end
+
+    if actualreward(t) > 0
+
     % Update for the selected choice
     qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
         params.eta_d_win * (actualreward(t) * params.reward_value - qvalue(selected, 1, t));
@@ -124,32 +188,9 @@ for t = 1:task.num_trials
         params.omega_a_win * (qvalue(3, 2, 1) - qvalue(3, 2, t));
     qvalue(2, 3, t+1) = qvalue(3, 2, t+1);
     qvalue(3, 3, t+1) = qvalue(2, 2, t+1);
+   
+    elseif actualreward(t) < 0
 
-
-   elseif selected == 1  %advice
-   hint = observations.hints(t)+1;
-
-   exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, hint, t));
-   action_probs(2:3, 2, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
-
-   deltasecond = actualreward(t)*params.reward_value - qvalue(choices(t, 2), hint, t);
-   deltafirst = qvalue(choices(t, 2), hint, t) - qvalue(1, 1, t);
-
-   qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_win * deltafirst + params.eta_a_win * params.lamgda * deltasecond;
- 
-   secchoice = choices(t, 2);
-          qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_win * (2*actualreward(t)*params.reward_value - qvalue(secchoice, 1, t));
-          qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_a_win * (actualreward(t)*params.reward_value - qvalue(secchoice, hint, t));
-          qvalue(5-secchoice, 1, t+1) = qvalue(5-secchoice, 1, t) + params.eta_d_win * (-loss*params.reward_value - qvalue(5-secchoice, 1, t));
-          qvalue(5-secchoice, hint, t+1) = qvalue(5-secchoice, hint, t) + params.eta_a_win * (-loss*params.reward_value - qvalue(5-secchoice, hint, t));
-          qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
-          qvalue(3, 5-hint, t+1) = qvalue(2, hint, t+1);
-   end
-
-
-  elseif actualreward(t) < 0
-
-   if selected == 2 || selected == 3
     % Update for the selected choice
     qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
         params.eta_d_loss * (-loss * params.reward_value - qvalue(selected, 1, t));
@@ -172,19 +213,72 @@ for t = 1:task.num_trials
     qvalue(2, 3, t+1) = qvalue(3, 2, t+1);
     qvalue(3, 3, t+1) = qvalue(2, 2, t+1);
 
+    end
 
-   elseif selected == 1  %advice
-   hint = observations.hints(t)+1;
+ elseif selected == 1  %advice
+   
+   if sim == 1
+                hint_outcomes(t) = find(rand < cumsum(true_p_o_hint(:,t)'),1);
+   else 
+                hint_outcomes(t) = observations.hints(t);
+   end
+  
+   hint = hint_outcomes(t)+1;
 
-   exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, hint, t));
-   action_probs(2:3, 2, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
+%   exp_valuesafteradvice = exp(params.inv_temp * qvalue(2:3, hint, t));
+ 
+%   exp_valuesafteradvice = exp(params.inv_temp * (qvalue(2:3, hint, t) - max(qvalue(2:3, hint, t))));
+%   action_probs(2:3, 2, t) = exp_valuesafteradvice / sum(exp_valuesafteradvice);
 
-   deltasecond = -loss*params.reward_value - qvalue(choices(t, 2), hint, t);
-   deltafirst = qvalue(choices(t, 2), hint, t) - qvalue(1, 1, t);
+  action_probs(:,2,t) = [0; spm_softmax(params.inv_temp*qvalue(2:3,hint,t))]';
+
+    % select actions
+    if sim == 1
+           actions(t,2) = find(rand < cumsum(action_probs(:,2,t)'),1);
+    else
+           actions(t,2) = choices(t,2);
+    end
+
+    if sim == 1
+           reward_outcomes(t) = find(rand < cumsum(true_p_o_win(:,actions(t,2),t)'),1);
+           if reward_outcomes(t) == 1
+                actualreward(t) = 2;
+           elseif reward_outcomes(t) == 2
+                 if task.block_type == "SL"
+                    actualreward(t) = -4;
+                 elseif task.block_type == "LL"
+                    actualreward(t) = -8;
+                 end
+           end   
+    else
+        reward_outcomes(t) = observations.rewards(t);
+    end    
+
+   if actualreward(t) > 0
+   
+   deltasecond = actualreward(t)*params.reward_value - qvalue(actions(t, 2), hint, t);
+   deltafirst = qvalue(actions(t, 2), hint, t) - qvalue(1, 1, t);
+
+   qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_win * deltafirst + params.eta_a_win * params.lamgda * deltasecond;
+ 
+   secchoice = actions(t, 2);
+          qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_win * (2*actualreward(t)*params.reward_value - qvalue(secchoice, 1, t));
+          qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_a_win * (actualreward(t)*params.reward_value - qvalue(secchoice, hint, t));
+          qvalue(5-secchoice, 1, t+1) = qvalue(5-secchoice, 1, t) + params.eta_d_win * (-loss*params.reward_value - qvalue(5-secchoice, 1, t));
+          qvalue(5-secchoice, hint, t+1) = qvalue(5-secchoice, hint, t) + params.eta_a_win * (-loss*params.reward_value - qvalue(5-secchoice, hint, t));
+          qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
+          qvalue(3, 5-hint, t+1) = qvalue(2, hint, t+1);
+  
+
+
+   elseif actualreward(t) < 0
+
+   deltasecond = -loss*params.reward_value - qvalue(actions(t, 2), hint, t);
+   deltafirst = qvalue(actions(t, 2), hint, t) - qvalue(1, 1, t);
 
    qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_loss * deltafirst + params.eta_a_loss * params.lamgda * deltasecond;
  
-   secchoice = choices(t, 2);
+   secchoice = actions(t, 2);
           qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_loss * (-loss*params.reward_value - qvalue(secchoice, 1, t));
           qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_a_loss * (-loss*params.reward_value - qvalue(secchoice, hint, t));
           qvalue(5-secchoice, 1, t+1) = qvalue(5-secchoice, 1, t) + params.eta_d_loss * (4*params.reward_value - qvalue(5-secchoice, 1, t));
@@ -200,7 +294,7 @@ for t = 1:task.num_trials
 end
 
 
-results.choices(:,:) = choices(:,:);
+results.choices(:,:) = actions(:,:);
 
     results.input.task = task;
     results.input.params = params;
@@ -209,7 +303,10 @@ results.choices(:,:) = choices(:,:);
     results.input.sim = sim;
 
     results.blockwise.action_probs = action_probs;
-    results.blockwise.actions = choices;
+    results.blockwise.actions = actions;
+    results.blockwise.hint_outcomes = hint_outcomes;
+    results.blockwise.reward_outcomes = reward_outcomes;
+    results.blockwise.actualreward = actualreward*10;
 
 
 

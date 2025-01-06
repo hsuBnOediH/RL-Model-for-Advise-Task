@@ -32,13 +32,17 @@ load('trialinfo_forty_eighty.mat');
         end
         MDP = [];
         sim = 1;
-        MDPs  = Simple_Advice_Model_TT(task, MDP,params, sim);
+        
+        if    model == 1
+              MDPs  = Simple_Advice_Model_TT(task, MDP, params, sim);
+        elseif model == 2
+              MDPs  = ModelFreeRLModelconnect_TT(task, MDP, params, sim);
+        elseif model == 3
+              MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP, params, sim);
+        end
+
         all_MDPs = [all_MDPs; MDPs'];
     end
-
-
-
-
 
 
 
