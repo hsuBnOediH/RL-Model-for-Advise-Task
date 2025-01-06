@@ -152,8 +152,21 @@ if a_inf_path is not None:
             else:
                 res_table[subjects.index(subject)+1].append(None)
 
-# write the table into a csv file
 
+# exclude the subject id by reading file 
+excluded_subjects_file_path = '/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/subject_id/excluded_ids.csv'
+excluded_subjects_ids = []
+with open(excluded_subjects_file_path) as infile:
+    for line in infile:
+        excluded_subjects_ids.append(line.strip())
+
+for subject_id in excluded_subjects_ids:
+    if subject_id in subjects:
+        res_table.pop(subjects.index(subject_id)+1)
+        subjects.remove(subject_id)
+
+
+# write the table into a csv file
 import csv
 
 output_path = f'/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/rl_results/RL/model_free/{run_name}/F_table.csv'
