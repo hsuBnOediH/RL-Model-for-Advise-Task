@@ -4,7 +4,7 @@ dbstop if error
 rng('default');
 cd(fileparts(mfilename('fullpath')));
 
-SIM = true; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
+SIM = false; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
 FIT = true; % Fit example subject data 'BBBBB' or fit simulated behavior (if SIM == true)
 plot = true;
 %indicate if prolific or local
@@ -17,7 +17,7 @@ if ispc
     FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88'; %  6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
     %INPUT_DIRECTORY = [root '/rsmith/wellbeing/tasks/AdviceTask/behavioral_files_2-6-24'];  % Where the subject file is located
     INPUT_DIRECTORY = [root '/NPC/DataSink/StimTool_Online/WB_Advice'];  % Where the subject file is located
-    INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/Activeinferencers3'];  % Where the subject file is located
+    INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/ActiveinferencersFixedcl3'];  % Where the subject file is located
 
 else
     root = '/media/labs';
@@ -53,7 +53,7 @@ addpath([root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask']);
 
 
 %%% Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected
-model = 1; 
+model = 3; 
 
 %%% Specify 
 IFLAMGDA = false;
@@ -62,7 +62,7 @@ IFLAMGDA = false;
 % weight to 0
 
 
-%for paramcombi = 1:5
+for paramcombi = 1:5
 
 if SIM
 
@@ -83,7 +83,8 @@ paramsim.p_a = subdatsim.posterior_p_a;
 paramsim.inv_temp = subdatsim.posterior_inv_temp;
 paramsim.reward_value = subdatsim.posterior_reward_value;
 %paramsim.reward_value = 1;
-paramsim.l_loss_value = subdatsim.posterior_l_loss_value;
+%paramsim.l_loss_value = subdatsim.posterior_l_loss_value;
+paramsim.l_loss_value = 4;
 
 paramsim.omega = subdatsim.posterior_omega;
 %paramsim.omega_d = subdatsim.posterior_omega_d;
@@ -116,6 +117,7 @@ params.inv_temp = 1;
 
 params.state_exploration = 1;
 params.parameter_exploration = 0;
+params.Rsensitivity = 2; 
 
  if model == 1 %for Active inference
 params.reward_value = 4; 
@@ -125,118 +127,117 @@ params.reward_value = 1;
 params.l_loss_value = 8; 
  end
 
- %temtative for one model checking
-    params.omega = .2;
-    params.eta_d_win = .5;
-    params.eta_d_loss = .5;
-    params.eta_a = .5;
-    params.Rsensitivity = 2; 
-
-        %params.lamgda = 1; %As fixed param for RL
-        field = {'Rsensitivity', 'reward_value', 'state_exploration','p_a','inv_temp', 'l_loss_value','omega','eta_d_win','eta_d_loss','eta_a'};
-
-% if paramcombi == 1
-% 
-%    params.omega = .2;
-%    params.eta = .5;
-% 
-%  if model == 1
-%     field = {'p_a','inv_temp','reward_value','l_loss_value','omega','eta'}; %those are fitted
-%  elseif model ~= 1
-%      if IFLAMGDA
-%         params.lamgda = .5;
-%         field = {'p_a','inv_temp','l_loss_value','omega','eta','lamgda'}; %those are fitted
-%      else
-%         params.lamgda = 1; %As fixed param
-%         field = {'p_a','inv_temp','l_loss_value','omega','eta'};
-%      end
-%  end
-% 
-% elseif paramcombi == 2
-% 
-%     params.omega = .2;
-%     params.eta_d = .5;
-%     params.eta_a = .5;
-% 
-%  if model == 1
-%     field = {'p_a','inv_temp','reward_value','l_loss_value','omega','eta_d','eta_a'}; %those are fitted
-%  elseif model ~= 1
-%      if IFLAMGDA
-%         params.lamgda = .5;
-%         field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a','lamgda'}; %those are fitted
-%      else
-%         params.lamgda = 1; %As fixed param
-%         field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a'};
-%      end
-%  end
-% 
-% elseif paramcombi == 3
-% 
+%  %temtative for one model checking
 %     params.omega = .2;
 %     params.eta_d_win = .5;
 %     params.eta_d_loss = .5;
 %     params.eta_a = .5;
-% 
-%  if model == 1
-%     field = {'p_a','inv_temp','reward_value','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a'}; %those are fitted
-%  elseif model ~= 1
-%      if IFLAMGDA
-%         params.lamgda = .5;
-%         field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a','lamgda'}; %those are fitted
-%      else
-%         params.lamgda = 1; %As fixed param
-%         field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a'};
-%      end
-%  end
-% 
-% elseif paramcombi == 4
-% 
-%     params.omega = .2;
-%     params.eta_d = .5;
-%     params.eta_a_win = .5;
-%     params.eta_a_loss = .5;
-% 
-%  if model == 1
-%     field = {'p_a','inv_temp','reward_value','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss'}; %those are fitted
-%  elseif model ~= 1
-%      if IFLAMGDA
-%         params.lamgda = .5;
-%         field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss','lamgda'}; %those are fitted
-%      else
-%         params.lamgda = 1; %As fixed param
-%         field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss'};
-%      end
-%  end
-% 
-%  elseif paramcombi == 5
 %     
-%     params.omega_d_win = .2;
-%     params.omega_d_loss = .2;
-%     params.omega_a_win = .2;
-%     params.omega_a_loss = .2;
-%     params.eta = .5;
-% 
-%  if model == 1
-%     field = {'p_a','inv_temp','reward_value','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta'}; %those are fitted
-%  elseif model == 2
-%      if IFLAMGDA
-%         params.lamgda = .5;
-%         field = {'p_a','inv_temp','l_loss_value','omega_a_win','omega_a_loss','eta','lamgda'}; %those are fitted
-%      else
-%         params.lamgda = 1; %As fixed param
-%         field = {'p_a','inv_temp','l_loss_value','omega_a_win','omega_a_loss','eta'};
-%      end
-%  elseif model == 3
-%      if IFLAMGDA
-%         params.lamgda = .5;
-%         field = {'p_a','inv_temp','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','lamgda'}; %those are fitted
-%      else
-%         params.lamgda = 1; %As fixed param
-%         field = {'p_a','inv_temp','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta'};
-%      end
-%  end
-% 
-% end
+%         %params.lamgda = 1; %As fixed param for RL
+%         field = {'Rsensitivity', 'reward_value', 'state_exploration','p_a','inv_temp', 'omega','eta_d_win','eta_d_loss','eta_a'};
+
+if paramcombi == 1
+
+   params.omega = .2;
+   params.eta = .5;
+
+ if model == 1
+    field = {'p_a','inv_temp','reward_value','omega','eta', 'state_exploration', 'Rsensitivity'}; %those are fitted
+ elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega','eta','lamgda'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','l_loss_value','omega','eta'};
+     end
+ end
+
+elseif paramcombi == 2
+
+    params.omega = .2;
+    params.eta_d = .5;
+    params.eta_a = .5;
+
+ if model == 1
+    field = {'p_a','inv_temp','reward_value','omega','eta_d','eta_a', 'state_exploration', 'Rsensitivity'}; %those are fitted
+ elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a','lamgda'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a'};
+     end
+ end
+
+elseif paramcombi == 3
+
+    params.omega = .2;
+    params.eta_d_win = .5;
+    params.eta_d_loss = .5;
+    params.eta_a = .5;
+
+ if model == 1
+    field = {'p_a','inv_temp','reward_value','omega','eta_d_win','eta_d_loss','eta_a', 'state_exploration', 'Rsensitivity'}; %those are fitted
+ elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a','lamgda'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a'};
+     end
+ end
+
+elseif paramcombi == 4
+
+    params.omega = .2;
+    params.eta_d = .5;
+    params.eta_a_win = .5;
+    params.eta_a_loss = .5;
+
+ if model == 1
+    field = {'p_a','inv_temp','reward_value','omega','eta_d','eta_a_win','eta_a_loss', 'state_exploration', 'Rsensitivity'}; %those are fitted
+ elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss','lamgda'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss'};
+     end
+ end
+
+ elseif paramcombi == 5
+    
+    params.omega_d_win = .2;
+    params.omega_d_loss = .2;
+    params.omega_a_win = .2;
+    params.omega_a_loss = .2;
+    params.eta = .5;
+
+ if model == 1
+    field = {'p_a','inv_temp','reward_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta', 'state_exploration', 'Rsensitivity'}; %those are fitted
+ elseif model == 2
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega_a_win','omega_a_loss','eta','lamgda'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','l_loss_value','omega_a_win','omega_a_loss','eta'};
+     end
+ elseif model == 3
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','lamgda'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta'};
+     end
+ end
+
+end
 
 
 
@@ -260,7 +261,7 @@ params.l_loss_value = 8;
         
     end
 
-end
+%end
 
  
  fit_results.F = DCM.F;
@@ -268,29 +269,29 @@ end
       
  currentDateTimeString = datestr(now, 'yyyy-mm-dd_HH-MM-SS');  
 
-% % Define the folder name dynamically based on paramcombi
-% folder_name = fullfile(results_dir, ['paramcombi' num2str(paramcombi)]);
-% 
-% % Check if the folder exists; if not, create it
-% if ~exist(folder_name, 'dir')
-%     mkdir(folder_name);
-% end
-% 
-% % Save the table to the folder
-% writetable(struct2table(fit_results), ...
-%     fullfile(folder_name, ['advise_task-' FIT_SUBJECT '_' currentDateTimeString '_fits.csv']));
-% 
-% % Save the plot to the folder
-% saveas(gcf, fullfile(folder_name, [FIT_SUBJECT '_' currentDateTimeString '_fit_plot.png']));
-% 
-% % Save the .mat file to the folder
-% save(fullfile(folder_name, ['fit_results_' FIT_SUBJECT '_' currentDateTimeString '.mat']), 'DCM');
+% Define the folder name dynamically based on paramcombi
+folder_name = fullfile(results_dir, ['paramcombi' num2str(paramcombi)]);
 
+% Check if the folder exists; if not, create it
+if ~exist(folder_name, 'dir')
+    mkdir(folder_name);
+end
 
-writetable(struct2table(fit_results), [results_dir '/advise_task-' FIT_SUBJECT '_' currentDateTimeString '_fits.csv']); 
-saveas(gcf,[results_dir '/' FIT_SUBJECT '_' currentDateTimeString '_fit_plot.png']);
-save(fullfile([results_dir '/fit_results_' FIT_SUBJECT '_' currentDateTimeString '.mat']), 'DCM');
+% Save the table to the folder
+writetable(struct2table(fit_results), ...
+    fullfile(folder_name, ['advise_task-' FIT_SUBJECT '_' currentDateTimeString '_fits.csv']));
+
+% Save the plot to the folder
+saveas(gcf, fullfile(folder_name, [FIT_SUBJECT '_' currentDateTimeString '_fit_plot.png']));
+
+% Save the .mat file to the folder
+save(fullfile(folder_name, ['fit_results_' FIT_SUBJECT '_' currentDateTimeString '.mat']), 'DCM');
+
+% 
+% writetable(struct2table(fit_results), [results_dir '/advise_task-' FIT_SUBJECT '_' currentDateTimeString '_fits.csv']); 
+% saveas(gcf,[results_dir '/' FIT_SUBJECT '_' currentDateTimeString '_fit_plot.png']);
+% save(fullfile([results_dir '/fit_results_' FIT_SUBJECT '_' currentDateTimeString '.mat']), 'DCM');
  
-%end
+end
 
-%end
+end

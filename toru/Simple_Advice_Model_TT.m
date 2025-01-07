@@ -188,11 +188,11 @@ context_floor = 1;
     
     % reward value distribution
     if task.block_type(block)== "LL"
-        R(:,block) =  spm_softmax([params.reward_value+eps (-params.l_loss_value*params.Rsensitivity)-eps]');
-        Rafteradvice(:,block) = spm_softmax([(params.reward_value/params.Rsensitivity)+eps (-params.l_loss_value*params.Rsensitivity)-eps]');
-    else
         R(:,block) =  spm_softmax([params.reward_value+eps -params.l_loss_value-eps]');
-        Rafteradvice(:,block) =  spm_softmax([(params.reward_value/params.Rsensitivity)+eps -params.l_loss_value-eps]');
+        Rafteradvice(:,block) = spm_softmax([(params.reward_value/params.Rsensitivity)+eps -params.l_loss_value-eps]');
+    else
+        R(:,block) =  spm_softmax([params.reward_value+eps -eps]');
+        Rafteradvice(:,block) =  spm_softmax([(params.reward_value/params.Rsensitivity)+eps -eps]');
     end
 
     if sim == 0
