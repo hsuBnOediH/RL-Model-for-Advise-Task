@@ -4,7 +4,7 @@ dbstop if error
 rng('default');
 cd(fileparts(mfilename('fullpath')));
 
-SIM = false; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
+SIM = true; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
 FIT = true; % Fit example subject data 'BBBBB' or fit simulated behavior (if SIM == true)
 plot = true;
 %indicate if prolific or local
@@ -17,7 +17,7 @@ if ispc
     FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88'; %  6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
     %INPUT_DIRECTORY = [root '/rsmith/wellbeing/tasks/AdviceTask/behavioral_files_2-6-24'];  % Where the subject file is located
     INPUT_DIRECTORY = [root '/NPC/DataSink/StimTool_Online/WB_Advice'];  % Where the subject file is located
-    INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/Activeinference/paramcombi4'];  % Where the subject file is located
+    INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/Activeinferencers3'];  % Where the subject file is located
 
 else
     root = '/media/labs';
@@ -76,7 +76,7 @@ if SIM
     filesim = [INPUT_DIRECTORYforSIM '/' directorysim(index_array).name];
     subdatsim = readtable(filesim);
 
-paramsim.state_exploration = 1;
+paramsim.state_exploration = subdatsim.posterior_state_exploration;
 paramsim.parameter_exploration = 0;
 
 paramsim.p_a = subdatsim.posterior_p_a;
@@ -93,14 +93,15 @@ paramsim.omega = subdatsim.posterior_omega;
 %paramsim.omega_a_win = subdatsim.posterior_omega_a_win;
 %paramsim.omega_a_loss = subdatsim.posterior_omega_a_loss;
 %paramsim.eta = subdatsim.posterior_eta;
-paramsim.eta_d = subdatsim.posterior_eta_d;
-%paramsim.eta_d_win = subdatsim.posterior_eta_d_win;
-%paramsim.eta_d_loss = subdatsim.posterior_eta_d_loss;
-%paramsim.eta_a = subdatsim.posterior_eta_a;
-paramsim.eta_a_win = subdatsim.posterior_eta_a_win;
-paramsim.eta_a_loss = subdatsim.posterior_eta_a_loss;
+%paramsim.eta_d = subdatsim.posterior_eta_d;
+paramsim.eta_d_win = subdatsim.posterior_eta_d_win;
+paramsim.eta_d_loss = subdatsim.posterior_eta_d_loss;
+paramsim.eta_a = subdatsim.posterior_eta_a;
+%paramsim.eta_a_win = subdatsim.posterior_eta_a_win;
+%paramsim.eta_a_loss = subdatsim.posterior_eta_a_loss;
 %paramsim.lamgda = subdatsim.posterior_lamgda;
-paramsim.lamgda = 1;
+%paramsim.lamgda = 1;
+paramsim.Rsensitivity = subdatsim.posterior_Rsensitivity;
 
     [gen_data] = advise_simTT(paramsim, plot, model);
 
@@ -124,14 +125,15 @@ params.reward_value = 1;
 params.l_loss_value = 8; 
  end
 
- %temtative for sim
+ %temtative for one model checking
     params.omega = .2;
-    params.eta_d = .5;
-    params.eta_a_win = .5;
-    params.eta_a_loss = .5;
+    params.eta_d_win = .5;
+    params.eta_d_loss = .5;
+    params.eta_a = .5;
+    params.Rsensitivity = 2; 
 
-        params.lamgda = 1; %As fixed param
-        field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss'};
+        %params.lamgda = 1; %As fixed param for RL
+        field = {'Rsensitivity', 'reward_value', 'state_exploration','p_a','inv_temp', 'l_loss_value','omega','eta_d_win','eta_d_loss','eta_a'};
 
 % if paramcombi == 1
 % 

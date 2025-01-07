@@ -186,7 +186,7 @@ end
                     'omega_d_win', 'eta_d_loss', 'omega_d_loss', 'lamgda'})
                 params.(field) = 1/(1+exp(-DCM.Ep.(field)));
             elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value', 'state_exploration',...
-                    'parameter_exploration'})
+                    'parameter_exploration', 'Rsensitivity'})
                 params.(field) = exp(DCM.Ep.(field));
             else
                 params.(field) = DCM.Ep.(field);

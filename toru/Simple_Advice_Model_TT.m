@@ -188,9 +188,11 @@ context_floor = 1;
     
     % reward value distribution
     if task.block_type(block)== "LL"
-        R(:,block) =  spm_softmax([params.reward_value+eps -params.l_loss_value-eps]');
+        R(:,block) =  spm_softmax([params.reward_value+eps (-params.l_loss_value*params.Rsensitivity)-eps]');
+        Rafteradvice(:,block) = spm_softmax([(params.reward_value/params.Rsensitivity)+eps (-params.l_loss_value*params.Rsensitivity)-eps]');
     else
-        R(:,block) =  spm_softmax([params.reward_value+eps -eps]');
+        R(:,block) =  spm_softmax([params.reward_value+eps -params.l_loss_value-eps]');
+        Rafteradvice(:,block) =  spm_softmax([(params.reward_value/params.Rsensitivity)+eps -params.l_loss_value-eps]');
     end
 
     if sim == 0
@@ -344,12 +346,12 @@ context_floor = 1;
                     p_o_win(:,option,trial) = A{2}(:,:,1)*pp_context(:,:,trial);
                     novelty_value(option,tp,trial) = 0;
                     epistemic_value(option,tp,trial) = 0;
-                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
+                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
                 elseif option == 3 
                     p_o_win(:,option,trial) = A{2}(:,:,2)*pp_context(:,:,trial);
                     novelty_value(option,tp,trial) = 0;
                     epistemic_value(option,tp,trial) = 0;
-                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
+                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
                 end
                 Q(option, tp,trial) = params.state_exploration*epistemic_value(option,tp,trial) + pragmatic_value(option,tp,trial) + params.parameter_exploration*novelty_value(option,tp,trial);
             end

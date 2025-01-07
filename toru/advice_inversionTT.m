@@ -65,7 +65,7 @@ for i = 1:length(DCM.field)
             pE.(field) = log(DCM.params.(field)/(1-DCM.params.(field)));  % bound between 0 and 1
             pC{i,i}    = prior_variance;
         elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value', 'state_exploration',...
-                'parameter_exploration', })
+                'parameter_exploration', 'Rsensitivity'})
             pE.(field) = log(DCM.params.(field));               % in log-space (to keep positive)
             pC{i,i}    = prior_variance;  
         else
@@ -126,7 +126,7 @@ for i = 1:length(fields)
             'omega_d_win', 'eta_d_loss', 'omega_d_loss', 'lamgda'})
         params.(field) = 1/(1+exp(-P.(field)));
     elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value', 'state_exploration',...
-            'parameter_exploration'})
+            'parameter_exploration', 'Rsensitivity'})
         params.(field) = exp(P.(field));
     else
         params.(field) = P.(field);
