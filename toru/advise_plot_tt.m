@@ -65,7 +65,9 @@ for subPlotIndx = 1:NumSubplots
     Nt = 30; % number of trials in a block
      for i = 1:Nt
         o(:,i) = MDP(i).o(2,:)';
-        act_prob(:,i) = MDP(i).P(:,:,1)'; % get action probs for first time step
+        if isfield(MDP, 'P')
+           act_prob(:,i) = MDP(i).P(:,:,1)'; % get action probs for first time step
+        end
         act(:,i) = MDP(i).u(2,1);
         is_win_trial = any(o == 3, 1);
         
@@ -79,7 +81,9 @@ for subPlotIndx = 1:NumSubplots
     else
         MarkerSize = 16;
     end
-    image(64*(1 - act_prob)),  hold on
+    if isfield(MDP, 'P')
+       image(64*(1 - act_prob)),  hold on
+    end
 
    % plot(act,col{3},'MarkerSize',MarkerSize)
    % plot win trials
@@ -109,28 +113,34 @@ for subPlotIndx = 1:NumSubplots
         plot(Np*(1 - E(end,:)),'r:')
     end
     
+% Check if "reaction_times" exists in MDP
+if isfield(MDP, 'reaction_times')
     % get max and mean reaction time for the block
     % Step 1: Extract reaction times into a cell array
-%    reaction_times_cells = {MDP.reaction_times};
+    reaction_times_cells = {MDP.reaction_times};
 
     % Step 2: Concatenate all reaction times into a single array
     % Flatten the cell array and filter out NaN values
-%    all_reaction_times = cellfun(@(c) c(~isnan(c)), reaction_times_cells, 'UniformOutput', false);
-%    all_reaction_times = [all_reaction_times{:}];  % This creates a single array
+    all_reaction_times = cellfun(@(c) c(~isnan(c)), reaction_times_cells, 'UniformOutput', false);
+    all_reaction_times = [all_reaction_times{:}];  % This creates a single array
 
     % Step 3: Calculate the mean and maximum, ignoring NaN values
-%    mean_reaction_time = mean(all_reaction_times, 'omitnan');
+    mean_reaction_time = mean(all_reaction_times, 'omitnan');
   %  mean_reaction_time = round(mean_reaction_time,2);
-%    max_reaction_time = max(all_reaction_times, [], 'omitnan');  % The '[]' ensures max operates on the entire array
+    max_reaction_time = max(all_reaction_times, [], 'omitnan');  % The '[]' ensures max operates on the entire array
    % max_reaction_time = round(max_reaction_time,2);
     % Now you have the mean and max without NaN values
-
+end
     
     
     
     xlim([0 30]); 
     set(gca, 'YTick', 1:4, 'YTickLabel', {'Start','Hint          ', 'Left', 'Right          '});
+if isfield(MDP, 'reaction_times')
+    title(sprintf('Block %d;   Mean RT: %.2f, Max RT: %.2f', subPlotIndx, mean_reaction_time, max_reaction_time));
+else
     title(sprintf('Block %d', subPlotIndx));
+end
     %subtitle(sprintf('Mean RT: %d, Max RT: %d', mean_reaction_time, max_reaction_time));
 
     hold off;
