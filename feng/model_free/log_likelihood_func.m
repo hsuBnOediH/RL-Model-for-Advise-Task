@@ -149,8 +149,14 @@ function L = log_likelihood_func(P, M, U, Y)
         % element-wise multiplication the outcome sensitivity to the Q table    
         actual_states = trial.states;
         actual_actions = trial.actions;
-        % scale the rewards by 0.1 times
-        actual_reward = trial.rewards * 0.1;
+        % scale the rewards by 0.1 times, if is loss, use the loss value init by the party size
+        actual_reward = trial.rewards;
+        if actual_reward > 0
+            actual_reward = actual_reward * 0.1;
+        else
+            actual_reward = loss;
+        end
+        
 
         % compute the action probability for each action at time step 1
         % read out the q values for each action at time step 1, time the inv_temp
