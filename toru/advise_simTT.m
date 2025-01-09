@@ -113,6 +113,20 @@ for n = 1:length(merged_rewards)
 
 end
 
+if plot
+    N = numel(o); % Number of elements (360 in this case)
+
+    % Initialize the struct array
+    whole_MDP(N,1) = struct('o', [], 'u', []);
+
+    % Loop through and populate the struct fields
+    for i = 1:N
+    whole_MDP(i).o = o{i};                     % Assign the i-th element of o
+    whole_MDP(i).u = u{i};                     % Assign the i-th element of u
+    end
+    advise_plot_tt(whole_MDP);
+end
+
 gen_data = struct(                ...
     'observations', {o}',       ...
     'responses', {u}',           ...

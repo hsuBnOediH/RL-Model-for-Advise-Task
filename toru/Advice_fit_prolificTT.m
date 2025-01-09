@@ -351,7 +351,7 @@ end
                 trial_action_probs = vertcat(zero_row, trial_action_probs)';
                 MDP(i).P = permute(trial_action_probs, [3 2 1]);
             end
-            advise_plot_cmg(MDP);
+            advise_plot_tt(MDP);
 
         end
          

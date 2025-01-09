@@ -112,9 +112,9 @@ qvalue = zeros(3, 3, task.num_trials);
 
 
 if task.block_type == "SL"
-     loss = 4;
-elseif task.block_type == "LL"
      loss = params.l_loss_value;
+elseif task.block_type == "LL"
+     loss = params.l_loss_value*params.Rsensitivity;
 end
 
 %Initialization of q table (column: start, advised left, advised right; row: take advice, left, right)
