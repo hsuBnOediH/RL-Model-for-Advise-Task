@@ -112,10 +112,11 @@ function L = log_likelihood_func(P, M, U, Y)
         party_size = trial.party_size;
 
         if party_size == 40
-            loss = 4;
-        elseif party_size == 80
             loss = params.large_loss_sensitive;
+        elseif party_size == 80
+            loss = params.large_loss_sensitive * params.r_sensitivity;
         end
+
 
         % if the trial could be divided by the number of trials in one block, reinitialize the Q table
         % need another sensitivity for the largt party size
