@@ -1,7 +1,7 @@
 function [results] = ModelFreeRLModeldisconnect_TT(task, MDP, params, sim)
 
 %%%Specify forget or non-forget model
-FORGET = false;
+%FORGET = false;
 
 % observations.hints = 0 is no hint, 1 is left hint, 2 is right hint
 % observations.rewards(trial) 1 is win, 2 is loss

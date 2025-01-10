@@ -4,7 +4,7 @@ dbstop if error
 rng('default');
 cd(fileparts(mfilename('fullpath')));
 
-SIM = true; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
+SIM = false; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
 FIT = true; % Fit example subject data 'BBBBB' or fit simulated behavior (if SIM == true)
 plot = true;
 %indicate if prolific or local
@@ -57,13 +57,13 @@ model = 1;
 
 %%% Specify 
 IFLAMGDA = false;
-ONEMODEL = true;
+ONEMODEL = false;
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
 
 
-%for paramcombi = 1:5
+for paramcombi = 1:5
 
 
 if SIM
@@ -78,46 +78,17 @@ if SIM
     filesim = [INPUT_DIRECTORYforSIM '/' directorysim(index_array).name];
     subdatsim = readtable(filesim);
 
-paramsim.state_exploration = subdatsim.posterior_state_exploration;
-paramsim.parameter_exploration = 0;
-
-paramsim.p_a = subdatsim.posterior_p_a;
-paramsim.inv_temp = subdatsim.posterior_inv_temp;
-%paramsim.reward_value = subdatsim.posterior_reward_value;
-paramsim.reward_value = 1;  % 4 in the original model
-%paramsim.l_loss_value = subdatsim.posterior_l_loss_value;
-paramsim.l_loss_value = 1;  % 4 in the original model
-
-paramsim.omega = subdatsim.posterior_omega;
-%paramsim.omega_d = subdatsim.posterior_omega_d;
-%paramsim.omega_d_win = subdatsim.posterior_omega_d_win;
-%paramsim.omega_d_loss = subdatsim.posterior_omega_d_loss;
-%paramsim.omega_a = subdatsim.posterior_omega_a;
-%paramsim.omega_a_win = subdatsim.posterior_omega_a_win;
-%paramsim.omega_a_loss = subdatsim.posterior_omega_a_loss;
-%paramsim.eta = subdatsim.posterior_eta;
-%paramsim.eta_d = subdatsim.posterior_eta_d;
-paramsim.eta_d_win = subdatsim.posterior_eta_d_win;
-paramsim.eta_d_loss = subdatsim.posterior_eta_d_loss;
-paramsim.eta_a = subdatsim.posterior_eta_a;
-%paramsim.eta_a_win = subdatsim.posterior_eta_a_win;
-%paramsim.eta_a_loss = subdatsim.posterior_eta_a_loss;
-%paramsim.lamgda = subdatsim.posterior_lamgda;
-%paramsim.lamgda = 1;
-paramsim.Rsensitivity = subdatsim.posterior_Rsensitivity;
-
-% %%%to play around
-% paramsim.state_exploration = 1;
+% paramsim.state_exploration = subdatsim.posterior_state_exploration;
 % paramsim.parameter_exploration = 0;
 % 
-% paramsim.p_a = .8;
-% paramsim.inv_temp = 1;
+% paramsim.p_a = subdatsim.posterior_p_a;
+% paramsim.inv_temp = subdatsim.posterior_inv_temp;
 % %paramsim.reward_value = subdatsim.posterior_reward_value;
 % paramsim.reward_value = 1;  % 4 in the original model
 % %paramsim.l_loss_value = subdatsim.posterior_l_loss_value;
 % paramsim.l_loss_value = 1;  % 4 in the original model
 % 
-% paramsim.omega = .2;
+% paramsim.omega = subdatsim.posterior_omega;
 % %paramsim.omega_d = subdatsim.posterior_omega_d;
 % %paramsim.omega_d_win = subdatsim.posterior_omega_d_win;
 % %paramsim.omega_d_loss = subdatsim.posterior_omega_d_loss;
@@ -126,14 +97,43 @@ paramsim.Rsensitivity = subdatsim.posterior_Rsensitivity;
 % %paramsim.omega_a_loss = subdatsim.posterior_omega_a_loss;
 % %paramsim.eta = subdatsim.posterior_eta;
 % %paramsim.eta_d = subdatsim.posterior_eta_d;
-% paramsim.eta_d_win = .5;
-% paramsim.eta_d_loss = .5;
-% paramsim.eta_a = .5;
+% paramsim.eta_d_win = subdatsim.posterior_eta_d_win;
+% paramsim.eta_d_loss = subdatsim.posterior_eta_d_loss;
+% paramsim.eta_a = subdatsim.posterior_eta_a;
 % %paramsim.eta_a_win = subdatsim.posterior_eta_a_win;
 % %paramsim.eta_a_loss = subdatsim.posterior_eta_a_loss;
 % %paramsim.lamgda = subdatsim.posterior_lamgda;
 % %paramsim.lamgda = 1;
-% paramsim.Rsensitivity = 100;
+% paramsim.Rsensitivity = subdatsim.posterior_Rsensitivity;
+
+%%%to play around
+paramsim.state_exploration = 1;
+paramsim.parameter_exploration = 0;
+
+paramsim.p_a = .8;
+paramsim.inv_temp = 1;
+%paramsim.reward_value = subdatsim.posterior_reward_value;
+paramsim.reward_value = 1;  % 4 in the original model
+%paramsim.l_loss_value = subdatsim.posterior_l_loss_value;
+paramsim.l_loss_value = 1;  % 4 in the original model
+
+paramsim.omega = .2;
+%paramsim.omega_d = subdatsim.posterior_omega_d;
+%paramsim.omega_d_win = subdatsim.posterior_omega_d_win;
+%paramsim.omega_d_loss = subdatsim.posterior_omega_d_loss;
+%paramsim.omega_a = subdatsim.posterior_omega_a;
+%paramsim.omega_a_win = subdatsim.posterior_omega_a_win;
+%paramsim.omega_a_loss = subdatsim.posterior_omega_a_loss;
+%paramsim.eta = subdatsim.posterior_eta;
+%paramsim.eta_d = subdatsim.posterior_eta_d;
+paramsim.eta_d_win = .5;
+paramsim.eta_d_loss = .5;
+paramsim.eta_a = .5;
+%paramsim.eta_a_win = subdatsim.posterior_eta_a_win;
+%paramsim.eta_a_loss = subdatsim.posterior_eta_a_loss;
+%paramsim.lamgda = subdatsim.posterior_lamgda;
+%paramsim.lamgda = 1;
+paramsim.Rsensitivity = 0;
 
     [gen_data] = advise_simTT(paramsim, plot, model);
 
@@ -179,7 +179,7 @@ if paramcombi == 1
    params.eta = .5;
 
  if model == 1
-    field = {'p_a','inv_temp','reward_value','l_loss_value','omega','eta','state_exploration', 'Rsensitivity'}; %those are fitted
+    field = {'p_a','inv_temp','omega','eta','state_exploration', 'Rsensitivity'}; %those are fitted
  elseif model ~= 1
      if IFLAMGDA
         params.lamgda = .5;
@@ -197,7 +197,7 @@ elseif paramcombi == 2
     params.eta_a = .5;
 
  if model == 1
-    field = {'p_a','inv_temp','reward_value','l_loss_value','omega','eta_d','eta_a', 'state_exploration', 'Rsensitivity'}; %those are fitted
+    field = {'p_a','inv_temp','omega','eta_d','eta_a', 'state_exploration','Rsensitivity'}; %those are fitted
  elseif model ~= 1
      if IFLAMGDA
         params.lamgda = .5;
@@ -216,7 +216,7 @@ elseif paramcombi == 3
     params.eta_a = .5;
 
  if model == 1
-    field = {'p_a','inv_temp','reward_value','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a', 'state_exploration', 'Rsensitivity'}; %those are fitted
+    field = {'p_a','inv_temp','omega','eta_d_win','eta_d_loss','eta_a','state_exploration','Rsensitivity'}; %those are fitted
  elseif model ~= 1
      if IFLAMGDA
         params.lamgda = .5;
@@ -235,7 +235,7 @@ elseif paramcombi == 4
     params.eta_a_loss = .5;
 
  if model == 1
-    field = {'p_a','inv_temp','reward_value','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss', 'state_exploration', 'Rsensitivity'}; %those are fitted
+    field = {'p_a','inv_temp','omega','eta_d','eta_a_win','eta_a_loss','state_exploration','Rsensitivity'}; %those are fitted
  elseif model ~= 1
      if IFLAMGDA
         params.lamgda = .5;
@@ -255,7 +255,7 @@ elseif paramcombi == 4
     params.eta = .5;
 
  if model == 1
-    field = {'p_a','inv_temp','reward_value','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta', 'state_exploration', 'Rsensitivity'}; %those are fitted
+    field = {'p_a','inv_temp','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','state_exploration','Rsensitivity'}; %those are fitted
  elseif model == 2
      if IFLAMGDA
         params.lamgda = .5;
@@ -335,7 +335,7 @@ save(fullfile([results_dir '/fit_results_' FIT_SUBJECT '_' currentDateTimeString
 end
 
 end
-%end
+end
 
 
 
