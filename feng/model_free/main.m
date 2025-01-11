@@ -192,7 +192,7 @@ zero_one_fields = {'left_better','advise_truthness','learning_rate','with_advise
     'with_advise_win_forgetting_rate','with_advise_loss_forgetting_rate','without_advise_win_forgetting_rate','without_advise_loss_forgetting_rate','discount_factor'};
 % all the parameters need to be transformed into positive values, logit transformation
 % todo: the range of discount factor is [0,1] or [0,inf]?
-positive_fields = {'inv_temp','outcome_sensitivity',...
+positive_fields = {'inv_temp','outcome_sensitivity','r_sensitivity',...
     };
 
 % for 10 candidates, we have 10 different fields settings, _fields is for free parameters, fix_fields is for fixed parameters
