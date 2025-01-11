@@ -164,6 +164,7 @@ function L = log_likelihood_func(P, M, U, Y)
         % compute the action probability for each action at time step 1
         % read out the q values for each action at time step 1, time the inv_temp
         q_start_row = q_model.q_table(1,:) * params.inv_temp;
+        q_start_row = reshape(q_start_row, [], 1);
         % softmax the Q table
         action_prob_t1 = spm_softmax(q_start_row);
         action_probs(i,1,:) = action_prob_t1;
@@ -285,6 +286,7 @@ function L = log_likelihood_func(P, M, U, Y)
             after_advise_state = actual_states(2);
             % read out the q values for each action at time step 2, time the inv_temp
             q_after_advise_row = q_model.q_table(after_advise_state,1:2)* params.inv_temp;
+            q_after_advise_row = reshape(q_after_advise_row, [], 1);
             % softmax the Q table and store the action probability
             action_prob_t2 = spm_softmax(q_after_advise_row);
             action_probs(i,2,1:2) = action_prob_t2;
