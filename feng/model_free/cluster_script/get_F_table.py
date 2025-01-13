@@ -126,7 +126,7 @@ a_inf_subfolders.sort()
 if active_inference_idx == 0:
     a_inf_path = None
 else:
-    a_inf_path = os.listdir(a_inf_parent_path)[-active_inference_idx] + '/temp_res'
+    a_inf_path = a_inf_parent_path + a_inf_subfolders[-active_inference_idx] + '/temp_res'
 
 
 if a_inf_path is not None:
