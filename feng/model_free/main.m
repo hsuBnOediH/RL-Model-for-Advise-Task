@@ -46,7 +46,7 @@ end
 
 % SETTINGS
 % Subject identifier for the test or experiment, if on cluster read from ENV var
-FIT_SUBJECT = 'FENGTEST';
+FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88';
 if ON_CLUSTER
     FIT_SUBJECT = getenv('FIT_SUBJECT');
 end
@@ -80,7 +80,7 @@ end
 % IDX_CANDIDATE:
 % This will define which candidate (set of parameters) is currently in use
 % Modify this value to switch between different candidates (1 to 10 in this case)
-IDX_CANDIDATE = 1; % Default to candidate 1, can be changed dynamically
+IDX_CANDIDATE = 10; % Default to candidate 1, can be changed dynamically
 if ON_CLUSTER
     env_value = getenv('IDX_CANDIDATE');
     IDX_CANDIDATE = str2double(env_value);
@@ -88,7 +88,7 @@ end
 
 % IS_CONNECTED:
 % This will define if the left option change will connectely change the right option 
-IS_CONNECTED = true;
+IS_CONNECTED = false;
 if ON_CLUSTER
     IS_CONNECTED = getenv('IS_CONNECTED');
     IS_CONNECTED = strcmp(IS_CONNECTED, 'True');
@@ -166,7 +166,7 @@ all_params = struct(...
     'advise_truthness', 0.8, ...
     'inv_temp', 1, ...
     'outcome_sensitivity',1, ...
-    'large_loss_sensitive', 8, ...
+    'large_loss_sensitive', 4, ...
     'forgetting_rate', 0.2, ...
     'learning_rate', 0.5, ...
     'with_advise_learning_rate', 0.5, ...
@@ -182,7 +182,7 @@ all_params = struct(...
     'without_advise_win_forgetting_rate', 0.2, ...
     'without_advise_loss_forgetting_rate', 0.2, ...
     'discount_factor', 1, ...
-    'reaction_time_threshold', 60,...
+    'reaction_time_threshold', 7200,...
     'r_sensitivity', 2 ...
     );
 
@@ -192,7 +192,7 @@ zero_one_fields = {'left_better','advise_truthness','learning_rate','with_advise
     'with_advise_win_forgetting_rate','with_advise_loss_forgetting_rate','without_advise_win_forgetting_rate','without_advise_loss_forgetting_rate','discount_factor'};
 % all the parameters need to be transformed into positive values, logit transformation
 % todo: the range of discount factor is [0,1] or [0,inf]?
-positive_fields = {'inv_temp','outcome_sensitivity','r_sensitivity',...
+positive_fields = {'inv_temp','outcome_sensitivity','r_sensitivity','large_loss_sensitive',...
     };
 
 % for 10 candidates, we have 10 different fields settings, _fields is for free parameters, fix_fields is for fixed parameters
@@ -248,7 +248,7 @@ if FIT && ~SIM
 
 
     % inite the model
-    q_model = init_q_learning_model(params,all_params);
+    q_model = init_q_learning_model(params,zero_one_fields,positive_fields);
 
     % overwrite the log likelihood function function
     M.L = @(P,M,U,Y)log_likelihood_func(P, M, U, Y);
@@ -258,6 +258,8 @@ if FIT && ~SIM
     M.fixed_params = fixed_params;
     M.q_table = q_model.q_table;
     M.is_connected = IS_CONNECTED;
+    M.zero_one_fields = zero_one_fields;
+    M.positive_fields = positive_fields;
     % Y wont be used in the log likelihood function, so just assign it as the same as U
     U = preprocessed_data;
     Y = preprocessed_data;
