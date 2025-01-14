@@ -37,9 +37,9 @@ end
 addpath(spmPath);
 
 % input_file = 'L:/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/output.csv';
-input_file = 'F_table.csv';
+input_file = 'dis_vs_act_F_table.csv';
 % output_file = 'L:/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/';
-output_folder_path = 'final_output.csv';
+output_folder_path = '';
 % addpath('L:/rsmith/all-studies/util/spm12/');
 
 allData = readtable(input_file);
@@ -57,5 +57,9 @@ results_table.xp = xp';
 results_table.pxp = pxp';
 results_table.bor = repmat(bor,size(lme,2),1);
 
+% get the input path, remove the csv extension add results to the name
+[~,input_file_name,~] = fileparts(input_file);
+output_file_name = strcat(input_file_name, '_results.csv');
 
-writetable(results_table, fullfile(output_folder_path, 'model_identifiability_results_advicetask.csv'));
+
+writetable(results_table, fullfile(output_folder_path, output_file_name));
