@@ -2,7 +2,7 @@ function L = log_likelihood_func(P, M, U, Y)
     % P is free parameters
     % M is model
     q_model = M;
-    fields = fieldnames(q_model.pE);
+    fields = fieldnames(P);
     fixed_fields = fieldnames(q_model.fixed_params);
     preprocessed_data = U;
     % U is input, states,response, action and rewards
@@ -10,33 +10,32 @@ function L = log_likelihood_func(P, M, U, Y)
 
     is_connected = q_model.is_connected;
 
+    % define the fields that need to be transformed
+    zero_one_fields = M.zero_one_fields;
+    positive_fields = M.positive_fields;
+   
     % copy the params to preprocessed_params
     preprocessed_params = struct();
     for i = 1:length(fields)
-        preprocessed_params.(fields{i}) = P.(fields{i});
+
+        field = fields{i};
+        if ismember(field, zero_one_fields)
+            preprocessed_params.(field) = 1/(1+exp(-P.(field)));
+        elseif ismember(field, positive_fields)
+            preprocessed_params.(field) = exp(P.(field));
+        end
+
+
     end
     % add the fixed parameters to the params and append the free parameters
     for i = 1:length(fixed_fields)
         preprocessed_params.(fixed_fields{i}) = q_model.fixed_params.(fixed_fields{i});
     end
 
-    % define the fields that need to be transformed
-    zero_one_fields = {'left_better','advise_truthness','learning_rate','with_advise_learning_rate','without_advise_learning_rate','with_advise_win_learning_rate','with_advise_loss_learning_rate',...
-        'without_advise_win_learning_rate','without_advise_loss_learning_rate','forgetting_rate','with_advise_forgetting_rate','without_advise_forgetting_rate',...
-        'with_advise_win_forgetting_rate','with_advise_loss_forgetting_rate','without_advise_win_forgetting_rate','without_advise_loss_forgetting_rate','discount_factor'};
-    positive_fields = {'inv_temp','outcome_sensitivity','r_sensitivity',...
-        };
-
+ 
     % check the fields and transform them
     fields = fieldnames(preprocessed_params);
-    for i = 1:length(fields)
-        field = fields{i};
-        if ismember(field, zero_one_fields)
-            preprocessed_params.(field) = 1/(1+exp(-preprocessed_params.(field)));
-        elseif ismember(field, positive_fields)
-            preprocessed_params.(field) = log(1+exp(preprocessed_params.(field)));
-        end
-    end
+  
 
     % process the params, replace some fields for generality
     params = struct();
@@ -124,30 +123,31 @@ function L = log_likelihood_func(P, M, U, Y)
         % need another sensitivity for the largt party size
         if mod(i, 30) == 1
             q_model.q_table = zeros(3,3);
-            q_model.q_table(1, 1) = 40 * left_better + (-10 * loss)* (1-left_better);
-            q_model.q_table(1, 2) = 40 * (1-left_better) + (-10 * loss) * left_better;
+            q_model.q_table(1, 1) = 4 * left_better -(loss* (1-left_better)) ;
+            q_model.q_table(1, 2) = 4 * (1-left_better) - loss * left_better;
             % truthness * value win + (1-truthness) * value lose
-            q_model.q_table(1, 3) = 20 * advise_truthness + (-10 * loss) * (1-advise_truthness);
-            q_model.q_table(2, 1) = 20 * advise_truthness + (-10 * loss) * (1-advise_truthness);
-            q_model.q_table(2, 2) = 20 * (1-advise_truthness) + (-10 * loss) * advise_truthness;
-            q_model.q_table(2, 3) = NaN;
-            q_model.q_table(3, 1) = 20 * (1-advise_truthness) + (-10 * loss) * advise_truthness;
-            q_model.q_table(3, 2) = 20 * advise_truthness + (-10 * loss) * (1-advise_truthness);
-            q_model.q_table(3, 3) = NaN;
-        end
-        
-        % scale the Q table by the 0.1 times the outcome sensitivity
-        outcome_sensitive_table = ones(3,3) * params.outcome_sensitivity;
-        q_model.q_table = q_model.q_table .* outcome_sensitive_table;
-        q_model.q_table = q_model.q_table * 0.1;
+            q_model.q_table(1, 3) = 2 * advise_truthness - loss * (1-advise_truthness);
+            q_model.q_table(2, 1) = 2 * advise_truthness -loss * (1-advise_truthness);
+            q_model.q_table(2, 2) = 2 * (1-advise_truthness) -loss * advise_truthness;
 
-        start_left_init_q = q_model.q_table(1,1);
-        start_right_init_q = q_model.q_table(1,2);
-        start_advise_init_q = q_model.q_table(1,3);
-        advise_left_left_init_q = q_model.q_table(2,1);
-        advise_left_right_init_q = q_model.q_table(2,2);
-        advise_right_left_init_q = q_model.q_table(3,1);
-        advise_right_right_init_q = q_model.q_table(3,2);
+            q_model.q_table(3, 1) = 2 * (1-advise_truthness) -loss * advise_truthness;
+            q_model.q_table(3, 2) = 2 * advise_truthness -loss * (1-advise_truthness);
+
+            outcome_sensitive_table = ones(3,3) * params.outcome_sensitivity;
+            q_model.q_table = q_model.q_table .* outcome_sensitive_table;
+
+            start_left_init_q = q_model.q_table(1,1);
+            start_right_init_q = q_model.q_table(1,2);
+            start_advise_init_q = q_model.q_table(1,3);
+            advise_left_left_init_q = q_model.q_table(2,1);
+            advise_left_right_init_q = q_model.q_table(2,2);
+            advise_right_left_init_q = q_model.q_table(3,1);
+            advise_right_right_init_q = q_model.q_table(3,2);
+        end
+ 
+        
+
+
 
         % element-wise multiplication the outcome sensitivity to the Q table    
         actual_states = trial.states;
@@ -157,7 +157,7 @@ function L = log_likelihood_func(P, M, U, Y)
         if actual_reward > 0
             actual_reward = actual_reward * 0.1;
         else
-            actual_reward = loss;
+            actual_reward = -loss;
         end
         
 
@@ -199,10 +199,12 @@ function L = log_likelihood_func(P, M, U, Y)
             reward_term = 0;
             if actual_reward > 0
                 reward_term = params.outcome_sensitivity * actual_reward;
+                opposite_reward = params.outcome_sensitivity * (-loss);
                 lr = params.without_advise_win_learning_rate;
                 fr = params.without_advise_win_forgetting_rate;
             else
-                reward_term = params.outcome_sensitivity * actual_reward;
+                reward_term = params.outcome_sensitivity * (-loss);
+                opposite_reward = params.outcome_sensitivity * 4;
                 lr = params.without_advise_loss_learning_rate;
                 fr = params.without_advise_loss_forgetting_rate;
             end
@@ -215,7 +217,7 @@ function L = log_likelihood_func(P, M, U, Y)
             %       forget update: (start,right), (advise_left,left), (advise_left,right), (advise_right,left), (advise_right,right), (start,advise)
             if is_connected
                 % learn update
-                opposite_reward = -reward_term;
+
                 q_model.q_table(1,1) = q_model.q_table(1,1) + lr*(reward_term  - q_model.q_table(1,1));
                 q_model.q_table(1,2) = q_model.q_table(1,2) + lr*(opposite_reward  - q_model.q_table(1,2));
                 % forget update
@@ -242,10 +244,12 @@ function L = log_likelihood_func(P, M, U, Y)
             reward_term = 0;
             if actual_reward > 0
                 reward_term = params.outcome_sensitivity * actual_reward;
+                opposite_reward = params.outcome_sensitivity * (-loss);
                 lr = params.without_advise_win_learning_rate;
                 fr = params.without_advise_win_forgetting_rate;
             else
                 reward_term = params.outcome_sensitivity * actual_reward;
+                opposite_reward = params.outcome_sensitivity * 4;
                 lr = params.without_advise_loss_learning_rate;
                 fr = params.without_advise_loss_forgetting_rate;
             end
@@ -259,7 +263,7 @@ function L = log_likelihood_func(P, M, U, Y)
 
             if is_connected
                 % learn update
-                opposite_reward = - reward_term;
+                
                 q_model.q_table(1,2) = q_model.q_table(1,2) + lr*(reward_term  - q_model.q_table(1,2));
                 q_model.q_table(1,1) = q_model.q_table(1,1) + lr*(opposite_reward  - q_model.q_table(1,1));
                 % forget update
@@ -277,6 +281,7 @@ function L = log_likelihood_func(P, M, U, Y)
                 q_model.q_table(2,1) = q_model.q_table(2,1) + fr * (advise_left_left_init_q - q_model.q_table(2,1));
                 q_model.q_table(2,2) = q_model.q_table(2,2) + fr * (advise_left_right_init_q - q_model.q_table(2,2));
                 q_model.q_table(3,1) = q_model.q_table(3,1) + fr * (advise_right_left_init_q - q_model.q_table(3,1));
+                q_model.q_table(3,2) = q_model.q_table(3,2) + fr * (advise_right_right_init_q - q_model.q_table(3,2));
             end   
         end
 
@@ -292,29 +297,17 @@ function L = log_likelihood_func(P, M, U, Y)
             action_probs(i,2,1:2) = action_prob_t2;
 
             if actual_reward > 0
-                if party_size == 40
-                    reward_term = actual_reward  * params.outcome_sensitivity;
-                    opposite_reward = actual_reward * -2 * params.outcome_sensitivity;
-                    without_advise_actual_reward = actual_reward * 2 * params.outcome_sensitivity;
-                    without_advise_opposite_reward = actual_reward * -2 * params.outcome_sensitivity;
-                else
-                    reward_term = actual_reward  * params.outcome_sensitivity;
-                    opposite_reward = actual_reward * -4 * params.outcome_sensitivity;
-                    without_advise_actual_reward = actual_reward * 2 * params.outcome_sensitivity;
-                    without_advise_opposite_reward = actual_reward * -4 * params.outcome_sensitivity;
-                end
+                    reward_term = 2  * params.outcome_sensitivity;
+                    opposite_reward = (-loss) * params.outcome_sensitivity;
+                    without_advise_actual_reward = 4 * params.outcome_sensitivity;
+                    without_advise_opposite_reward = (-loss) * params.outcome_sensitivity;
+                
             else
-                if party_size == 40
-                    reward_term = actual_reward  * params.outcome_sensitivity;
-                    opposite_reward = actual_reward * (-0.5) * params.outcome_sensitivity;
-                    without_advise_actual_reward = actual_reward * params.outcome_sensitivity;
-                    without_advise_opposite_reward = actual_reward * (-1) * params.outcome_sensitivity;
-                else
-                    reward_term = actual_reward  * params.outcome_sensitivity;
-                    opposite_reward = actual_reward * (-0.25) * params.outcome_sensitivity;
-                    without_advise_actual_reward = actual_reward  * params.outcome_sensitivity;
-                    without_advise_opposite_reward = actual_reward * (-0.5) * params.outcome_sensitivity;
-                end
+                    reward_term = (-loss) * params.outcome_sensitivity;
+                    opposite_reward = 2 * params.outcome_sensitivity;
+                    without_advise_actual_reward = (-loss) * params.outcome_sensitivity;
+                    without_advise_opposite_reward = 4 * params.outcome_sensitivity;
+                
             end
 
 
