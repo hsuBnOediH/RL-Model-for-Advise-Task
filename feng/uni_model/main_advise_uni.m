@@ -6,7 +6,6 @@ dbstop if error
 rng('default');
 clear all;
 clear variables;
-cd(fileparts(mfilename('fullpath')));
 
 
 SIM = false; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
@@ -121,6 +120,7 @@ elseif strcmp(env_sys, 'cluster')
     spmDemPath = '/mnt/dell_storage/labs/rsmith/all-studies/util/spm12/toolbox/DEM';
     tutorialPath = '/mnt/dell_storage/labs/rsmith/lab-members/cgoldman/Active-Inference-Tutorial-Scripts-main';
     addpath('/media/labs/rsmith/lab-members/fli/advise_task/RL-Model-for-Advise-Task/feng/model_free/')
+    INPUT_DIRECTORY = [ROOT '/' INPUT_PATH];
 end
 
 addpath(spmPath);
