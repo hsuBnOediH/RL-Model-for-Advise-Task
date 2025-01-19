@@ -30,10 +30,16 @@ addpath(spmPath);
 
 F_TABLE_PATH_1 = getenv('F_TABLE_PATH_1');
 F_TABLE_PATH_2 = getenv('F_TABLE_PATH_2');
+MODLE_NAME_1 = getenv('MODLE_NAME_1');
+MODLE_NAME_2 = getenv('MODLE_NAME_2');
+AUTHOR_NAME_1 = getenv('AUTHOR_NAME_1');
+AUTHOR_NAME_2 = getenv('AUTHOR_NAME_2');
 OUTPUT_PATH = getenv('OUTPUT_PATH');
 output_folder_path = OUTPUT_PATH;
-
-
+disp([]);
+disp(['F_TABLE_PATH_1: ', F_TABLE_PATH_1]);
+disp(['F_TABLE_PATH_2: ', F_TABLE_PATH_2]);
+disp(['OUTPUT_PATH: ', OUTPUT_PATH]);
 
 if isempty(F_TABLE_PATH_1)
     disp('F_TABLE_PATH_1 not set');
@@ -45,15 +51,6 @@ if isempty(F_TABLE_PATH_2)
     return
 end
 
-% read both csv files name
-file_name_1 = F_TABLE_PATH_1.split('/').end();
-file_name_2 = F_TABLE_PATH_2.split('/').end();
-
-model_name_1 = file_name_1.split('-').get(0);
-model_name_2 = file_name_2.split('-').get(0);
-
-author_name_1 = file_name_1.split('-').get(1).split('_').get(0);
-author_name_2 = file_name_2.split('-').get(1).split('_').get(0);
 
 % read both csv files
 allData_1 = readtable(F_TABLE_PATH_1);
@@ -74,10 +71,11 @@ results_table.exp_r = exp_r';
 results_table.xp = xp';
 results_table.pxp = pxp';
 results_table.bor = repmat(bor,size(lme,2),1);
+disp(results_table);
 
 % get the input path, remove the csv extension add results to the name
-
-output_file_name = strcat(model_name_1, '_', author_name_1, '_vs_', model_name_2, '_', author_name_2, '_bms.csv');
-
+disp(["output_folder_path: ", output_folder_path]);
+output_file_name = strcat('bms_results-', MODLE_NAME_1, '_', AUTHOR_NAME_1, '-', MODLE_NAME_2, '_', AUTHOR_NAME_2, '.csv');
+disp(['output_file_name: ', output_file_name]);
 
 writetable(results_table, fullfile(output_folder_path, output_file_name));
