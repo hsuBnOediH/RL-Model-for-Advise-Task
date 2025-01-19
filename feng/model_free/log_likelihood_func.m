@@ -201,12 +201,12 @@ function L = log_likelihood_func(P, M, U, Y)
                 reward_term = params.outcome_sensitivity * actual_reward;
                 opposite_reward = params.outcome_sensitivity * (-loss);
                 lr = params.without_advise_win_learning_rate;
-                fr = params.without_advise_win_forgetting_rate;
+                fr = params.with_advise_win_forgetting_rate;
             else
                 reward_term = params.outcome_sensitivity * (-loss);
                 opposite_reward = params.outcome_sensitivity * 4;
                 lr = params.without_advise_loss_learning_rate;
-                fr = params.without_advise_loss_forgetting_rate;
+                fr = params.with_advise_loss_forgetting_rate;
             end
             % for case of (start,left)
             %   connect version:
@@ -246,7 +246,7 @@ function L = log_likelihood_func(P, M, U, Y)
                 reward_term = params.outcome_sensitivity * actual_reward;
                 opposite_reward = params.outcome_sensitivity * (-loss);
                 lr = params.without_advise_win_learning_rate;
-                fr = params.without_advise_win_forgetting_rate;
+                fr = params.with_advise_win_forgetting_rate;
             else
                 reward_term = params.outcome_sensitivity * actual_reward;
                 opposite_reward = params.outcome_sensitivity * 4;
@@ -337,7 +337,7 @@ function L = log_likelihood_func(P, M, U, Y)
                     
                     if is_connected
                         % learn update
-                        q_model.q_table(2,1) = q_model.q_table(after_advise_state,1) + lr*(reward_term  - q_model.q_table(after_advise_state,1));
+                        q_model.q_table(2,1) = q_model.q_table(2,1) + lr*(reward_term  - q_model.q_table(2,1));
                         q_model.q_table(3,2) = q_model.q_table(3,2) + lr*(reward_term  - q_model.q_table(3,2));
 
                         q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(opposite_reward  - q_model.q_table(2,2));
@@ -347,7 +347,7 @@ function L = log_likelihood_func(P, M, U, Y)
                         q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(without_advise_opposite_reward  - q_model.q_table(1,2));
                         % forget update None
                     else
-                        q_model.q_table(2,1) = q_model.q_table(after_advise_state,1) + lr*(reward_term  - q_model.q_table(after_advise_state,1));
+                        q_model.q_table(2,1) = q_model.q_table(2,1) + lr*(reward_term  - q_model.q_table(2,1));
                         q_model.q_table(3,2) = q_model.q_table(3,2) + lr*(reward_term  - q_model.q_table(3,2));
 
                         q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(without_advise_actual_reward  - q_model.q_table(1,1));
@@ -380,7 +380,7 @@ function L = log_likelihood_func(P, M, U, Y)
 
                     if is_connected
                         % learn update
-                        q_model.q_table(2,2) = q_model.q_table(after_advise_state,2) + lr*(reward_term  - q_model.q_table(after_advise_state,2));
+                        q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(reward_term  - q_model.q_table(2,2));
                         q_model.q_table(3,1) = q_model.q_table(3,1) + lr*(reward_term  - q_model.q_table(3,1));
 
                         q_model.q_table(2,1) = q_model.q_table(2,1) + lr*(opposite_reward  - q_model.q_table(2,1));
@@ -390,7 +390,7 @@ function L = log_likelihood_func(P, M, U, Y)
                         q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(without_advise_opposite_reward  - q_model.q_table(1,1));
                         % forget update None
                     else
-                        q_model.q_table(2,2) = q_model.q_table(after_advise_state,2) + lr*(reward_term  - q_model.q_table(after_advise_state,2));
+                        q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(reward_term  - q_model.q_table(2,2));
                         q_model.q_table(3,1) = q_model.q_table(3,1) + lr*(reward_term  - q_model.q_table(3,1));
 
                         q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(without_advise_actual_reward  - q_model.q_table(1,2));
@@ -428,7 +428,7 @@ function L = log_likelihood_func(P, M, U, Y)
                     %      forget update: (advise_right,right), (advise_left,left), (start,right)
 
                     if is_connected
-                        q_model.q_table(3,1) = q_model.q_table(after_advise_state,1) + lr*(reward_term  - q_model.q_table(after_advise_state,1));
+                        q_model.q_table(3,1) = q_model.q_table(3,1) + lr*(reward_term  - q_model.q_table(3,1));
                         q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(reward_term  - q_model.q_table(2,2));
 
                         q_model.q_table(3,2) = q_model.q_table(3,2) + lr*(opposite_reward  - q_model.q_table(3,2));
@@ -438,7 +438,7 @@ function L = log_likelihood_func(P, M, U, Y)
                         q_model.q_table(1,2) = q_model.q_table(1,2) + params.discount_factor * wo_advise_lr*(without_advise_opposite_reward  - q_model.q_table(1,2));
                         % forget update None
                     else
-                        q_model.q_table(3,1) = q_model.q_table(after_advise_state,1) + lr*(reward_term  - q_model.q_table(after_advise_state,1));
+                        q_model.q_table(3,1) = q_model.q_table(3,1) + lr*(reward_term  - q_model.q_table(3,1));
                         q_model.q_table(2,2) = q_model.q_table(2,2) + lr*(reward_term  - q_model.q_table(2,2));
 
                         q_model.q_table(1,1) = q_model.q_table(1,1) + params.discount_factor * wo_advise_lr*(without_advise_actual_reward  - q_model.q_table(1,1));
