@@ -1,4 +1,4 @@
-function [results] = rl_model_connect_uni(task, MDP, params, sim)
+function [results] = rl_model_disconnect_uni(task, MDP, params, sim)
     % observations.hints = 0 is no hint, 1 is left hint, 2 is right hint
     % observations.rewards(trial) 1 is win, 2 is loss
     % choices : 1 is advisor, 2 is left, 3 is right
@@ -11,7 +11,7 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
     if sim == 0
         for trial=1:task.num_trials
             trial_info = MDP(trial);
-            observations.hints(trial) = trial_info.o(1,2)-1; % 0 if no hint
+            observations.hints(trial) = trial_info.o(1,2)-1;
             % if selected advisor
             if observations.hints(trial) 
                 observations.rewards(trial) = 4 - trial_info.o(2,3); % ryan made win 1, loss 2
@@ -28,6 +28,7 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
     params.p_right = .5;
     single_omega = 0;
     single_eta = 0;
+    %field = task.field;
     field = fieldnames(params);
     for i = 1:length(field)
         if strcmp(field{i},'omega')
@@ -71,14 +72,20 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
     actions = zeros(task.num_trials,2);
 
     for trial = 1:task.num_trials
+        hint_outcome_vector(:,trial) = [0 0]';
+        true_context(:,:,trial) = zeros(2,1);
         true_A{1}(:,:,trial) = zeros(2,2);
         A{2}(:,:,trial) = zeros(2,2);
+        p_o_win(:,:,trial) = zeros(2,3);
+        if sim == 1
+            true_context_vector(trial) = find(rand < cumsum([1-task.true_p_right(trial) task.true_p_right(trial)]'),1)-1;
+        end
     end
 
     %left better
     A{2}(:,:,1) = [p_win   1-p_win; % win
-                1-p_win p_win];  % lose
-            
+                    1-p_win p_win];  % lose
+
     %right better
     A{2}(:,:,2) = [1-p_win p_win;   % win
                 p_win   1-p_win];% lose
@@ -99,9 +106,9 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
     qvalue(:, :, 1) = [(2*params.p_a-loss*(1-params.p_a))*params.reward_value, 0, 0;
                     (4*(1-params.p_right)-params.p_right*loss)*params.reward_value, (2*params.p_a-loss*(1-params.p_a))*params.reward_value, (2*(1-params.p_a)-loss*params.p_a)*params.reward_value;
                     (4*params.p_right-(1-params.p_right)*loss)*params.reward_value, (2*(1-params.p_a)-loss*params.p_a)*params.reward_value, (2*params.p_a-loss*(1-params.p_a))*params.reward_value];
+
     for t = 1:task.num_trials
         action_probs(:, 1, t) = spm_softmax(params.inv_temp*qvalue(:,1,t))';
-    
         if sim == 1
             true_context(:,:,t) = [1-true_context_vector(t) true_context_vector(t)]';
             true_A{1}(:,:,t) =  [task.true_p_a(t)   1-task.true_p_a(t); % "try left"
@@ -109,12 +116,11 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
             true_p_o_hint(:,t) = true_A{1}(:,:,1)*true_context(:,:,t);
             true_p_o_win(:,2,t) = A{2}(:,:,1)*true_context(:,:,t);
             true_p_o_win(:,3,t) = A{2}(:,:,2)*true_context(:,:,t);
-
             actions(t, 1) = find(rand < cumsum(action_probs(:, 1, t)'), 1);
         elseif sim == 0
             actions(t, 1) = choices(t, 1);
         end
-
+        
         selected = actions(t, 1); % 1 (ask advice) or 2 (left) or 3 (right)
         if selected ~= 1
             if sim == 1
@@ -137,10 +143,10 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
                 % Update for the selected choice
                 qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
                     params.eta_d_win * (actualreward(t) * params.reward_value - qvalue(selected, 1, t));
-                % Update for the opposite choice
-                opposite = 5 - selected; % Maps 2 to 3 and 3 to 2
+                % Forget the opposite choice
+                opposite = 5 - selected; % If selected is 2, opposite is 3; if selected is 3, opposite is 2
                 qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
-                    params.eta_d_win * (-loss * params.reward_value - qvalue(opposite, 1, t));
+                    params.omega_d_win * (qvalue(opposite, 1, 1) - qvalue(opposite, 1, t));
                 % Forget qvalue(1, 1)
                 qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
                     params.omega_a_win * (qvalue(1, 1, 1) - qvalue(1, 1, t));
@@ -155,10 +161,10 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
                 % Update for the selected choice
                 qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
                     params.eta_d_loss * (-loss * params.reward_value - qvalue(selected, 1, t));
-                % Update for the opposite choice
-                opposite = 5 - selected; % Maps 2 to 3 and 3 to 2
+                % Forget the opposite choice
+                opposite = 5 - selected; % If selected is 2, opposite is 3; if selected is 3, opposite is 2
                 qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
-                    params.eta_d_loss * (4 * params.reward_value - qvalue(opposite, 1, t));
+                    params.omega_d_loss * (qvalue(opposite, 1, 1) - qvalue(opposite, 1, t));
                 % Forget qvalue(1, 1)
                 qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
                     params.omega_a_loss * (qvalue(1, 1, 1) - qvalue(1, 1, t));
@@ -176,7 +182,7 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
             else 
                 hint_outcomes(t) = observations.hints(t);
             end
-            hint = hint_outcomes(t)+1; %2 advise left, 3 advise right
+            hint = hint_outcomes(t)+1;
             action_probs(:,2,t) = [0; spm_softmax(params.inv_temp*qvalue(2:3,hint,t))]';
             % select actions
             if sim == 1
@@ -187,7 +193,7 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
             if sim == 1
                 reward_outcomes(t) = find(rand < cumsum(true_p_o_win(:,actions(t,2),t)'),1);
                 if reward_outcomes(t) == 1
-                    actualreward(t) = 2;
+                        actualreward(t) = 2;
                 elseif reward_outcomes(t) == 2
                     if task.block_type == "SL"
                         actualreward(t) = -4;
@@ -199,15 +205,21 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
                 reward_outcomes(t) = observations.rewards(t);
             end    
             max_q_predict = max(max(qvalue(2:3,2:3,t)));
-
+            
             if actualreward(t) > 0
                 secchoice = actions(t, 2);
                 qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_win * (max_q_predict - qvalue(1, 1, t));
 
+                
+               
                 qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_win * (2*actualreward(t)*params.reward_value - qvalue(secchoice, 1, t));
                 qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_a_win * (actualreward(t)*params.reward_value - qvalue(secchoice, hint, t));
-                qvalue(5-secchoice, 1, t+1) = qvalue(5-secchoice, 1, t) + params.eta_d_win * (-loss*params.reward_value - qvalue(5-secchoice, 1, t));
-                qvalue(5-secchoice, hint, t+1) = qvalue(5-secchoice, hint, t) + params.eta_a_win * (-loss*params.reward_value - qvalue(5-secchoice, hint, t));
+                
+                % Forget the opposite choice
+                qvalue(5 - secchoice, 1, t+1) = qvalue(5 - secchoice, 1, t) + params.omega_d_win * (qvalue(5 - secchoice, 1, 1) - qvalue(5 - secchoice, 1, t));
+                qvalue(5 - secchoice, hint, t+1) = qvalue(5 - secchoice, hint, t) + params.omega_a_win * (qvalue(5 - secchoice, hint, 1) - qvalue(5 - secchoice, hint, t));
+                
+                %Same updates as the advised option
                 qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
                 qvalue(3, 5-hint, t+1) = qvalue(2, hint, t+1);
             elseif actualreward(t) < 0
@@ -216,8 +228,10 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
 
                 qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_loss * (-loss*params.reward_value - qvalue(secchoice, 1, t));
                 qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_a_loss * (-loss*params.reward_value - qvalue(secchoice, hint, t));
-                qvalue(5-secchoice, 1, t+1) = qvalue(5-secchoice, 1, t) + params.eta_d_loss * (4*params.reward_value - qvalue(5-secchoice, 1, t));
-                qvalue(5-secchoice, hint, t+1) = qvalue(5-secchoice, hint, t) + params.eta_a_loss * (2*params.reward_value - qvalue(5-secchoice, hint, t));
+                % Forget the opposite choice
+                qvalue(5 - secchoice, 1, t+1) = qvalue(5 - secchoice, 1, t) + params.omega_d_loss * (qvalue(5 - secchoice, 1, 1) - qvalue(5 - secchoice, 1, t));
+                qvalue(5 - secchoice, hint, t+1) = qvalue(5 - secchoice, hint, t) + params.omega_a_loss * (qvalue(5 - secchoice, hint, 1) - qvalue(5 - secchoice, hint, t));
+                %Same updates as the advised option
                 qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
                 qvalue(3, 5-hint, t+1) = qvalue(2, hint, t+1);
             end
@@ -236,6 +250,3 @@ function [results] = rl_model_connect_uni(task, MDP, params, sim)
     results.blockwise.reward_outcomes = reward_outcomes;
     results.blockwise.actualreward = actualreward*10;
 return
-
-
-

@@ -206,7 +206,7 @@ function [fit_results, DCM] = advice_fit_prolific_uni(subject,folder,params,fiel
         elseif model == 2
             MDPs  = rl_model_connect_uni(task, MDP,params, 0);
         elseif model == 3
-            MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+            MDPs  = rl_model_disconnect_uni(task, MDP,params, 0);
         end
 
         for j = 1:numel(actions)

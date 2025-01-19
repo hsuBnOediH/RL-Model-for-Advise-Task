@@ -147,7 +147,7 @@ function L = spm_mdp_L(P,M,U,Y)
         elseif M.model == 2
             MDP  = rl_model_connect_uni(task, MDP,params, 0);
         elseif M.model == 3
-            MDP  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+            MDP  = rl_model_disconnect_uni(task, MDP,params, 0);
         end
 
 
