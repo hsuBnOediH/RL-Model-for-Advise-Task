@@ -145,7 +145,7 @@ function L = spm_mdp_L(P,M,U,Y)
         if M.model == 1
             MDP  = active_inference_model_uni(task, MDP,params, 0);
         elseif M.model == 2
-            MDP  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
+            MDP  = rl_model_connect_uni(task, MDP,params, 0);
         elseif M.model == 3
             MDP  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
         end
