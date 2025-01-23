@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --partition=c3_short
+#SBATCH --partition=c3
 #SBATCH --ntasks=1
 #SBATCH --mem=3000
 #SBATCH --nodes=1

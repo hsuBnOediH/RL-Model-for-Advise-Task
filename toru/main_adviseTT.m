@@ -17,7 +17,7 @@ if ispc
     FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88'; %  6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
     %INPUT_DIRECTORY = [root '/rsmith/wellbeing/tasks/AdviceTask/behavioral_files_2-6-24'];  % Where the subject file is located
     INPUT_DIRECTORY = [root '/NPC/DataSink/StimTool_Online/WB_Advice'];  % Where the subject file is located
-    INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/Activeinferencersfixed1CRCL3'];  % Where the subject file is located
+    INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/RLdisconnectedwolamgdarsNoforgetall/paramcombi4'];  % Where the subject file is located
 
 else
     root = '/media/labs';
@@ -53,7 +53,7 @@ addpath([root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask']);
 
 
 %%% Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected
-model = 1; 
+model = 2; 
 
 %%% Specify 
 IFLAMGDA = false;
@@ -64,7 +64,7 @@ ONEMODEL = false;
 
 
 for paramcombi = 1:5
-
+%for paramcombi = 1:4
 
 if SIM
 
@@ -78,17 +78,17 @@ if SIM
     filesim = [INPUT_DIRECTORYforSIM '/' directorysim(index_array).name];
     subdatsim = readtable(filesim);
 
-% paramsim.state_exploration = subdatsim.posterior_state_exploration;
+% %paramsim.state_exploration = subdatsim.posterior_state_exploration;
 % paramsim.parameter_exploration = 0;
 % 
 % paramsim.p_a = subdatsim.posterior_p_a;
 % paramsim.inv_temp = subdatsim.posterior_inv_temp;
 % %paramsim.reward_value = subdatsim.posterior_reward_value;
 % paramsim.reward_value = 1;  % 4 in the original model
-% %paramsim.l_loss_value = subdatsim.posterior_l_loss_value;
-% paramsim.l_loss_value = 1;  % 4 in the original model
+% paramsim.l_loss_value = subdatsim.posterior_l_loss_value;
+% %paramsim.l_loss_value = 1;  % 4 in the original model
 % 
-% paramsim.omega = subdatsim.posterior_omega;
+% %paramsim.omega = subdatsim.posterior_omega;
 % %paramsim.omega_d = subdatsim.posterior_omega_d;
 % %paramsim.omega_d_win = subdatsim.posterior_omega_d_win;
 % %paramsim.omega_d_loss = subdatsim.posterior_omega_d_loss;
@@ -96,28 +96,28 @@ if SIM
 % %paramsim.omega_a_win = subdatsim.posterior_omega_a_win;
 % %paramsim.omega_a_loss = subdatsim.posterior_omega_a_loss;
 % %paramsim.eta = subdatsim.posterior_eta;
-% %paramsim.eta_d = subdatsim.posterior_eta_d;
-% paramsim.eta_d_win = subdatsim.posterior_eta_d_win;
-% paramsim.eta_d_loss = subdatsim.posterior_eta_d_loss;
-% paramsim.eta_a = subdatsim.posterior_eta_a;
-% %paramsim.eta_a_win = subdatsim.posterior_eta_a_win;
-% %paramsim.eta_a_loss = subdatsim.posterior_eta_a_loss;
+% paramsim.eta_d = subdatsim.posterior_eta_d;
+% %paramsim.eta_d_win = subdatsim.posterior_eta_d_win;
+% %paramsim.eta_d_loss = subdatsim.posterior_eta_d_loss;
+% %paramsim.eta_a = subdatsim.posterior_eta_a;
+% paramsim.eta_a_win = subdatsim.posterior_eta_a_win;
+% paramsim.eta_a_loss = subdatsim.posterior_eta_a_loss;
 % %paramsim.lamgda = subdatsim.posterior_lamgda;
-% %paramsim.lamgda = 1;
+% paramsim.lamgda = 1;
 % paramsim.Rsensitivity = subdatsim.posterior_Rsensitivity;
 
 %%%to play around
 paramsim.state_exploration = 1;
 paramsim.parameter_exploration = 0;
 
-paramsim.p_a = .8;
-paramsim.inv_temp = 1;
+paramsim.p_a = .5;
+paramsim.inv_temp = 2;
 %paramsim.reward_value = subdatsim.posterior_reward_value;
 paramsim.reward_value = 1;  % 4 in the original model
 %paramsim.l_loss_value = subdatsim.posterior_l_loss_value;
-paramsim.l_loss_value = 1;  % 4 in the original model
+paramsim.l_loss_value = 4;  % 4 in the original model
 
-paramsim.omega = .2;
+paramsim.omega = .1;
 %paramsim.omega_d = subdatsim.posterior_omega_d;
 %paramsim.omega_d_win = subdatsim.posterior_omega_d_win;
 %paramsim.omega_d_loss = subdatsim.posterior_omega_d_loss;
@@ -125,15 +125,15 @@ paramsim.omega = .2;
 %paramsim.omega_a_win = subdatsim.posterior_omega_a_win;
 %paramsim.omega_a_loss = subdatsim.posterior_omega_a_loss;
 %paramsim.eta = subdatsim.posterior_eta;
-%paramsim.eta_d = subdatsim.posterior_eta_d;
-paramsim.eta_d_win = .5;
-paramsim.eta_d_loss = .5;
-paramsim.eta_a = .5;
-%paramsim.eta_a_win = subdatsim.posterior_eta_a_win;
-%paramsim.eta_a_loss = subdatsim.posterior_eta_a_loss;
+paramsim.eta_d = .3;
+%paramsim.eta_d_win = .5;
+%paramsim.eta_d_loss = .5;
+%paramsim.eta_a = .5;
+paramsim.eta_a_win = .3;
+paramsim.eta_a_loss = .3;
 %paramsim.lamgda = subdatsim.posterior_lamgda;
-%paramsim.lamgda = 1;
-paramsim.Rsensitivity = 0;
+paramsim.lamgda = 1;
+paramsim.Rsensitivity = 2;
 
     [gen_data] = advise_simTT(paramsim, plot, model);
 
@@ -162,13 +162,13 @@ if ONEMODEL
 
  %temtative for one model checking
     params.omega = .2;
-    params.eta_d_win = .5;
-    params.eta_d_loss = .5;
-    params.eta_a = .5;
+    params.eta_d = .5;
+    params.eta_a_win = .5;
+    params.eta_a_loss = .5;
 
     params.lamgda = 1; %As fixed param
 
-        field = {'p_a','inv_temp','omega','eta_d_win','eta_d_loss','eta_a','Rsensitivity','state_exploration'};
+        field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a_win','eta_a_loss','omega','Rsensitivity'};
     
 
 else
@@ -187,6 +187,7 @@ if paramcombi == 1
      else
         params.lamgda = 1; %As fixed param
         field = {'p_a','inv_temp','l_loss_value','omega','eta','Rsensitivity'};
+        %field = {'p_a','inv_temp','l_loss_value','eta','Rsensitivity'};
      end
  end
 
@@ -205,6 +206,7 @@ elseif paramcombi == 2
      else
         params.lamgda = 1; %As fixed param
         field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a','Rsensitivity'};
+        %field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a','Rsensitivity'};
      end
  end
 
@@ -224,6 +226,7 @@ elseif paramcombi == 3
      else
         params.lamgda = 1; %As fixed param
         field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a','Rsensitivity'};
+        %field = {'p_a','inv_temp','l_loss_value','eta_d_win','eta_d_loss','eta_a','Rsensitivity'};
      end
  end
 
@@ -243,6 +246,7 @@ elseif paramcombi == 4
      else
         params.lamgda = 1; %As fixed param
         field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss','Rsensitivity'};
+        %field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a_win','eta_a_loss','Rsensitivity'};
      end
  end
 
