@@ -247,7 +247,7 @@ context_floor = 1;
                 % novelty_value(option,tp,trial) = .5*dot(A{1}(:,1,trial),info_gain(:,1)) + .5*dot(A{1}(:,2,trial),info_gain(:,1));
                 % novelty_value(option,tp,trial) = (sum(sum(a{1}(:,:,trial))))^-1;
                 a_sums{1}(:,:,trial) = [sum(a{1}(:,1,trial)) sum(a{1}(:,2,trial)); sum(a{1}(:,1,trial)) sum(a{1}(:,2,trial))];
-                info_gain = (a{1}(:,:,trial).^-1) - (a_sums{1}(:,:,trial).^-1);
+                info_gain = .5*(a{1}(:,:,trial).^-1) - (a_sums{1}(:,:,trial).^-1);
                 %marginalize over context state factor (i.e. left better or
                 %right better)
                 novelty_for_each_observation = info_gain(:,1)*p_context(1,:,trial) + info_gain(:,2)*p_context(2,:,trial);
@@ -260,12 +260,14 @@ context_floor = 1;
                 novelty_value(option,tp,trial) = 0;
                 epistemic_value(option,tp,trial) = 0;
                 pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
+                %pragmatic_value(option,tp,trial) = log(dot(p_o_win(:,option,trial),R(:,block)));
             elseif option == 3 
                 p_o_win(:,option,trial) = A{2}(:,:,2)*p_context(:,:,trial);
                 true_p_o_win(:,option,trial) = A{2}(:,:,2)*true_context(:,:,trial);
                 novelty_value(option,tp,trial) = 0;
                 epistemic_value(option,tp,trial) = 0;
                 pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
+                %pragmatic_value(option,tp,trial) = log(dot(p_o_win(:,option,trial),R(:,block)));
             end
             Q(option, tp,trial) = params.state_exploration*epistemic_value(option,tp,trial) + pragmatic_value(option,tp,trial) + params.parameter_exploration*novelty_value(option,tp,trial);
         end
@@ -347,11 +349,13 @@ context_floor = 1;
                     novelty_value(option,tp,trial) = 0;
                     epistemic_value(option,tp,trial) = 0;
                     pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
+                    %pragmatic_value(option,tp,trial) = log(dot(p_o_win(:,option,trial),Rafteradvice(:,block)));
                 elseif option == 3 
                     p_o_win(:,option,trial) = A{2}(:,:,2)*pp_context(:,:,trial);
                     novelty_value(option,tp,trial) = 0;
                     epistemic_value(option,tp,trial) = 0;
                     pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
+                    %pragmatic_value(option,tp,trial) = log(dot(p_o_win(:,option,trial),Rafteradvice(:,block)));
                 end
                 Q(option, tp,trial) = params.state_exploration*epistemic_value(option,tp,trial) + pragmatic_value(option,tp,trial) + params.parameter_exploration*novelty_value(option,tp,trial);
             end
