@@ -27,7 +27,7 @@ if ON_CLUSTER
     SIM = getenv('SIM');
     % tanform the char to logical
     SIM = strcmp(SIM, 'True');
-end 
+end
 % True -> Fit the behavior data into the model
 FIT = true;
 if ON_CLUSTER
@@ -76,8 +76,8 @@ if ON_CLUSTER
 end
 
 % MODEL_IDX:
-% Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected
-MODEL_IDX = 3; % Default to candidate 1, can be changed dynamically
+% Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected, 4 = active inference with message passing
+MODEL_IDX = 4; % Default to candidate 1, can be changed dynamically
 if ON_CLUSTER
     env_value = getenv('MODEL_IDX');
     MODEL_IDX = str2double(env_value);
@@ -171,7 +171,7 @@ for paramcombi = 1:5
         params.parameter_exploration = 0;
         params.Rsensitivity = 2; 
     
-        if MODEL_IDX == 1 %for Active inference
+        if MODEL_IDX == 1 || MODEL_IDX == 4%for Active inference
             params.reward_value = 1; % 4 in the original model
             params.l_loss_value = 1; % 4 in the original model
         elseif MODEL_IDX ~= 1 % for RL
@@ -192,7 +192,9 @@ for paramcombi = 1:5
                 params.eta = .5;
                 if MODEL_IDX == 1
                     field = {'p_a','inv_temp','omega','eta','state_exploration', 'Rsensitivity'}; %those are fitted
-                elseif MODEL_IDX ~= 1
+                elseif MODEL_IDX == 4
+                    field = {'p_a','inv_temp','omega','eta','state_exploration', 'Rsensitivity'}; %those are fitted
+                elseif MODEL_IDX ~= 1 && MODEL_IDX ~= 4
                     if IFLAMGDA
                         params.lamgda = .5;
                         field = {'p_a','inv_temp','l_loss_value','omega','eta','lamgda','Rsensitivity'}; %those are fitted
@@ -208,7 +210,9 @@ for paramcombi = 1:5
                 params.eta_a = .5;
                 if MODEL_IDX == 1
                     field = {'p_a','inv_temp','omega','eta_d','eta_a', 'state_exploration','Rsensitivity'}; %those are fitted
-                elseif MODEL_IDX ~= 1
+                elseif MODEL_IDX == 4
+                    field = {'p_a','inv_temp','omega','eta_d','eta_a', 'state_exploration','Rsensitivity'}; %those are fitted
+                elseif MODEL_IDX ~= 1 && MODEL_IDX ~= 4
                     if IFLAMGDA
                         params.lamgda = .5;
                         field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a','lamgda','Rsensitivity'}; %those are fitted
@@ -224,7 +228,9 @@ for paramcombi = 1:5
                 params.eta_a = .5;
                 if MODEL_IDX == 1
                     field = {'p_a','inv_temp','omega','eta_d_win','eta_d_loss','eta_a','state_exploration','Rsensitivity'}; %those are fitted
-                elseif MODEL_IDX ~= 1
+                elseif MODEL_IDX == 4
+                    field = {'p_a','inv_temp','omega','eta_d_win','eta_d_loss','eta_a','state_exploration','Rsensitivity'}; %those are fitted
+                elseif MODEL_IDX ~= 1 && MODEL_IDX ~= 4
                     if IFLAMGDA
                         params.lamgda = .5;
                         field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a','lamgda','Rsensitivity'}; %those are fitted
@@ -240,7 +246,9 @@ for paramcombi = 1:5
                 params.eta_a_loss = .5;      
                 if MODEL_IDX == 1
                     field = {'p_a','inv_temp','omega','eta_d','eta_a_win','eta_a_loss','state_exploration','Rsensitivity'}; %those are fitted
-                elseif MODEL_IDX ~= 1
+                elseif MODEL_IDX == 4
+                    field = {'p_a','inv_temp','omega','eta_d','eta_a_win','eta_a_loss','state_exploration','Rsensitivity'}; %those are fitted
+                elseif MODEL_IDX ~= 1 && MODEL_IDX ~= 4
                     if IFLAMGDA
                         params.lamgda = .5;
                         field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss','lamgda','Rsensitivity'}; %those are fitted
@@ -255,7 +263,9 @@ for paramcombi = 1:5
                 params.omega_a_win = .2;
                 params.omega_a_loss = .2;
                 params.eta = .5;
-                if MODEL_IDX == 1
+                if MODEL_IDX == 1 
+                    field = {'p_a','inv_temp','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','state_exploration','Rsensitivity'}; %those are fitted
+                elseif MODEL_IDX == 4
                     field = {'p_a','inv_temp','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','state_exploration','Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX == 2
                     if IFLAMGDA
@@ -275,7 +285,9 @@ for paramcombi = 1:5
                     end
                 end
             end
+            
         end
+
         if SIM
             [fit_results, DCM] = advise_sim_fit_uni(FIT_SUBJECT, INPUT_DIRECTORYforSIM, gen_data, field, params, plot, MODEL_IDX);
         else

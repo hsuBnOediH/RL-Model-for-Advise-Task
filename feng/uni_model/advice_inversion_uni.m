@@ -148,6 +148,10 @@ function L = spm_mdp_L(P,M,U,Y)
             MDP  = rl_model_connect_uni(task, MDP,params, 0);
         elseif M.model == 3
             MDP  = rl_model_disconnect_uni(task, MDP,params, 0);
+        elseif M.model == 4
+            MDP  = active_inference_model_mp_uni(task, MDP,params, 0);
+        else
+            print('Model not recognized')
         end
 
 
