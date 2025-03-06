@@ -53,17 +53,17 @@ addpath([root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask']);
 
 
 %%% Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected
-model = 2; 
+model = 1; 
 
 %%% Specify 
 IFLAMGDA = false;
-ONEMODEL = false;
+ONEMODEL = true;
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
 
 
-for paramcombi = 1:5
+%for paramcombi = 1:5
 %for paramcombi = 1:4
 
 if SIM
@@ -160,15 +160,13 @@ params.l_loss_value = 4; % 8 in the original model
 
 if ONEMODEL 
 
- %temtative for one model checking
+ %tentative for one model checking
     params.omega = .2;
-    params.eta_d = .5;
-    params.eta_a_win = .5;
-    params.eta_a_loss = .5;
+    params.eta = .5;
 
     params.lamgda = 1; %As fixed param
 
-        field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a_win','eta_a_loss','omega','Rsensitivity'};
+        field = {'p_a','inv_temp','omega','eta','state_exploration', 'Rsensitivity'};
     
 
 else
@@ -339,7 +337,7 @@ save(fullfile([results_dir '/fit_results_' FIT_SUBJECT '_' currentDateTimeString
 end
 
 end
-end
+%end
 
 
 
