@@ -44,7 +44,7 @@ end
 
 % SETTINGS
 % Subject identifier for the test or experiment, if on cluster read from ENV var
-FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88';
+FIT_SUBJECT = 'FENGTEST';
 if ON_CLUSTER
     FIT_SUBJECT = getenv('FIT_SUBJECT');
 end
@@ -136,6 +136,8 @@ ONEMODEL = false;
 
 for paramcombi = 1:5
 
+    %TODO: need to delete the following line, for debugging purpose only
+    paramcombi = 2;
     if SIM
         directorysim = dir(INPUT_DIRECTORYforSIM);
         index_array = find(arrayfun(@(n) contains(directorysim(n).name, ['advise_task-' FIT_SUBJECT]),1:numel(directorysim)));

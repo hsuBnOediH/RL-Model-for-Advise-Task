@@ -97,7 +97,7 @@ function [results] = active_inference_model_uni(task, MDP, params, sim)
         novelty_value(:,:,trial) = zeros(3,1);
         p_o_win(:,:,trial) = zeros(2,3);
         if sim == 1
-            true_context_vector(trial) = find(rand < cumsum([1-task.true_p_right(block,trial) task.true_p_right(block,trial)]'),1)-1;
+            true_context_vector(trial) = find(rand < cumsum([1-task.true_p_right(blocsk,trial) task.true_p_right(block,trial)]'),1)-1;
         end
     end
  
