@@ -97,7 +97,8 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
     catch, 
         % feng: missing, should it be definded somewhere, should it be fixed?
         % controls how strictly the model evaluates potential policies (or actions)
-        zeta  = 3;
+        zeta  = 0;
+        % TODO: remove the zeta parameter, set to 0 for considering all policies
         % disp('zeta is missing, set to default value ');
     end
     % feng: instead of using eta_win or eta_loss, we use four separate eta values
@@ -755,6 +756,7 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
                 tstart = tic;
                 for f = 1:Nf(m)
                     x{m,f} = spm_softmax(spm_log(x{m,f})/erp);
+                    % TODO: read the orgianl doc shared by Carter, if not solved, ask Ryan
                 end
                 
                 % Variational updates (hidden states) under sequential policies
@@ -770,7 +772,7 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
                     R = S;
                 end
 
-                F     = zeros(Np(m),1);
+                F = zeros(Np(m),1);
                 % 2.6. 3loop over plausible policies
                 for k = p{m}                % loop over plausible policies
                     % dF is used to track the change in the free energy (F) as we update the beliefs.
@@ -1147,7 +1149,10 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
                     if (advisor_chosen == 2 | advisor_chosen == 3)
                         a_learned = (MDP(m).a{g}(:,:,2) - MDP.a_floor(:,:));
                         % Feng: 
+                        % TODO: How to access which action was chosen? and what is the final result of the action win or loss?
                         % apply leraning rate for win and loss under the advisor
+                        a_learned(2, :) = a_learned(2, :) * (1 - omega_a_loss);
+                        
                         a_learned(2, :) = a_learned(2, :) * eta_a_loss;
                         a_learned(3, :) = a_learned(3, :) * eta_a_win;
                         % a_learned(2, :) = a_learned(2, :) * omega_eta_advisor_loss; 
@@ -1155,6 +1160,8 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
                         count = da(:,:,2);
                         % Feng:
                         % apply forgeting rate for win and loss under the advisor
+                        % remove the 1- part, it used to be connected to the eta, 1- is not needed anymore
+                        count(2,:) = count(2,:) * eta_d_loss;
                         count(2,:) = count(2,:) * (1 - omega_a_loss);
                         count(3,:) = count(3,:) * (1 - omega_a_win);
                         % count(2,:) = count(2,:) * (1 - omega_eta_advisor_loss);
@@ -1168,6 +1175,21 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
                         %                         % apply forgetting rate for wins
                         %                         MDP(m).a{g}(:,:,2) = (MDP(m).a{g}(:,:,2) - MDP.a_floor(:,:))*omega_advisor_win + MDP.a_floor(:,:) +da(:,:,2)*eta;
                         %                     end
+                    else
+                        % TODO
+                        % for advisor not chosen
+                        % siligtly forget the MDP(m).a{g}(:,:,2
+                        count(2,:) = count(2,:) * eta_d_loss;
+                        count(2,:) = count(2,:) * (1 - omega_a_loss);
+                        count(3,:) = count(3,:) * (1 - omega_a_win);
+                        MDP(m).a{g}(:,:,2) = MDP.a_floor(:,:) + count;
+
+                        % TODO  for chose left and right direcly, update the values
+
+                        
+
+                        
+
                     end
                     %                 for q = 1:2
                     %                      for r = 2:3
@@ -1221,12 +1243,17 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
                 % should split for left_better and right better?
                 
                 % if choose left and win:
+                % TODO remove the 1- part, it used to be connected to the eta, 1- is not needed anymore
+                MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*(1-omega_d_win) + MDP(m).d_floor(1) + (tmp(1))*eta_d_win;
+
+
                     tmp = X{m,f}(i,1);
                     MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*eta_d_win + MDP(m).d_floor(1) + (tmp(1))*(1-omega_d_win);
                     MDP(m).d{f}(2) = (MDP(m).d{f}(2) - MDP(m).d_floor(2))*eta_d_loss + MDP(m).d_floor(2) + (tmp(2))*(1-omega_d_loss);
                 % if choose right and win:
                     MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*eta_d_loss + MDP(m).d_floor(1) + (tmp(1))*(1-omega_d_loss);
                     MDP(m).d{f}(2) = (MDP(m).d{f}(2) - MDP(m).d_floor(2))*eta_d_win + MDP(m).d_floor(2) + (tmp(2))*(1-omega_d_win);
+                    
                 % MDP(m).d{f} = (MDP(m).d{f} - MDP(m).d_floor)*omega_eta_context + MDP(m).d_floor + X{m,f}(i,3)*(1-omega_eta_context);
 
                 %             MDP(m).d{f}(i) = MDP(m).d{f}(i)*omega + X{m,f}(i,1)*eta;

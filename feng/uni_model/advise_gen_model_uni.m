@@ -83,7 +83,8 @@ function mdp = advise_gen_model_uni(trialinfo,priors)
     %                 novelty_value(option,tp,trial) = sum(novelty_for_each_observation);
     % also, it is not been used in this code, assgin 0.3000 to it for now
     % novelty_scalar = priors.novelty_scalar; 
-    novelty_scalar = 0.3000;
+    % TODO: comment out the novelty_scalar for now, 
+    % novelty_scalar = 0.3000;
 
 
     for t = 1:size(trialinfo,1)
@@ -111,6 +112,7 @@ function mdp = advise_gen_model_uni(trialinfo,priors)
 
         d{1} = prior_d*[p_lb 1-p_lb]';  % {'left better','right better'}
         d{2} = [1 0 0 0]'*200; % {'start','hint','choose-left','choose-right'} !!! why times 200?
+        % TODO: maybe could be other value rather than 200, maybe 500 1 etc
 
 
         % State-outcome mappings and beliefs: A and a
@@ -363,7 +365,7 @@ function mdp = advise_gen_model_uni(trialinfo,priors)
         mdp(t).p_ha = p_ha;
         mdp(t).prior_a = prior_a;
         mdp(t).rs = rs;
-        mdp(t).novelty_scalar = novelty_scalar;
+        % mdp(t).novelty_scalar = novelty_scalar;
         %mdp(t).la = la;
         %mdp(t).eff = eff;
 
