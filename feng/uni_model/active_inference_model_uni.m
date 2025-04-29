@@ -161,6 +161,7 @@ function [results] = active_inference_model_uni(task, MDP, params, sim)
                 novelty_for_each_observation = info_gain(:,1)*p_context(1,:,trial) + info_gain(:,2)*p_context(2,:,trial);
                 novelty_value(option,tp,trial) = sum(novelty_for_each_observation);
                 epistemic_value(option,tp,trial) = G_epistemic_value(log(A{1}(:,:,trial)),log(p_context(:,:,trial)));
+                % epistemic_value(option,tp,trial) = G_epistemic_value(A{1}(:,:,trial),p_context(:,:,trial));
                 pragmatic_value(option,tp,trial) = 0;
             elseif option == 2 
                 p_o_win(:,option,trial) = A{2}(:,:,1)*p_context(:,:,trial);
@@ -168,17 +169,21 @@ function [results] = active_inference_model_uni(task, MDP, params, sim)
                 novelty_value(option,tp,trial) = 0;
                 epistemic_value(option,tp,trial) = 0;
                 pragmatic_value(option,tp,trial) = log(dot(p_o_win(:,option,trial),R(:,block)));
+                % pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
             elseif option == 3 
                 p_o_win(:,option,trial) = A{2}(:,:,2)*p_context(:,:,trial);
                 true_p_o_win(:,option,trial) = A{2}(:,:,2)*true_context(:,:,trial);
                 novelty_value(option,tp,trial) = 0;
                 epistemic_value(option,tp,trial) = 0;
                 pragmatic_value(option,tp,trial) = log(dot(p_o_win(:,option,trial),R(:,block)));
+                % pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
             end
             Q(option, tp,trial) = - params.state_exploration*epistemic_value(option,tp,trial) - pragmatic_value(option,tp,trial) + params.parameter_exploration*novelty_value(option,tp,trial);
+            % Q(option, tp,trial) = params.state_exploration*epistemic_value(option,tp,trial) + pragmatic_value(option,tp,trial) + params.parameter_exploration*novelty_value(option,tp,trial);
         end
         % compute action probabilities
-        action_probs(:,tp,trial) = spm_softmax(params.inv_temp*(-Q(:,tp,trial))');
+        action_probs(:,tp,trial) = spm_softmax(params.inv_temp*(-Q(:,tp,trial)))';
+        % action_probs(:,tp,trial) = spm_softmax(params.inv_temp*Q(:,tp,trial))';
         % select actions
         % note that 1 corresponds to choosing advisor, 2 corresponds to
         % choosing left bandit, 3 corresponds to choosing right bandit.
