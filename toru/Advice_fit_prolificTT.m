@@ -262,7 +262,9 @@ end
              
              %task.field = fields;
              if model == 1
-              MDPs  = Simple_Advice_Model_TT(task, MDP, params, 0);
+              %MDPs  = spm_MDP_VB_X_advice_no_message_passing_faster(MDP);
+              %MDPs  = Simple_Advice_Model_TT(task, MDP, params, 0);
+              MDPs  = Simple_Formal_Advice_Model_TT(task, MDP, params, 0);
              elseif model == 2
               MDPs  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
              elseif model == 3

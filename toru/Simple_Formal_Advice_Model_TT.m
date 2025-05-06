@@ -75,7 +75,7 @@
 % end
 
 
-function [results] = Simple_Advice_Model_TT(task, MDP, params, sim)
+function [results] = Simple_Formal_Advice_Model_TT(task, MDP, params, sim)
 
 % observations.hints = 0 is no hint, 1 is left hint, 2 is right hint
 % observations.rewards(trial) 1 is win, 2 is loss
@@ -188,10 +188,10 @@ context_floor = 1;
     
     % reward value distribution
     if task.block_type(block)== "LL"
-        R(:,block) =  spm_softmax([params.reward_value+eps (-params.l_loss_value*params.Rsensitivity)-eps]');
+        R(:,block) =  spm_softmax([0 params.reward_value+eps (-params.l_loss_value*params.Rsensitivity)-eps]');
         Rafteradvice(:,block) = spm_softmax([params.reward_value+eps (-params.l_loss_value*params.Rsensitivity)-eps]');
     else
-        R(:,block) =  spm_softmax([params.reward_value+eps -params.l_loss_value-eps]');
+        R(:,block) =  spm_softmax([0 params.reward_value+eps -params.l_loss_value-eps]');
         Rafteradvice(:,block) =  spm_softmax([params.reward_value+eps -params.l_loss_value-eps]');
     end
 
@@ -253,31 +253,31 @@ context_floor = 1;
                 novelty_value(option,tp,trial) = sum(novelty_for_each_observation);
                 epistemic_value(option,tp,trial) = G_epistemic_value(A{1}(:,:,trial),p_context(:,:,trial));
                 %epistemic_value(option,tp,trial) = G_epistemic_value(log(A{1}(:,:,trial)),log(p_context(:,:,trial))); %Wrong version because A and s should be probability 
-                pragmatic_value(option,tp,trial) = 0;
+                pragmatic_value(option,tp,trial) = log(R(1,block));
             elseif option == 2 
                 p_o_win(:,option,trial) = A{2}(:,:,1)*p_context(:,:,trial);
                 true_p_o_win(:,option,trial) = A{2}(:,:,1)*true_context(:,:,trial);
                 novelty_value(option,tp,trial) = 0;
                 epistemic_value(option,tp,trial) = 0;
-                pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
-                %pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),log(R(:,block)));
+                %pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
+                pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),log(R(2:3,block)));
             elseif option == 3 
                 p_o_win(:,option,trial) = A{2}(:,:,2)*p_context(:,:,trial);
                 true_p_o_win(:,option,trial) = A{2}(:,:,2)*true_context(:,:,trial);
                 novelty_value(option,tp,trial) = 0;
                 epistemic_value(option,tp,trial) = 0;
-                pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
-                %pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),log(R(:,block)));
+                %pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
+                pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),log(R(2:3,block)));
             end
-            Q(option, tp,trial) = params.state_exploration*epistemic_value(option,tp,trial) + pragmatic_value(option,tp,trial) + params.parameter_exploration*novelty_value(option,tp,trial);
-            %Q(option, tp,trial) = - params.state_exploration*epistemic_value(option,tp,trial) - pragmatic_value(option,tp,trial) - params.parameter_exploration*novelty_value(option,tp,trial);
+            %Q(option, tp,trial) = params.state_exploration*epistemic_value(option,tp,trial) + pragmatic_value(option,tp,trial) + params.parameter_exploration*novelty_value(option,tp,trial);
+            Q(option, tp,trial) = - params.state_exploration*epistemic_value(option,tp,trial) - pragmatic_value(option,tp,trial) - params.parameter_exploration*novelty_value(option,tp,trial);
         end
     
         %dot(A{2}(:,:,1)*p_context(:,:,trial),(log(A{2}(:,:,1)*p_context(:,:,trial)) - log(R(:,block)));
             
         % compute action probabilities
-        action_probs(:,tp,trial) = spm_softmax(params.inv_temp*Q(:,tp,trial))';
-        %action_probs(:,tp,trial) = spm_softmax(params.inv_temp*-Q(:,tp,trial))';
+        %action_probs(:,tp,trial) = spm_softmax(params.inv_temp*Q(:,tp,trial))';
+        action_probs(:,tp,trial) = spm_softmax(params.inv_temp*-Q(:,tp,trial))';
 
         % select actions
         % note that 1 corresponds to choosing advisor, 2 corresponds to
@@ -351,22 +351,22 @@ context_floor = 1;
                     p_o_win(:,option,trial) = A{2}(:,:,1)*pp_context(:,:,trial);
                     novelty_value(option,tp,trial) = 0;
                     epistemic_value(option,tp,trial) = 0;
-                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
-                    %pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),log(Rafteradvice(:,block)));
+                    %pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
+                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),log(Rafteradvice(:,block)));
                 elseif option == 3 
                     p_o_win(:,option,trial) = A{2}(:,:,2)*pp_context(:,:,trial);
                     novelty_value(option,tp,trial) = 0;
                     epistemic_value(option,tp,trial) = 0;
-                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
-                    %pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),log(Rafteradvice(:,block)));
+                    %pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
+                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),log(Rafteradvice(:,block)));
                 end
-                Q(option, tp,trial) = params.state_exploration*epistemic_value(option,tp,trial) + pragmatic_value(option,tp,trial) + params.parameter_exploration*novelty_value(option,tp,trial);
-                %Q(option, tp,trial) = - params.state_exploration*epistemic_value(option,tp,trial) - pragmatic_value(option,tp,trial) - params.parameter_exploration*novelty_value(option,tp,trial);
+                %Q(option, tp,trial) = params.state_exploration*epistemic_value(option,tp,trial) + pragmatic_value(option,tp,trial) + params.parameter_exploration*novelty_value(option,tp,trial);
+                Q(option, tp,trial) = - params.state_exploration*epistemic_value(option,tp,trial) - pragmatic_value(option,tp,trial) - params.parameter_exploration*novelty_value(option,tp,trial);
             end
     
             % compute action probabilities
-            action_probs(:,tp,trial) = [0; spm_softmax(params.inv_temp*Q(2:3,tp,trial))]';
-            %action_probs(:,tp,trial) = [0; spm_softmax(params.inv_temp*-Q(2:3,tp,trial))]';
+            %action_probs(:,tp,trial) = [0; spm_softmax(params.inv_temp*Q(2:3,tp,trial))]';
+            action_probs(:,tp,trial) = [0; spm_softmax(params.inv_temp*-Q(2:3,tp,trial))]';
 
             % select actions
             if sim == 1

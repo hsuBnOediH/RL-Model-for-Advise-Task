@@ -199,7 +199,9 @@ for idx_block = 1:num_blocks
     task.field = fields;
 
     if M.model == 1
-     MDP  = Simple_Advice_Model_TT(task, MDP,params, 0);
+     %MDP  = spm_MDP_VB_X_advice_no_message_passing_faster(MDP);
+     %MDP  = Simple_Advice_Model_TT(task, MDP,params, 0);
+     MDP  = Simple_Formal_Advice_Model_TT(task, MDP,params, 0);
     elseif M.model == 2
      MDP  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
     elseif M.model == 3

@@ -14,7 +14,7 @@ local = false;
 if ispc
     root = 'L:';
     results_dir = 'L:/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/ATresults';
-    FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88'; %  6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
+    FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88'; % 6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
     %INPUT_DIRECTORY = [root '/rsmith/wellbeing/tasks/AdviceTask/behavioral_files_2-6-24'];  % Where the subject file is located
     INPUT_DIRECTORY = [root '/NPC/DataSink/StimTool_Online/WB_Advice'];  % Where the subject file is located
     INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/RLdisconnectedwolamgdarsNoforgetall/paramcombi4'];  % Where the subject file is located
@@ -166,7 +166,7 @@ if ONEMODEL
 
     params.lamgda = 1; %As fixed param
 
-        field = {'p_a','inv_temp','omega','eta','state_exploration', 'Rsensitivity'};
+        field = {'state_exploration', 'p_a','inv_temp','omega','eta','Rsensitivity'};
     
 
 else
@@ -196,7 +196,7 @@ elseif paramcombi == 2
     params.eta_a = .5;
 
  if model == 1
-    field = {'p_a','inv_temp','omega','eta_d','eta_a', 'state_exploration','Rsensitivity'}; %those are fitted
+    field = {'p_a','inv_temp','omega','eta_d','eta_a','state_exploration','Rsensitivity'}; %those are fitted
  elseif model ~= 1
      if IFLAMGDA
         params.lamgda = .5;
@@ -300,13 +300,15 @@ end
         
     end
 
-%end
+end
 
  
  fit_results.F = DCM.F;
  fit_results.modelAIorRL = model;
       
  currentDateTimeString = datestr(now, 'yyyy-mm-dd_HH-MM-SS');  
+
+ modelStr = num2str(model);
 
 if ~ONEMODEL
 
@@ -320,23 +322,23 @@ end
 
 % Save the table to the folder
 writetable(struct2table(fit_results), ...
-    fullfile(folder_name, ['advise_task-' FIT_SUBJECT '_' currentDateTimeString '_fits.csv']));
+    fullfile(folder_name, ['advise_task-' FIT_SUBJECT '_AIorRL' modelStr '_' currentDateTimeString '_fits.csv']));
 
 % Save the plot to the folder
-saveas(gcf, fullfile(folder_name, [FIT_SUBJECT '_' currentDateTimeString '_fit_plot.png']));
+saveas(gcf, fullfile(folder_name, [FIT_SUBJECT '_AIorRL' modelStr '_' currentDateTimeString '_fit_plot.png']));
 
 % Save the .mat file to the folder
-save(fullfile(folder_name, ['fit_results_' FIT_SUBJECT '_' currentDateTimeString '.mat']), 'DCM');
+save(fullfile(folder_name, ['fit_results_' FIT_SUBJECT '_AIorRL' modelStr '_' currentDateTimeString '.mat']), 'DCM');
 
 else
 
-writetable(struct2table(fit_results), [results_dir '/advise_task-' FIT_SUBJECT '_' currentDateTimeString '_fits.csv']); 
-saveas(gcf,[results_dir '/' FIT_SUBJECT '_' currentDateTimeString '_fit_plot.png']);
-save(fullfile([results_dir '/fit_results_' FIT_SUBJECT '_' currentDateTimeString '.mat']), 'DCM');
+writetable(struct2table(fit_results), [results_dir '/advise_task-' FIT_SUBJECT '_AIorRL' modelStr '_' currentDateTimeString '_fits.csv']); 
+saveas(gcf,[results_dir '/' FIT_SUBJECT '_AIorRL' modelStr '_' currentDateTimeString '_fit_plot.png']);
+save(fullfile([results_dir '/fit_results_' FIT_SUBJECT '_AIorRL' modelStr '_' currentDateTimeString '.mat']), 'DCM');
 
 end
 
-end
+%end
 %end
 
 
