@@ -76,7 +76,7 @@ end
 
 % MODEL_IDX:
 % Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected, 4 = active inference with message passing
-MODEL_IDX = 1; % Default to candidate 1, can be changed dynamically
+MODEL_IDX = 4; % Default to candidate 1, can be changed dynamically
 if ON_CLUSTER
     env_value = getenv('MODEL_IDX');
     MODEL_IDX = str2double(env_value);

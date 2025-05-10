@@ -37,7 +37,7 @@ end
 addpath(spmPath);
 
 % input_file = 'L:/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/output.csv';
-input_file = 'dis_vs_act_F_table.csv';
+input_file = '../outputs/combined_with_without_log_active_inference_F_table.csv';
 % output_file = 'L:/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/';
 output_folder_path = '';
 % addpath('L:/rsmith/all-studies/util/spm12/');

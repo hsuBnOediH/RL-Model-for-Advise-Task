@@ -171,7 +171,10 @@ function [fit_results, DCM] = advice_fit_prolific_uni(subject,folder,params,fiel
         %MDP     =
         %advise_gen_model(trialinfo(30*idx_block-29:30*idx_block,:),priors);
         %old model
-
+        if model == 4
+            MDP     = advise_gen_model_uni(trialinfo(30*idx_block-29:30*idx_block,:),params);
+        end
+       
         if (num_trials == 1)
             outcomes = u;
             actions = y;
@@ -214,30 +217,69 @@ function [fit_results, DCM] = advice_fit_prolific_uni(subject,folder,params,fiel
         end
 
         for j = 1:numel(actions)
-            if actions{j}(2,1) ~= 2
-                action_prob = MDPs.blockwise.action_probs(actions{j}(2,1)-1,1,j);
-                act_prob_time1 = [act_prob_time1 action_prob]; 
-                if action_prob == max(MDPs.blockwise.action_probs(:,1,j))
-                    model_acc_time1 = [model_acc_time1 1];
+            % if not choice the hint
+            if actions{j}(2,1) ~= 2 
+                if model == 4
+                    gt_aciton_idx = actions{j}(2,1)-1;
+                    time1_action_prob = MDPs(j).P(1,2:4);
+                    action_prob = time1_action_prob(gt_aciton_idx);
+                    act_prob_time1 = [act_prob_time1 action_prob];
+                    if  action_prob == max(time1_action_prob)
+                        model_acc_time1 = [model_acc_time1 1];
+                    else
+                        model_acc_time1 = [model_acc_time1 0];
+                    end
                 else
-                    model_acc_time1 = [model_acc_time1 0];
+                    action_prob = MDPs.blockwise.action_probs(actions{j}(2,1)-1,1,j);
+                    act_prob_time1 = [act_prob_time1 action_prob]; 
+                    if action_prob == max(MDPs.blockwise.action_probs(:,1,j))
+                        model_acc_time1 = [model_acc_time1 1];
+                    else
+                        model_acc_time1 = [model_acc_time1 0];
+                    end
                 end
             else
-                prob_choose_advisor = MDPs.blockwise.action_probs(1,1,j); 
-                prob_choose_bandit = MDPs.blockwise.action_probs(actions{j}(2,2)-1,2,j); 
-                act_prob_time1 = [act_prob_time1 prob_choose_advisor];
-                act_prob_time2 = [act_prob_time2 prob_choose_bandit];
-                if prob_choose_advisor==max(MDPs.blockwise.action_probs(:,1,j))
-                    model_acc_time1 = [model_acc_time1 1];
-                else
-                    model_acc_time1 = [model_acc_time1 0];
-                end
+                if model ==4
+                    gt_time1_aciton_idx = actions{j}(2,1)-1;
+                    time1_action_prob = MDPs(j).P(1,2:4);
+                    gt_time2_aciton_idx = actions{j}(2,2)-2;
+                    prob_choose_advisor = MDPs(j).P(1, 2, 1);
 
-                if prob_choose_bandit==max(MDPs.blockwise.action_probs(:,2,j))
-                    model_acc_time2 = [model_acc_time2 1];
+                    time2_action_prob = MDPs(j).P(1,7:8);
+                    prob_choose_bandit = time2_action_prob(gt_time2_aciton_idx);
+
+                    act_prob_time1 = [act_prob_time1 prob_choose_advisor];
+                    act_prob_time2 = [act_prob_time2 prob_choose_bandit];
+
+                    if prob_choose_advisor == max(time1_action_prob)
+                        model_acc_time1 = [model_acc_time1 1];
+                    else
+                        model_acc_time1 = [model_acc_time1 0];
+                    end
+
+                    if prob_choose_bandit==max(time2_action_prob)
+                        model_acc_time2 = [model_acc_time2 1];
+                    else
+                        model_acc_time2 = [model_acc_time2 0];
+                    end  
                 else
-                    model_acc_time2 = [model_acc_time2 0];
-                end                    
+
+                    prob_choose_advisor = MDPs.blockwise.action_probs(1,1,j); 
+                    prob_choose_bandit = MDPs.blockwise.action_probs(actions{j}(2,2)-1,2,j);
+                    act_prob_time1 = [act_prob_time1 prob_choose_advisor];
+                    act_prob_time2 = [act_prob_time2 prob_choose_bandit];
+                    if prob_choose_advisor==max(MDPs.blockwise.action_probs(:,1,j))
+                        model_acc_time1 = [model_acc_time1 1];
+                    else
+                        model_acc_time1 = [model_acc_time1 0];
+                    end
+    
+                    if prob_choose_bandit==max(MDPs.blockwise.action_probs(:,2,j))
+                        model_acc_time2 = [model_acc_time2 1];
+                    else
+                        model_acc_time2 = [model_acc_time2 0];
+                    end   
+                end
             end
         end
 
@@ -245,7 +287,7 @@ function [fit_results, DCM] = advice_fit_prolific_uni(subject,folder,params,fiel
         clear MDPs
     end
 
-    if plot
+    if plot && model~=4
         for i=1:length(DCM.U)
             MDP(i).o = DCM.U{1,i};
             MDP(i).u = DCM.Y{1,i};

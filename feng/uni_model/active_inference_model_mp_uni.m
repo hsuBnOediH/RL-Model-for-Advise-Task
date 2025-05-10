@@ -248,7 +248,7 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
         novelty_scalar = MDP(1).novelty_scalar;           
     catch, 
         novelty_scalar = .25;
-        disp('novelty_scalar is missing, set to default value ');
+        % disp('novelty_scalar is missing, set to default value ');
     end
     %try, eff = MDP(1).eff;         catch, eff = 1;end
     % preclude precision updates for moving policies
@@ -1148,8 +1148,7 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
                     % same time
                     if (advisor_chosen == 2 | advisor_chosen == 3)
                         a_learned = (MDP(m).a{g}(:,:,2) - MDP.a_floor(:,:));
-                        % Feng: 
-                        % TODO: How to access which action was chosen? and what is the final result of the action win or loss?
+                        % Feng:
                         % apply leraning rate for win and loss under the advisor
                         a_learned(2, :) = a_learned(2, :) * (1 - omega_a_loss);
                         
@@ -1162,8 +1161,8 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
                         % apply forgeting rate for win and loss under the advisor
                         % remove the 1- part, it used to be connected to the eta, 1- is not needed anymore
                         count(2,:) = count(2,:) * eta_d_loss;
-                        count(2,:) = count(2,:) * (1 - omega_a_loss);
-                        count(3,:) = count(3,:) * (1 - omega_a_win);
+                        count(2,:) = count(2,:) * omega_a_loss;
+                        count(3,:) = count(3,:) * omega_a_win;
                         % count(2,:) = count(2,:) * (1 - omega_eta_advisor_loss);
                         % count(3,:) = count(3,:) * (1 -omega_eta_advisor_win);
                         MDP(m).a{g}(:,:,2) = MDP.a_floor(:,:) + a_learned + count;
@@ -1176,15 +1175,16 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
                         %                         MDP(m).a{g}(:,:,2) = (MDP(m).a{g}(:,:,2) - MDP.a_floor(:,:))*omega_advisor_win + MDP.a_floor(:,:) +da(:,:,2)*eta;
                         %                     end
                     else
-                        % TODO
+                        % Feng
                         % for advisor not chosen
-                        % siligtly forget the MDP(m).a{g}(:,:,2
+                        % siligtly forget the MDP(m).a{g}(:,:,2)
+                        count = da(:,:,2);
                         count(2,:) = count(2,:) * eta_d_loss;
-                        count(2,:) = count(2,:) * (1 - omega_a_loss);
-                        count(3,:) = count(3,:) * (1 - omega_a_win);
+                        count(2,:) = count(2,:) * omega_a_loss;
+                        count(3,:) = count(3,:) * omega_a_win;
                         MDP(m).a{g}(:,:,2) = MDP.a_floor(:,:) + count;
 
-                        % TODO  for chose left and right direcly, update the values
+                        % TODO  for chose left and right direcly, update the value
 
                         
 
@@ -1233,28 +1233,48 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
         if isfield(MDP,'d')
             for f = 1
                 i = MDP(m).d{f} > 0;
+
                 % why are we using the posterior over states at time t=1 to
                 % update concentration param for context
                 %MDP(m).d{f} = (MDP(m).d{f} - MDP(m).d_floor)*omega + MDP(m).d_floor + X{m,f}(i,1)*eta;
                 % update belief at time 3
                 %MDP(m).d{f} = (MDP(m).d{f} - MDP(m).d_floor)*omega_context + MDP(m).d_floor + X{m,f}(i,3)*eta;
+                
+                
                 % Feng:
                 % Update the initial hidden states with the context learning rate and forgeting rate
-                % should split for left_better and right better?
+          
                 
-                % if choose left and win:
-                % TODO remove the 1- part, it used to be connected to the eta, 1- is not needed anymore
-                MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*(1-omega_d_win) + MDP(m).d_floor(1) + (tmp(1))*eta_d_win;
+               
+                % MDP(m).d{f} = (MDP(m).d{f} - MDP(m).d_floor)*omega_eta_context + MDP(m).d_floor + X{m,f}(i,3)*(1-omega_eta_context);
+                % MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*(1-omega_d_win) + MDP(m).d_floor(1) + (tmp(1))*eta_d_win;
+                if advisor_chosen == 1
+                    choose_left = O{m}(3,2);
+                else
+                    choose_left = O{m}(3,3);
+                end
+                
+                choose_left = find(cell2mat(choose_left) == 1);
+                choose_left = choose_left ==3;
 
-
-                    tmp = X{m,f}(i,1);
+                is_win = O{m}(2,3);
+                is_win = find(cell2mat(is_win) == 1);
+                is_win = is_win == 3;
+     
+                tmp = X{m,f}(i,1);
+                 % if choose left and win. right and lose
+                if (choose_left == 1 && is_win == 1) || (choose_left==0 && is_win == 0)
+                    
                     MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*eta_d_win + MDP(m).d_floor(1) + (tmp(1))*(1-omega_d_win);
                     MDP(m).d{f}(2) = (MDP(m).d{f}(2) - MDP(m).d_floor(2))*eta_d_loss + MDP(m).d_floor(2) + (tmp(2))*(1-omega_d_loss);
-                % if choose right and win:
+                else
+                % if choose right and win, left and lose
                     MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*eta_d_loss + MDP(m).d_floor(1) + (tmp(1))*(1-omega_d_loss);
                     MDP(m).d{f}(2) = (MDP(m).d{f}(2) - MDP(m).d_floor(2))*eta_d_win + MDP(m).d_floor(2) + (tmp(2))*(1-omega_d_win);
-                    
+                end
+                
                 % MDP(m).d{f} = (MDP(m).d{f} - MDP(m).d_floor)*omega_eta_context + MDP(m).d_floor + X{m,f}(i,3)*(1-omega_eta_context);
+                
 
                 %             MDP(m).d{f}(i) = MDP(m).d{f}(i)*omega + X{m,f}(i,1)*eta;
                 %                 for q = 1:2
