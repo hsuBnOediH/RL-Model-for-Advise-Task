@@ -14,7 +14,7 @@ local = false;
 if ispc
     root = 'L:';
     results_dir = 'L:/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/ATresults';
-    FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88'; % 6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
+    FIT_SUBJECT = 'TORUTEST'; % 6544b95b7a6b86a8cd8feb88 6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
     %INPUT_DIRECTORY = [root '/rsmith/wellbeing/tasks/AdviceTask/behavioral_files_2-6-24'];  % Where the subject file is located
     INPUT_DIRECTORY = [root '/NPC/DataSink/StimTool_Online/WB_Advice'];  % Where the subject file is located
     INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/RLdisconnectedwolamgdarsNoforgetall/paramcombi4'];  % Where the subject file is located
@@ -57,13 +57,13 @@ model = 1;
 
 %%% Specify 
 IFLAMGDA = false;
-ONEMODEL = true;
+ONEMODEL = false;
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
 
 
-%for paramcombi = 1:5
+for paramcombi = 1:5
 %for paramcombi = 1:4
 
 if SIM
@@ -338,7 +338,7 @@ save(fullfile([results_dir '/fit_results_' FIT_SUBJECT '_AIorRL' modelStr '_' cu
 
 end
 
-%end
+end
 %end
 
 

@@ -172,8 +172,6 @@ context_floor = 1;
         A{2}(:,:,trial) = zeros(2,2);
         action_probs(:,:,trial) = zeros(3,2);
         Q(:,:,trial) = zeros(3,1);
-        pragmatic_value1(trial) = zeros; %Pragmatic value for hint
-        pragmatic_value2(trial) = zeros; %Looking ahead for timestep2 at timestep 1
         epistemic_value(:,:,trial) = zeros(3,1);
         pragmatic_value(:,:,trial) = zeros(3,1);
         novelty_value(:,:,trial) = zeros(3,1);
@@ -367,12 +365,14 @@ context_floor = 1;
                     p_o_win(:,option,trial) = A{2}(:,:,1)*pp_context(:,:,trial);
                     %novelty_value(option,tp,trial) = 0;
                     epistemic_value(option,tp,trial) = 0;
-                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
+                    %pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
+                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
                 elseif option == 3 
                     p_o_win(:,option,trial) = A{2}(:,:,2)*pp_context(:,:,trial);
                     %novelty_value(option,tp,trial) = 0;
                     epistemic_value(option,tp,trial) = 0;
-                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
+                    %pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),Rafteradvice(:,block));
+                    pragmatic_value(option,tp,trial) = dot(p_o_win(:,option,trial),R(:,block));
                 end
                 %Q(option, tp,trial) = params.state_exploration*epistemic_value(option,tp,trial) + pragmatic_value(option,tp,trial) + params.parameter_exploration*novelty_value(option,tp,trial);
                 Q(option, tp,trial) = - params.state_exploration*epistemic_value(option,tp,trial) - pragmatic_value(option,tp,trial); % - params.parameter_exploration*novelty_value(option,tp,trial);
