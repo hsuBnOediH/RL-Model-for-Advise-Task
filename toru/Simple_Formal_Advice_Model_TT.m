@@ -427,7 +427,8 @@ context_floor = 1;
                 % learning part
                 a{1}(:,:,trial+1) = a{1}(:,:,trial+1) + params.eta_a_win*(ppp_context(:,trial)*hint_outcome_vector(:,trial)')';
             else
-                a{1}(:,:,trial+1) = a{1}(:,:,trial);
+                %a{1}(:,:,trial+1) = a{1}(:,:,trial);
+                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_win) + a_0;
             end
     
                 % forgetting part
@@ -441,13 +442,14 @@ context_floor = 1;
                 % learning part
                 a{1}(:,:,trial+1) = a{1}(:,:,trial+1) + params.eta_a_loss*(ppp_context(:,trial)*hint_outcome_vector(:,trial)')';
             else
-                a{1}(:,:,trial+1) = a{1}(:,:,trial);
+                %a{1}(:,:,trial+1) = a{1}(:,:,trial);
+                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_loss) + a_0;
             end
     
-            % forgetting part
-            dir_context(:,:,trial+1) = (dir_context(:,:,trial) - d_0)*(1-params.omega_d_loss) + d_0;
-            % learning part
-            dir_context(:,:,trial+1) = dir_context(:,:,trial+1) + params.eta_d_loss*ppp_context(:,trial);
+                % forgetting part
+                dir_context(:,:,trial+1) = (dir_context(:,:,trial) - d_0)*(1-params.omega_d_loss) + d_0;
+                % learning part
+                dir_context(:,:,trial+1) = dir_context(:,:,trial+1) + params.eta_d_loss*ppp_context(:,trial);
         end
     end
 
