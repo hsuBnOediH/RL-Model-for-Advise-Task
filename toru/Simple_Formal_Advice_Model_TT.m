@@ -266,12 +266,14 @@ context_floor = 1;
                                                  /sum(p_context(:,:,trial).*A{1}(:,2,trial),1);
                 p_o_win_ifhintright = A{2}(:,:,2)*pp_context_ifhintright(:,:,trial);
 
-                pragmatic_value_ifhintleft = dot(p_o_win_ifhintleft, Rafteradvice(:,block));
-                pragmatic_value_ifhintright = dot(p_o_win_ifhintright, Rafteradvice(:,block));
-                %pragmatic_value_ifhintleft = .5*(dot(p_o_win_ifhintleft, R(:,block)));
-                %pragmatic_value_ifhintright = .5*(dot(p_o_win_ifhintright, R(:,block)));
+                %pragmatic_value_ifhintleft = dot(p_o_win_ifhintleft, Rafteradvice(:,block));
+                %pragmatic_value_ifhintright = dot(p_o_win_ifhintright, Rafteradvice(:,block));
+                pragmatic_value_ifhintleft = .5*(dot(p_o_win_ifhintleft, R(:,block)));
+                pragmatic_value_ifhintright = .5*(dot(p_o_win_ifhintright, R(:,block)));
 
                 pragmatic_value(option,tp,trial) = .5*(pragmatic_value_ifhintleft + pragmatic_value_ifhintright);
+
+                %pragmatic_value(option,tp,trial) = 0;
 
             elseif option == 2 
                 p_o_win(:,option,trial) = A{2}(:,:,1)*p_context(:,:,trial);
