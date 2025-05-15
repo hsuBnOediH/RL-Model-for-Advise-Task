@@ -6,7 +6,7 @@
 #SBATCH --nodes=1
 #SBATCH --begin=now
 #SBATCH --chdir=/media/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/RLmodel/toru
-#SBATCH --time=1:30:00
+#SBATCH --time=2:30:00
 #
 #################################################
 

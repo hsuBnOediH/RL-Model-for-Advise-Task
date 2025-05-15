@@ -14,7 +14,7 @@ local = false;
 if ispc
     root = 'L:';
     results_dir = 'L:/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/ATresults';
-    FIT_SUBJECT = 'TORUTEST'; % 6544b95b7a6b86a8cd8feb88 6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
+    FIT_SUBJECT = 'TORUTEST'; % 6544b95b7a6b86a8cd8feb88 6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  
     %INPUT_DIRECTORY = [root '/rsmith/wellbeing/tasks/AdviceTask/behavioral_files_2-6-24'];  % Where the subject file is located
     INPUT_DIRECTORY = [root '/NPC/DataSink/StimTool_Online/WB_Advice'];  % Where the subject file is located
     INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/RLdisconnectedwolamgdarsNoforgetall/paramcombi4'];  % Where the subject file is located
@@ -167,7 +167,7 @@ if ONEMODEL
     params.lamgda = 1; %As fixed param
 
         %field = {'state_exploration', 'p_a','inv_temp','omega','eta','Rsensitivity'};
-        field = {'state_exploration', 'p_a','inv_temp','omega','eta','Rsensitivity','reward_value'};
+        field = {'p_a','inv_temp','omega','eta','Rsensitivity','reward_value'};
     
 
 else
@@ -179,7 +179,7 @@ if paramcombi == 1
 
  if model == 1
     %field = {'p_a','inv_temp','omega','eta','state_exploration', 'Rsensitivity'}; %those are fitted
-    field = {'reward_value','state_exploration','p_a','inv_temp','omega','eta','Rsensitivity'};
+    field = {'reward_value','inv_temp','p_a','omega','eta','Rsensitivity'};
  elseif model ~= 1
      if IFLAMGDA
         params.lamgda = .5;
@@ -199,7 +199,7 @@ elseif paramcombi == 2
 
  if model == 1
     %field = {'p_a','inv_temp','omega','eta_d','eta_a','state_exploration','Rsensitivity'}; %those are fitted
-    field = {'p_a','inv_temp','omega','eta_d','eta_a','state_exploration','Rsensitivity','reward_value'};
+    field = {'p_a','inv_temp','omega','eta_d','eta_a','Rsensitivity','reward_value'};
  elseif model ~= 1
      if IFLAMGDA
         params.lamgda = .5;
@@ -220,7 +220,7 @@ elseif paramcombi == 3
 
  if model == 1
     %field = {'p_a','inv_temp','omega','eta_d_win','eta_d_loss','eta_a','state_exploration','Rsensitivity'}; %those are fitted
-    field = {'p_a','inv_temp','omega','eta_d_win','eta_d_loss','eta_a','state_exploration','Rsensitivity','reward_value'};
+    field = {'p_a','inv_temp','omega','eta_d_win','eta_d_loss','eta_a','Rsensitivity','reward_value'};
  elseif model ~= 1
      if IFLAMGDA
         params.lamgda = .5;
@@ -241,7 +241,7 @@ elseif paramcombi == 4
 
  if model == 1
     %field = {'p_a','inv_temp','omega','eta_d','eta_a_win','eta_a_loss','state_exploration','Rsensitivity'}; %those are fitted
-    field = {'p_a','inv_temp','omega','eta_d','eta_a_win','eta_a_loss','state_exploration','Rsensitivity','reward_value'}; 
+    field = {'p_a','inv_temp','omega','eta_d','eta_a_win','eta_a_loss','Rsensitivity','reward_value'}; 
  elseif model ~= 1
      if IFLAMGDA
         params.lamgda = .5;
@@ -263,7 +263,7 @@ elseif paramcombi == 4
 
  if model == 1
     %field = {'p_a','inv_temp','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','state_exploration','Rsensitivity'}; %those are fitted
-    field = {'p_a','inv_temp','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','state_exploration','Rsensitivity','reward_value'};
+    field = {'p_a','inv_temp','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','Rsensitivity','reward_value'};
  elseif model == 2
      if IFLAMGDA
         params.lamgda = .5;

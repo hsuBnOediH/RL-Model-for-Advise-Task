@@ -268,6 +268,9 @@ context_floor = 1;
 
                 pragmatic_value_ifhintleft = dot(p_o_win_ifhintleft, Rafteradvice(:,block));
                 pragmatic_value_ifhintright = dot(p_o_win_ifhintright, Rafteradvice(:,block));
+                %pragmatic_value_ifhintleft = .5*(dot(p_o_win_ifhintleft, R(:,block)));
+                %pragmatic_value_ifhintright = .5*(dot(p_o_win_ifhintright, R(:,block)));
+
                 pragmatic_value(option,tp,trial) = .5*(pragmatic_value_ifhintleft + pragmatic_value_ifhintright);
 
             elseif option == 2 
