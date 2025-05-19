@@ -257,23 +257,23 @@ context_floor = 1;
                 epistemic_value(option,tp,trial) = G_epistemic_value(A{1}(:,:,trial),p_context(:,:,trial));
                 %epistemic_value(option,tp,trial) = G_epistemic_value(log(A{1}(:,:,trial)),log(p_context(:,:,trial))); %Wrong version because A and s should be probability
 
-                % state belief update (looking ahead)
-        
-                pp_context_ifhintleft(:,:,trial) = p_context(:,:,trial).*A{1}(:,1,trial)...
-                                                 /sum(p_context(:,:,trial).*A{1}(:,1,trial),1);
-                p_o_win_ifhintleft = A{2}(:,:,1)*pp_context_ifhintleft(:,:,trial);
-                pp_context_ifhintright(:,:,trial) = p_context(:,:,trial).*A{1}(:,2,trial)...
-                                                 /sum(p_context(:,:,trial).*A{1}(:,2,trial),1);
-                p_o_win_ifhintright = A{2}(:,:,2)*pp_context_ifhintright(:,:,trial);
+%                 % state belief update (looking ahead)
+%         
+%                 pp_context_ifhintleft(:,:,trial) = p_context(:,:,trial).*A{1}(:,1,trial)...
+%                                                  /sum(p_context(:,:,trial).*A{1}(:,1,trial),1);
+%                 p_o_win_ifhintleft = A{2}(:,:,1)*pp_context_ifhintleft(:,:,trial);
+%                 pp_context_ifhintright(:,:,trial) = p_context(:,:,trial).*A{1}(:,2,trial)...
+%                                                  /sum(p_context(:,:,trial).*A{1}(:,2,trial),1);
+%                 p_o_win_ifhintright = A{2}(:,:,2)*pp_context_ifhintright(:,:,trial);
+% 
+%                 %pragmatic_value_ifhintleft = dot(p_o_win_ifhintleft, Rafteradvice(:,block));
+%                 %pragmatic_value_ifhintright = dot(p_o_win_ifhintright, Rafteradvice(:,block));
+%                 pragmatic_value_ifhintleft = .5*(dot(p_o_win_ifhintleft, R(:,block)));
+%                 pragmatic_value_ifhintright = .5*(dot(p_o_win_ifhintright, R(:,block)));
+% 
+%                 pragmatic_value(option,tp,trial) = .5*(pragmatic_value_ifhintleft + pragmatic_value_ifhintright);
 
-                %pragmatic_value_ifhintleft = dot(p_o_win_ifhintleft, Rafteradvice(:,block));
-                %pragmatic_value_ifhintright = dot(p_o_win_ifhintright, Rafteradvice(:,block));
-                pragmatic_value_ifhintleft = .5*(dot(p_o_win_ifhintleft, R(:,block)));
-                pragmatic_value_ifhintright = .5*(dot(p_o_win_ifhintright, R(:,block)));
-
-                pragmatic_value(option,tp,trial) = .5*(pragmatic_value_ifhintleft + pragmatic_value_ifhintright);
-
-                %pragmatic_value(option,tp,trial) = 0;
+                pragmatic_value(option,tp,trial) = 0;
 
             elseif option == 2 
                 p_o_win(:,option,trial) = A{2}(:,:,1)*p_context(:,:,trial);
