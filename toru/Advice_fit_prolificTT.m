@@ -1,4 +1,4 @@
-function [fit_results, DCM] = Advice_fit_prolificTT(subject,folder,params,field, plot, model)
+function [fit_results, DCM] = Advice_fit_prolificTT(subject,folder,params,field, plot, model, OMEGAPOSINEGA)
 % initialize has_practice_effects to false, tracking if this participant's
 % first complete behavioral file came after they played the task a little
 % bit
@@ -268,7 +268,11 @@ end
              elseif model == 2
               MDPs  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
              elseif model == 3
-              MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+                 if OMEGAPOSINEGA
+                     MDPs  = ModelFreeRLModeldisconnect_omegaposinega_TT(task, MDP,params, 0);
+                 else
+                     MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+                 end
              end
 
              %MDPs_simmed  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 1);

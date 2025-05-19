@@ -14,7 +14,7 @@ local = false;
 if ispc
     root = 'L:';
     results_dir = 'L:/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/ATresults';
-    FIT_SUBJECT = 'TORUTEST'; % 6544b95b7a6b86a8cd8feb88 6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  
+    FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88'; %  6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
     %INPUT_DIRECTORY = [root '/rsmith/wellbeing/tasks/AdviceTask/behavioral_files_2-6-24'];  % Where the subject file is located
     INPUT_DIRECTORY = [root '/NPC/DataSink/StimTool_Online/WB_Advice'];  % Where the subject file is located
     INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/RLdisconnectedwolamgdarsNoforgetall/paramcombi4'];  % Where the subject file is located
@@ -53,18 +53,21 @@ addpath([root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask']);
 
 
 %%% Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected
-model = 1; 
+model = 3; 
 
 %%% Specify 
 IFLAMGDA = false;
 ONEMODEL = false;
+OMEGAPOSINEGA = false;
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
 
 
-for paramcombi = 1:5
 %for paramcombi = 1:4
+
+for paramcombi = 1:5
+
 
 if SIM
 
@@ -161,14 +164,34 @@ params.l_loss_value = 4; % 8 in the original model
 if ONEMODEL 
 
  %tentative for one model checking
-    params.omega = .2;
+    
     params.eta = .5;
-
     params.lamgda = 1; %As fixed param
 
-        field = {'state_exploration', 'p_a','inv_temp','omega','eta','Rsensitivity'};
-        %field = {'p_a','inv_temp','omega','eta','Rsensitivity','reward_value'};
+    if OMEGAPOSINEGA
     
+    params.omegaposi = .2;
+    params.omeganega = .2;
+
+      if model == 1
+         field = {'state_exploration', 'p_a','inv_temp','omegaposi','omeganega','eta','Rsensitivity'};
+      else
+          field = {'p_a','inv_temp','l_loss_value','omegaposi','omeganega','eta','Rsensitivity'};
+      end
+    
+    else
+
+    params.omega = .2;
+       
+       if model == 1
+
+          field = {'state_exploration', 'p_a','inv_temp','omega','eta','Rsensitivity'};
+          %field = {'p_a','inv_temp','omega','eta','Rsensitivity','reward_value'};
+       else 
+           field = {'p_a','inv_temp','l_loss_value','omega','eta','Rsensitivity'};
+       end
+    
+    end
 
 else
 
@@ -291,7 +314,7 @@ end
     else
     
         if ~local
-            [fit_results, DCM] = Advice_fit_prolificTT(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot, model);
+            [fit_results, DCM] = Advice_fit_prolificTT(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot, model, OMEGAPOSINEGA);
         else
             [fit_results, DCM] = Advice_fit(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot, model);
         end
