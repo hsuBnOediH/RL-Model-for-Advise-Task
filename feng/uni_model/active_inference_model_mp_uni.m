@@ -1140,56 +1140,27 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
                     %                 result = (O{m}(2,2));
                     %                 t_two_result = find(result{:});
                     %                 result = (O{m}(2,3));
-                    %                 t_three_result = find(result{:});   
+                    %                 t_three_result = find(result{:});  
+
+                    result = (O{m}(2,2));
+                    t_two_result = find(result{:});
+                    result = (O{m}(2,3));
+                    t_three_result = find(result{:}); 
                     result = (O{m}(1,2));
                     advisor_chosen = find(result{:});
+
+                    
                     %  only learn/forget when the advisor was chosen (i.e. hint left or hint right). 
                     % apply omega_advisor_loss and omega_advisor_win at the
                     % same time
                     if (advisor_chosen == 2 | advisor_chosen == 3)
                         a_learned = (MDP(m).a{g}(:,:,2) - MDP.a_floor(:,:));
                         % Feng:
-                        % apply leraning rate for win and loss under the advisor
-                        a_learned(2, :) = a_learned(2, :) * (1 - omega_a_loss);
-                        
-                        a_learned(2, :) = a_learned(2, :) * eta_a_loss;
-                        a_learned(3, :) = a_learned(3, :) * eta_a_win;
-                        % a_learned(2, :) = a_learned(2, :) * omega_eta_advisor_loss; 
-                        % a_learned(3, :) = a_learned(3, :) * omega_eta_advisor_win; 
-                        count = da(:,:,2);
-                        % Feng:
-                        % apply forgeting rate for win and loss under the advisor
-                        % remove the 1- part, it used to be connected to the eta, 1- is not needed anymore
-                        count(2,:) = count(2,:) * eta_d_loss;
-                        count(2,:) = count(2,:) * omega_a_loss;
-                        count(3,:) = count(3,:) * omega_a_win;
-                        % count(2,:) = count(2,:) * (1 - omega_eta_advisor_loss);
-                        % count(3,:) = count(3,:) * (1 -omega_eta_advisor_win);
-                        MDP(m).a{g}(:,:,2) = MDP.a_floor(:,:) + a_learned + count;
-                        %MDP(m).a{g}(:,:,2) = a_learned + MDP.a_floor(:,:) + da(:,:,2)*eta;
-                        %                     if (t_two_result == 2 | t_three_result == 2)
-                        %                        % apply forgetting rate for losses
-                        %                         MDP(m).a{g}(:,:,2) = (MDP(m).a{g}(:,:,2) - MDP.a_floor(:,:))*omega_advisor_loss + MDP.a_floor(:,:) +da(:,:,2)*eta;
-                        %                     elseif (t_two_result == 3 | t_three_result == 3)
-                        %                         % apply forgetting rate for wins
-                        %                         MDP(m).a{g}(:,:,2) = (MDP(m).a{g}(:,:,2) - MDP.a_floor(:,:))*omega_advisor_win + MDP.a_floor(:,:) +da(:,:,2)*eta;
-                        %                     end
-                    else
-                        % Feng
-                        % for advisor not chosen
-                        % siligtly forget the MDP(m).a{g}(:,:,2)
-                        count = da(:,:,2);
-                        count(2,:) = count(2,:) * eta_d_loss;
-                        count(2,:) = count(2,:) * omega_a_loss;
-                        count(3,:) = count(3,:) * omega_a_win;
-                        MDP(m).a{g}(:,:,2) = MDP.a_floor(:,:) + count;
-
-                        % TODO  for chose left and right direcly, update the value
-
-                        
-
-                        
-
+                        if (t_two_result == 3 | t_three_result == 3)
+                            MDP(m).a{g}(:,:,2) = a_learned * omega_a_win + MDP.a_floor(:,:) +da(:,:,2)*eta_a_win;
+                        else
+                            MDP(m).a{g}(:,:,2) = a_learned * omega_a_loss + MDP.a_floor(:,:) +da(:,:,2)*eta_a_loss;
+                        end
                     end
                     %                 for q = 1:2
                     %                      for r = 2:3
@@ -1243,36 +1214,38 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
                 
                 % Feng:
                 % Update the initial hidden states with the context learning rate and forgeting rate
-          
-                
-               
-                % MDP(m).d{f} = (MDP(m).d{f} - MDP(m).d_floor)*omega_eta_context + MDP(m).d_floor + X{m,f}(i,3)*(1-omega_eta_context);
-                % MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*(1-omega_d_win) + MDP(m).d_floor(1) + (tmp(1))*eta_d_win;
-                if advisor_chosen == 1
-                    choose_left = O{m}(3,2);
-                else
-                    choose_left = O{m}(3,3);
-                end
-                
-                choose_left = find(cell2mat(choose_left) == 1);
-                choose_left = choose_left ==3;
-
-                is_win = O{m}(2,3);
-                is_win = find(cell2mat(is_win) == 1);
-                is_win = is_win == 3;
      
-                tmp = X{m,f}(i,1);
-                 % if choose left and win. right and lose
-                if (choose_left == 1 && is_win == 1) || (choose_left==0 && is_win == 0)
-                    
-                    MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*eta_d_win + MDP(m).d_floor(1) + (tmp(1))*(1-omega_d_win);
-                    MDP(m).d{f}(2) = (MDP(m).d{f}(2) - MDP(m).d_floor(2))*eta_d_loss + MDP(m).d_floor(2) + (tmp(2))*(1-omega_d_loss);
-                else
-                % if choose right and win, left and lose
-                    MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*eta_d_loss + MDP(m).d_floor(1) + (tmp(1))*(1-omega_d_loss);
-                    MDP(m).d{f}(2) = (MDP(m).d{f}(2) - MDP(m).d_floor(2))*eta_d_win + MDP(m).d_floor(2) + (tmp(2))*(1-omega_d_win);
-                end
                 
+                % 
+                % if advisor_chosen == 1
+                %     choose_left = O{m}(3,2);
+                % else
+                %     choose_left = O{m}(3,3);
+                % end
+                % 
+                % result = (O{m}(2,2));
+                % t_two_result = find(result{:});
+                % result = (O{m}(2,3));
+                % t_three_result = find(result{:}); 
+                % result = (O{m}(1,2));
+                % advisor_chosen = find(result{:});
+
+                
+             
+          
+                % if (t_two_result == 3 | t_three_result == 3)
+                % 
+                %     MDP(m).d{f} = (MDP(m).d{f} - MDP(m).d_floor)*eta_d_win + MDP(m).d_floor + X{m,f}(i,3)*(1-omega_d_win);
+                %     % MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*eta_d_win + MDP(m).d_floor(1) + (tmp(1))*(1-omega_d_win);
+                %     % MDP(m).d{f}(2) = (MDP(m).d{f}(2) - MDP(m).d_floor(2))*eta_d_loss + MDP(m).d_floor(2) + (tmp(2))*(1-omega_d_loss);
+                % else
+                % % if choose right and win, left and lose
+                %     MDP(m).d{f} = (MDP(m).d{f} - MDP(m).d_floor)*eta_d_loss + MDP(m).d_floor + X{m,f}(i,3)*(1-omega_d_loss);
+                %     % MDP(m).d{f}(1) = (MDP(m).d{f}(1) - MDP(m).d_floor(1))*eta_d_loss + MDP(m).d_floor(1) + (tmp(1))*(1-omega_d_loss);
+                %     % MDP(m).d{f}(2) = (MDP(m).d{f}(2) - MDP(m).d_floor(2))*eta_d_win + MDP(m).d_floor(2) + (tmp(2))*(1-omega_d_win);
+                % end
+
+                MDP(m).d{f} = (MDP(m).d{f} - MDP(m).d_floor)*eta_d_loss + MDP(m).d_floor + X{m,f}(i,3)*(1-omega_d_loss);
                 % MDP(m).d{f} = (MDP(m).d{f} - MDP(m).d_floor)*omega_eta_context + MDP(m).d_floor + X{m,f}(i,3)*(1-omega_eta_context);
                 
 

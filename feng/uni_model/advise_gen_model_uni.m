@@ -60,6 +60,8 @@ function mdp = advise_gen_model_uni(trialinfo,priors)
     % alpha = priors.alpha;
     alpha = priors.inv_temp;
 
+    times_counts=1; % orignal version 200
+
     omega_d_win = priors.omega_d_win;
     omega_d_loss = priors.omega_d_loss;
     omega_a_win = priors.omega_a_win;
@@ -111,7 +113,7 @@ function mdp = advise_gen_model_uni(trialinfo,priors)
 
 
         d{1} = prior_d*[p_lb 1-p_lb]';  % {'left better','right better'}
-        d{2} = [1 0 0 0]'*200; % {'start','hint','choose-left','choose-right'} !!! why times 200?
+        d{2} = [1 0 0 0]'*times_counts; % {'start','hint','choose-left','choose-right'}
         % TODO: maybe could be other value rather than 200, maybe 500 1 etc
 
 
@@ -197,9 +199,9 @@ function mdp = advise_gen_model_uni(trialinfo,priors)
         % As another example, to simulate learning the hint accuracy one
         % might specify:
 
-        a{1} = A{1}*200;
-        a{2} = A{2}*200;
-        a{3} = A{3}*200;
+        a{1} = A{1}*times_counts;
+        a{2} = A{2}*times_counts;
+        a{3} = A{3}*times_counts;
         
             
         a{1}(:,:,2) =  [0     0;      % No Hint
