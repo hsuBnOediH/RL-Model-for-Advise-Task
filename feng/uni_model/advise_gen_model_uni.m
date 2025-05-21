@@ -60,7 +60,7 @@ function mdp = advise_gen_model_uni(trialinfo,priors)
     % alpha = priors.alpha;
     alpha = priors.inv_temp;
 
-    times_counts=1; % orignal version 200
+    times_counts=200; % orignal version 200
 
     omega_d_win = priors.omega_d_win;
     omega_d_loss = priors.omega_d_loss;

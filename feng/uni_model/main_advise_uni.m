@@ -6,8 +6,8 @@ dbstop if error
 rng('default');
 clear all;
 clear variables;
-
 plot = true;
+
 ON_CLUSTER = getenv('ON_CLUSTER');
 
 env_sys = '';

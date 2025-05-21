@@ -2,6 +2,7 @@
 function [DCM] = advice_inversion_uni(DCM, model)
     ALL = false;
     prior_variance = .5;
+   
 
     for i = 1:length(DCM.field)
         field = DCM.field{i};
@@ -53,6 +54,8 @@ function [DCM] = advice_inversion_uni(DCM, model)
 return
 
 function L = spm_mdp_L(P,M,U,Y)
+    % TODO: remove when runing on cluster
+    is_debugging = true;
     % log-likelihood function
     % FORMAT L = spm_mdp_L(P,M,U,Y)
     % P    - parameter structure
@@ -181,6 +184,26 @@ function L = spm_mdp_L(P,M,U,Y)
                 MDP(idx_trial).actualreward = actualreward(idx_trial);
                 task.true_p_right(idx_trial) = 1-str2double(trialinfo{(idx_block-1)*30+idx_trial,2});
                 task.true_p_a(idx_trial) = str2double(trialinfo{(idx_block-1)*30+idx_trial,1});
+
+                        
+                if is_debugging
+                    MDP(idx_trial).omega_d_win = 0.6;
+                    MDP(idx_trial).omega_a_win = 0.6;
+                    MDP(idx_trial).omega_d_loss = 0.6;
+                    MDP(idx_trial).omega_a_loss = 0.6;
+                    
+                    MDP(idx_trial).eta_d_win = 0.6;
+                    MDP(idx_trial).eta_a_win = 0.6;
+                    MDP(idx_trial).eta_d_loss = 0.6;
+                    MDP(idx_trial).eta_a_loss = 0.6;
+
+
+                    MDP(idx_trial).alpha = 2;
+
+                end
+
+
+
             end
             if strcmp(trialinfo{idx_block*30-29,3}, '80')
                 task.block_type = "LL";
@@ -193,6 +216,11 @@ function L = spm_mdp_L(P,M,U,Y)
         %MDP  = spm_MDP_VB_X_advice(MDP);
         %MDP  = spm_MDP_VB_X_advice_no_message_passing_faster(MDP);
         task.field = fields;
+
+
+
+
+
 
         if M.model == 1
             MDP  = active_inference_model_uni(task, MDP,params, 0);
