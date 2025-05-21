@@ -168,7 +168,7 @@ actualrewards = actualrewards(:).'; % Reshape into a row
 
 
 
-        DCM        = advice_inversionTT(DCM, model);   % Invert the model
+        DCM        = advice_inversionTT(DCM, model, OMEGAPOSINEGA);   % Invert the model
         break;
 end
      %% 6.3 Check deviation of prior and posterior means & posterior covariance:
@@ -183,7 +183,7 @@ end
             field = fields{i};
             if ismember(field, {'p_right', 'p_a', 'eta', 'omega', 'eta_a_win', 'omega_a_win',...
                     'eta_a','omega_a','eta_d','omega_d','eta_a_loss','omega_a_loss','eta_d_win',...
-                    'omega_d_win', 'eta_d_loss', 'omega_d_loss', 'lamgda'})
+                    'omega_d_win', 'eta_d_loss', 'omega_d_loss', 'omegaposi', 'omeganega', 'lamgda'})
                 params.(field) = 1/(1+exp(-DCM.Ep.(field)));
             elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value', 'state_exploration',...
                     'parameter_exploration', 'Rsensitivity'})
@@ -269,9 +269,9 @@ end
               MDPs  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
              elseif model == 3
                  if OMEGAPOSINEGA
-                     MDPs  = ModelFreeRLModeldisconnect_omegaposinega_TT(task, MDP,params, 0);
+                     MDPs  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
                  else
-                     MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+                     MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP, params, 0);
                  end
              end
 

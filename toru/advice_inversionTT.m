@@ -1,6 +1,6 @@
 % Samuel Taylor and Ryan Smith, 2021
 % Model inversion script
-function [DCM] = advice_inversionTT(DCM, model)
+function [DCM] = advice_inversionTT(DCM, model, OMEGAPOSINEGA)
 
 % MDP inversion using Variational Bayes
 % FORMAT [DCM] = spm_dcm_mdp(DCM)
@@ -61,7 +61,7 @@ for i = 1:length(DCM.field)
         % transform the parameters that we fit
         if ismember(field, {'p_right', 'p_a', 'eta', 'omega', 'eta_a_win', 'omega_a_win',...
                 'eta_a','omega_a','eta_d','omega_d','eta_a_loss','omega_a_loss','eta_d_win'...
-                'omega_d_win', 'eta_d_loss', 'omega_d_loss', 'lamgda'})
+                'omega_d_win', 'eta_d_loss', 'omega_d_loss', 'omegaposi', 'omeganega', 'lamgda'})
             pE.(field) = log(DCM.params.(field)/(1-DCM.params.(field)));  % bound between 0 and 1
             pC{i,i}    = prior_variance;
         elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value', 'state_exploration',...
@@ -80,6 +80,7 @@ pC      = spm_cat(pC);
 % model specification
 %--------------------------------------------------------------------------
 M.model = model;
+M.OMEGAPOSINEGA = OMEGAPOSINEGA;
 M.L     = @(P,M,U,Y)spm_mdp_L(P,M,U,Y);  % log-likelihood function
 M.pE    = pE;                            % prior means (parameters)
 M.pC    = pC;                            % prior variance (parameters)
@@ -123,7 +124,7 @@ for i = 1:length(fields)
     field = fields{i};
     if ismember(field, {'p_right', 'p_a', 'eta', 'omega', 'eta_a_win', 'omega_a_win',...
             'eta_a','omega_a','eta_d','omega_d','eta_a_loss','omega_a_loss','eta_d_win'...
-            'omega_d_win', 'eta_d_loss', 'omega_d_loss', 'lamgda'})
+            'omega_d_win', 'eta_d_loss', 'omega_d_loss', 'omegaposi', 'omeganega', 'lamgda'})
         params.(field) = 1/(1+exp(-P.(field)));
     elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value', 'state_exploration',...
             'parameter_exploration', 'Rsensitivity'})
@@ -205,7 +206,11 @@ for idx_block = 1:num_blocks
     elseif M.model == 2
      MDP  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
     elseif M.model == 3
-     MDP  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+        if M.OMEGAPOSINEGA
+            MDP  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
+        else
+            MDP  = ModelFreeRLModeldisconnect_TT(task, MDP, params, 0);
+        end
     end
 
 
