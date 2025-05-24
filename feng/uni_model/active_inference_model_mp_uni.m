@@ -95,10 +95,8 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
     try, 
         zeta  = MDP(1).zeta;  
     catch, 
-        % feng: missing, should it be definded somewhere, should it be fixed?
         % controls how strictly the model evaluates potential policies (or actions)
-        zeta  = 0;
-        % TODO: remove the zeta parameter, set to 0 for considering all policies
+        zeta  = 3;
         % disp('zeta is missing, set to default value ');
     end
     % feng: instead of using eta_win or eta_loss, we use four separate eta values
@@ -321,6 +319,10 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
     % p:
     % qb:
     % w:
+
+
+
+
     T     = T(1);                              % number of time steps
     Ni    = 8; 
     if MP == 0
@@ -530,6 +532,8 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
             M(t,:) = 1;
         end
     end
+
+
     % 2. Belief updating over successive time points
     % Feng: almost no change undet this part
     %==========================================================================
@@ -1119,6 +1123,13 @@ function [MDP] = active_inference_model_mp_uni(task, MDP, params, sim)
         
     end % end of loop over time
     
+
+    
+
+
+
+
+
     % 3. learning – accumulate concentration parameters
     %==========================================================================
     for m = 1:size(MDP,1)

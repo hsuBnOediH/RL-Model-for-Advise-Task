@@ -163,6 +163,7 @@ for paramcombi = 1:5
     if FIT
 
         clear params
+
         params.p_a = .8;
         params.inv_temp = 1;
         params.state_exploration = 1;
@@ -186,8 +187,20 @@ for paramcombi = 1:5
             field = {'p_a','inv_temp','omega','eta_d_win','eta_d_loss','eta_a','Rsensitivity','state_exploration'};
         else
             if paramcombi == 1
-                params.omega = .2;
-                params.eta = .5;
+
+                % TODO: remove when runing on cluster
+                is_debugging = false;
+
+                if is_debugging
+                    params.omega = .6;
+                    params.eta = .6;
+                    params.p_a = .75;
+                    params.inv_temp = 2;
+                else
+                    params.omega = .2;
+                    params.eta = .5;
+        
+                end
                 if MODEL_IDX == 1
                     field = {'p_a','inv_temp','omega','eta','state_exploration', 'Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX == 4

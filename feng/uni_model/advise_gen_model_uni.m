@@ -262,7 +262,7 @@ function mdp = advise_gen_model_uni(trialinfo,priors)
         % Feng: depending on the partsize and time(if take advise) asign the value to C
         if (LA == 8)        
             C{2}(:,:) =    [0      0        0;  % Null
-                            0 -priors.l_loss_value *priors.Rsensitivity -priors.l_loss_value* priors.Rsensitivity  ;  % Loss
+                            0 -priors.l_loss_value*priors.Rsensitivity -priors.l_loss_value* priors.Rsensitivity  ;  % Loss
                             0     priors.reward_value       priors.reward_value]; % win
         elseif (LA == 4)
             C{2}(:,:) =    [0      0        0;  % Null
