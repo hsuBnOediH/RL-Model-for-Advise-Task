@@ -58,7 +58,8 @@ model = 3;
 %%% Specify 
 IFLAMGDA = false;
 ONEMODEL = false;
-OMEGAPOSINEGA = false;
+OMEGAPOSINEGA = true;
+OMEGAdiff = false;
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
@@ -168,7 +169,7 @@ if ONEMODEL
     params.eta = .5;
     params.lamgda = 1; %As fixed param
 
-    if OMEGAPOSINEGA
+    if OMEGAdiff
     
     params.omegaposi = .2;
     params.omeganega = .2;
@@ -199,7 +200,7 @@ if paramcombi == 1
 
  params.eta = .5;
 
- if OMEGAPOSINEGA
+ if OMEGAdiff
     
     params.omegaposi = .2;
     params.omeganega = .2;
@@ -243,7 +244,7 @@ elseif paramcombi == 2
     params.eta_d = .5;
     params.eta_a = .5;
 
-if OMEGAPOSINEGA
+if OMEGAdiff
     
     params.omegaposi = .2;
     params.omeganega = .2;
@@ -291,7 +292,7 @@ elseif paramcombi == 3
     params.eta_d_loss = .5;
     params.eta_a = .5;
 
-if OMEGAPOSINEGA
+if OMEGAdiff
     
     params.omegaposi = .2;
     params.omeganega = .2;
@@ -338,7 +339,7 @@ elseif paramcombi == 4
     params.eta_a_win = .5;
     params.eta_a_loss = .5;
 
-if OMEGAPOSINEGA
+if OMEGAdiff
     
     params.omegaposi = .2;
     params.omeganega = .2;
