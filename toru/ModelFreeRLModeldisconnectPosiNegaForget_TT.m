@@ -350,7 +350,7 @@ for t = 1:task.num_trials
           
           secopposite = 5 - secchoice;
           
-           if FORGETopposite
+%            if FORGETopposite
 
             % Forget the opposite choice
             if qvalue(secopposite, 1, 1) <= qvalue(secopposite, 1, t)
@@ -359,19 +359,19 @@ for t = 1:task.num_trials
                qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t) + params.omega_d_nega * (qvalue(secopposite, 1, 1) - qvalue(secopposite, 1, t));
             end
 
-            if qvalue(secopposite, hint, 1) <= qvalue(secopposite, hint, t)
-               qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_posi * (qvalue(secopposite, hint, 1) - qvalue(secopposite, hint, t));
-            elseif qvalue(secopposite, hint, 1) > qvalue(secopposite, hint, t)
-               qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_nega * (qvalue(secopposite, hint, 1) - qvalue(secopposite, hint, t));
-            end
-
-           else
-
-            % No forget the opposite choice
-            qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t);
+%             if qvalue(secopposite, hint, 1) <= qvalue(secopposite, hint, t)
+%                qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_posi * (qvalue(secopposite, hint, 1) - qvalue(secopposite, hint, t));
+%             elseif qvalue(secopposite, hint, 1) > qvalue(secopposite, hint, t)
+%                qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_nega * (qvalue(secopposite, hint, 1) - qvalue(secopposite, hint, t));
+%             end
+% 
+%            else
+% 
+%             % No forget the opposite choice
+%             qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t);
             qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t);
 
-           end
+%            end
           
           %Same updates as the advised option
           qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
@@ -392,7 +392,7 @@ for t = 1:task.num_trials
           
           secopposite = 5 - secchoice;
 
-          if FORGETopposite
+%           if FORGETopposite
 
             % Forget the opposite choice
             if qvalue(secopposite, 1, 1) <= qvalue(secopposite, 1, t)
@@ -401,19 +401,19 @@ for t = 1:task.num_trials
                qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t) + params.omega_d_nega * (qvalue(secopposite, 1, 1) - qvalue(secopposite, 1, t));
             end
 
-            if qvalue(secopposite, hint, 1) <= qvalue(secopposite, hint, t)
-               qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_posi * (qvalue(secopposite, hint, 1) - qvalue(secopposite, hint, t));
-            elseif qvalue(secopposite, hint, 1) > qvalue(secopposite, hint, t)
-               qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_nega * (qvalue(secopposite, hint, 1) - qvalue(secopposite, hint, t));
-            end
-
-          else
-
-           % No forget the opposite choice
-           qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t);
+%             if qvalue(secopposite, hint, 1) <= qvalue(secopposite, hint, t)
+%                qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_posi * (qvalue(secopposite, hint, 1) - qvalue(secopposite, hint, t));
+%             elseif qvalue(secopposite, hint, 1) > qvalue(secopposite, hint, t)
+%                qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_nega * (qvalue(secopposite, hint, 1) - qvalue(secopposite, hint, t));
+%             end
+% 
+%           else
+% 
+%            % No forget the opposite choice
+%            qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t);
            qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t);
 
-          end
+%           end
           
           %Same updates as the advised option
           qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
