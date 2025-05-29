@@ -6,7 +6,7 @@
 #SBATCH --nodes=1
 #SBATCH --begin=now
 #SBATCH --chdir=/media/labs/rsmith/lab-members/fli/advise_task/RL-Model-for-Advise-Task/feng/uni_model
-#SBATCH --time=1:30:00
+#SBATCH --time=10:30:00
 #################################################
 
 SIM=$1
