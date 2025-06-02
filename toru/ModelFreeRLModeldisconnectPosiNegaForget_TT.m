@@ -342,9 +342,12 @@ for t = 1:task.num_trials
    deltafirst = qvalue(actions(t, 2), hint, t) - qvalue(1, 1, t);
 
    qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_win * deltafirst + params.eta_a_win * params.lamgda * deltasecond;
+
+%  qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_win * (actualreward(t)*params.reward_value - qvalue(1, 1, t));
  
    secchoice = actions(t, 2);
           qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_win * (2*actualreward(t)*params.reward_value - qvalue(secchoice, 1, t));
+
           qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_a_win * (actualreward(t)*params.reward_value - qvalue(secchoice, hint, t));
           
           

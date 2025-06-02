@@ -53,12 +53,12 @@ addpath([root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask']);
 
 
 %%% Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected
-model = 3; 
+model = 1; 
 
 %%% Specify 
 IFLAMGDA = false;
 ONEMODEL = false;
-OMEGAPOSINEGA = true;
+OMEGAPOSINEGA = false;
 OMEGAdiff = false;
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
@@ -67,7 +67,7 @@ OMEGAdiff = false;
 
 %for paramcombi = 1:4 %for connected, or posi nega forgetting version
 
-for paramcombi = 1:5
+for paramcombi = 5
 
 
 if SIM
