@@ -175,7 +175,7 @@ for paramcombi = 1:5
             params.l_loss_value = 1; % 4 in the original model
         elseif MODEL_IDX == 4 %for Active inference with policy
             params.reward_value = 1; % 4 in the original model
-            params.l_loss_value = 4; % 4 in the original model
+            params.l_loss_value = 1; % 4 in the original model
         elseif MODEL_IDX ~= 1 % for RL
             params.reward_value = 1; 
             params.l_loss_value = 4; % 8 in the original model
@@ -206,7 +206,7 @@ for paramcombi = 1:5
                 if MODEL_IDX == 1
                     field = {'p_a','inv_temp','omega','eta','state_exploration', 'Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX == 4
-                    field = {'p_a','inv_temp','l_loss_value','omega','eta','state_exploration', 'Rsensitivity'}; %those are fitted
+                    field = {'p_a','inv_temp','omega','eta','state_exploration', 'Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX ~= 1 && MODEL_IDX ~= 4
                     if IFLAMGDA
                         params.lamgda = .5;
@@ -224,7 +224,7 @@ for paramcombi = 1:5
                 if MODEL_IDX == 1
                     field = {'p_a','inv_temp','omega','eta_d','eta_a', 'state_exploration','Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX == 4
-                    field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a', 'state_exploration','Rsensitivity'}; %those are fitted
+                    field = {'p_a','inv_temp','omega','eta_d','eta_a', 'state_exploration','Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX ~= 1 && MODEL_IDX ~= 4
                     if IFLAMGDA
                         params.lamgda = .5;
@@ -242,7 +242,7 @@ for paramcombi = 1:5
                 if MODEL_IDX == 1
                     field = {'p_a','inv_temp','omega','eta_d_win','eta_d_loss','eta_a','state_exploration','Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX == 4
-                    field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a','state_exploration','Rsensitivity'}; %those are fitted
+                    field = {'p_a','inv_temp','omega','eta_d_win','eta_d_loss','eta_a','state_exploration','Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX ~= 1 && MODEL_IDX ~= 4
                     if IFLAMGDA
                         params.lamgda = .5;
@@ -260,7 +260,7 @@ for paramcombi = 1:5
                 if MODEL_IDX == 1
                     field = {'p_a','inv_temp','omega','eta_d','eta_a_win','eta_a_loss','state_exploration','Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX == 4
-                    field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss','state_exploration','Rsensitivity'}; %those are fitted
+                    field = {'p_a','inv_temp','omega','eta_d','eta_a_win','eta_a_loss','state_exploration','Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX ~= 1 && MODEL_IDX ~= 4
                     if IFLAMGDA
                         params.lamgda = .5;
@@ -279,7 +279,7 @@ for paramcombi = 1:5
                 if MODEL_IDX == 1 
                     field = {'p_a','inv_temp','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','state_exploration','Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX == 4
-                    field = {'p_a','inv_temp','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','state_exploration','Rsensitivity'}; %those are fitted
+                    field = {'p_a','inv_temp','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','state_exploration','Rsensitivity'}; %those are fitted
                 elseif MODEL_IDX == 2
                     if IFLAMGDA
                         params.lamgda = .5;

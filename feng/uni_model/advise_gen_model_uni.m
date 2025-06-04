@@ -260,16 +260,22 @@ function mdp = advise_gen_model_uni(trialinfo,priors)
         %                  0 -LA(1)*la -LA(1)*la  ;  % Loss
         %                  0      4        log(exp(4)/2)]; % win
         % Feng: depending on the partsize and time(if take advise) asign the value to C
-        loss = 0;
-        if (LA == 8)    
-            loss = priors.l_loss_value*priors.Rsensitivity;
-        elseif (LA == 4)
-            loss = priors.l_loss_value;
-        end 
 
-        C{2}(:,:) =    [0       0                               0;  % Null
-                        0       -loss*priors.reward_value       -loss*priors.reward_value  ;  % Loss
-                        0       4*priors.reward_value           2*priors.reward_value]; % win
+
+        C{2}(:,:) =    [0      0        0;  % Null
+                 0 -LA(1) -LA(1)  ;  % Loss
+                 0      4*rs        log(exp(4)/2)*rs]; % win
+
+        % loss = 0;
+        % if (LA == 8)    
+        %     loss = priors.l_loss_value*priors.Rsensitivity;
+        % elseif (LA == 4)
+        %     loss = priors.l_loss_value;
+        % end 
+
+        % C{2}(:,:) =    [0       0                               0;  % Null
+        %                 0       -loss*priors.reward_value       -loss*priors.reward_value  ;  % Loss
+        %                 0       4*priors.reward_value           2*priors.reward_value]; % win
 
 
         %                 % T1  T2  T3
