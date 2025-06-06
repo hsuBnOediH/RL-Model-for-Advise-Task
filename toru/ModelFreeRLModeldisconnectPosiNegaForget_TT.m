@@ -2,6 +2,7 @@ function [results] = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, para
 
 %%%Specify forget or non-forget model
 FORGETopposite = true;
+FORGETtoZero = true;
 
 % observations.hints = 0 is no hint, 1 is left hint, 2 is right hint
 % observations.rewards(trial) 1 is win, 2 is loss
@@ -181,7 +182,57 @@ for t = 1:task.num_trials
 
     opposite = 5 - selected; % If selected is 2, opposite is 3; if selected is 3, opposite is 2
 
-     if FORGETopposite
+     if FORGETtoZero
+    
+      if FORGETopposite
+      
+         if 0 <=  qvalue(opposite, 1, t)
+           % Forget the opposite choice
+           qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
+              params.omega_d_posi * (0 - qvalue(opposite, 1, t));
+         elseif 0 > qvalue(opposite, 1, t) 
+           % Forget the opposite choice
+           qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
+              params.omega_d_nega * (0 - qvalue(opposite, 1, t));
+         end
+
+      else
+
+      % No forget the opposite choice
+      qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t);
+   
+      end
+
+        if 0 <= qvalue(1, 1, t)
+           % Forget qvalue(1, 1)
+           qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
+             params.omega_a_posi * (0 - qvalue(1, 1, t));
+        elseif 0 > qvalue(1, 1, t)
+           % Forget qvalue(1, 1)
+           qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
+             params.omega_a_nega * (0 - qvalue(1, 1, t));
+        end
+
+        % Forget choices after advice
+        if 0 <= qvalue(2, 2, t)
+           qvalue(2, 2, t+1) = qvalue(2, 2, t) + ...
+             params.omega_a_posi * (0 - qvalue(2, 2, t));
+        elseif 0 > qvalue(2, 2, t)
+           qvalue(2, 2, t+1) = qvalue(2, 2, t) + ...
+             params.omega_a_nega * (0 - qvalue(2, 2, t));
+        end
+
+        if 0 <= qvalue(3, 2, t)
+           qvalue(3, 2, t+1) = qvalue(3, 2, t) + ...
+             params.omega_a_posi * (0 - qvalue(3, 2, t));
+        elseif 0 > qvalue(3, 2, t)
+           qvalue(3, 2, t+1) = qvalue(3, 2, t) + ...
+             params.omega_a_nega * (0 - qvalue(3, 2, t));
+        end
+
+     else
+
+      if FORGETopposite
       
          if qvalue(opposite, 1, 1) <=  qvalue(opposite, 1, t)
            % Forget the opposite choice
@@ -193,14 +244,12 @@ for t = 1:task.num_trials
               params.omega_d_nega * (qvalue(opposite, 1, 1) - qvalue(opposite, 1, t));
          end
 
-
-
-     else
+      else
 
       % No forget the opposite choice
       qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t);
    
-     end
+      end
 
         if qvalue(1, 1, 1) <= qvalue(1, 1, t)
            % Forget qvalue(1, 1)
@@ -228,6 +277,7 @@ for t = 1:task.num_trials
            qvalue(3, 2, t+1) = qvalue(3, 2, t) + ...
              params.omega_a_nega * (qvalue(3, 2, 1) - qvalue(3, 2, t));
         end
+     end
 
 
     qvalue(2, 3, t+1) = qvalue(3, 2, t+1);
@@ -242,6 +292,56 @@ for t = 1:task.num_trials
     
     % Forget the opposite choice
     opposite = 5 - selected; % If selected is 2, opposite is 3; if selected is 3, opposite is 2
+
+    if FORGETtoZero
+
+     if FORGETopposite
+
+      if 0 <=  qvalue(opposite, 1, t)
+           % Forget the opposite choice
+           qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
+              params.omega_d_posi * (0 - qvalue(opposite, 1, t));
+      elseif 0 > qvalue(opposite, 1, t) 
+           % Forget the opposite choice
+           qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t) + ...
+              params.omega_d_nega * (0 - qvalue(opposite, 1, t));
+      end
+
+     else
+
+      % No forget the opposite choice
+      qvalue(opposite, 1, t+1) = qvalue(opposite, 1, t);
+
+     end
+
+        if 0 <= qvalue(1, 1, t)
+           % Forget qvalue(1, 1)
+           qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
+             params.omega_a_posi * (0 - qvalue(1, 1, t));
+        elseif 0 > qvalue(1, 1, t)
+           % Forget qvalue(1, 1)
+           qvalue(1, 1, t+1) = qvalue(1, 1, t) + ...
+             params.omega_a_nega * (0 - qvalue(1, 1, t));
+        end
+
+        % Forget choices after advice
+        if 0 <= qvalue(2, 2, t)
+           qvalue(2, 2, t+1) = qvalue(2, 2, t) + ...
+             params.omega_a_posi * (0 - qvalue(2, 2, t));
+        elseif 0 > qvalue(2, 2, t)
+           qvalue(2, 2, t+1) = qvalue(2, 2, t) + ...
+             params.omega_a_nega * (0 - qvalue(2, 2, t));
+        end
+
+        if 0 <= qvalue(3, 2, t)
+           qvalue(3, 2, t+1) = qvalue(3, 2, t) + ...
+             params.omega_a_posi * (0 - qvalue(3, 2, t));
+        elseif 0 > qvalue(3, 2, t)
+           qvalue(3, 2, t+1) = qvalue(3, 2, t) + ...
+             params.omega_a_nega * (0 - qvalue(3, 2, t));
+        end
+
+    else
 
      if FORGETopposite
 
@@ -288,7 +388,7 @@ for t = 1:task.num_trials
            qvalue(3, 2, t+1) = qvalue(3, 2, t) + ...
              params.omega_a_nega * (qvalue(3, 2, 1) - qvalue(3, 2, t));
         end
-
+    end
 
     qvalue(2, 3, t+1) = qvalue(3, 2, t+1);
     qvalue(3, 3, t+1) = qvalue(2, 2, t+1);
@@ -346,14 +446,29 @@ for t = 1:task.num_trials
 %  qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_win * (actualreward(t)*params.reward_value - qvalue(1, 1, t));
  
    secchoice = actions(t, 2);
-          qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_win * (params.reward_value - qvalue(secchoice, 1, t));
-          qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_a_win * ((params.reward_value/2) - qvalue(secchoice, hint, t));
+        qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_win * (params.reward_value - qvalue(secchoice, 1, t));
+        qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_a_win * ((params.reward_value/2) - qvalue(secchoice, hint, t));
           
           
-          secopposite = 5 - secchoice;
+        secopposite = 5 - secchoice;
           
-           if FORGETopposite
+        if FORGETopposite
+          if FORGETtoZero
 
+            % Forget the opposite choice
+            if 0 <= qvalue(secopposite, 1, t)
+               qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t) + params.omega_d_posi * (0 - qvalue(secopposite, 1, t));
+            elseif 0 > qvalue(secopposite, 1, t)
+               qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t) + params.omega_d_nega * (0 - qvalue(secopposite, 1, t));
+            end
+
+            if 0 <= qvalue(secopposite, hint, t)
+               qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_posi * (0 - qvalue(secopposite, hint, t));
+            elseif 0 > qvalue(secopposite, hint, t)
+               qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_nega * (0 - qvalue(secopposite, hint, t));
+            end
+
+          else
             % Forget the opposite choice
             if qvalue(secopposite, 1, 1) <= qvalue(secopposite, 1, t)
                qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t) + params.omega_d_posi * (qvalue(secopposite, 1, 1) - qvalue(secopposite, 1, t));
@@ -366,14 +481,15 @@ for t = 1:task.num_trials
             elseif qvalue(secopposite, hint, 1) > qvalue(secopposite, hint, t)
                qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_nega * (qvalue(secopposite, hint, 1) - qvalue(secopposite, hint, t));
             end
+          end
 
-           else
+        else
 
             % No forget the opposite choice
             qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t);
             qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t);
 
-           end
+        end
           
           %Same updates as the advised option
           qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
@@ -388,14 +504,29 @@ for t = 1:task.num_trials
    qvalue(1, 1, t+1) = qvalue(1, 1, t) + params.eta_a_loss * deltafirst + params.eta_a_loss * params.lamgda * deltasecond;
  
    secchoice = actions(t, 2);
-          qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_loss * (-loss - qvalue(secchoice, 1, t));
-          qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_a_loss * (-loss - qvalue(secchoice, hint, t));
+        qvalue(secchoice, 1, t+1) = qvalue(secchoice, 1, t) + params.eta_d_loss * (-loss - qvalue(secchoice, 1, t));
+        qvalue(secchoice, hint, t+1) = qvalue(secchoice, hint, t) + params.eta_a_loss * (-loss - qvalue(secchoice, hint, t));
 
           
-          secopposite = 5 - secchoice;
+        secopposite = 5 - secchoice;
 
-          if FORGETopposite
+        if FORGETopposite
+          if FORGETtoZero
 
+            % Forget the opposite choice
+            if 0 <= qvalue(secopposite, 1, t)
+               qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t) + params.omega_d_posi * (0 - qvalue(secopposite, 1, t));
+            elseif 0 > qvalue(secopposite, 1, t)
+               qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t) + params.omega_d_nega * (0 - qvalue(secopposite, 1, t));
+            end
+
+            if 0 <= qvalue(secopposite, hint, t)
+               qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_posi * (0 - qvalue(secopposite, hint, t));
+            elseif 0 > qvalue(secopposite, hint, t)
+               qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_nega * (0 - qvalue(secopposite, hint, t));
+            end
+
+          else
             % Forget the opposite choice
             if qvalue(secopposite, 1, 1) <= qvalue(secopposite, 1, t)
                qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t) + params.omega_d_posi * (qvalue(secopposite, 1, 1) - qvalue(secopposite, 1, t));
@@ -408,14 +539,15 @@ for t = 1:task.num_trials
             elseif qvalue(secopposite, hint, 1) > qvalue(secopposite, hint, t)
                qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t) + params.omega_a_nega * (qvalue(secopposite, hint, 1) - qvalue(secopposite, hint, t));
             end
+          end
 
-          else
+        else
 
            % No forget the opposite choice
            qvalue(secopposite, 1, t+1) = qvalue(secopposite, 1, t);
            qvalue(secopposite, hint, t+1) = qvalue(secopposite, hint, t);
 
-          end
+        end
           
           %Same updates as the advised option
           qvalue(2, 5-hint, t+1) = qvalue(3, hint, t+1);
