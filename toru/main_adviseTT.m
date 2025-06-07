@@ -59,7 +59,7 @@ model = 3;
 IFLAMGDA = false;
 ONEMODEL = false;
 OMEGAPOSINEGA = true;
-OMEGAdiff = 2; % 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (good vs. bad)
+OMEGAdiff = 3; % 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (good vs. bad)
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
