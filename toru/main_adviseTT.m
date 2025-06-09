@@ -52,14 +52,14 @@ addpath([root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask']);
 
 
 
-%%% Specify model 1 = active inference, 2 = RL connected, 3 = RL disconnected
+%%% Specify model 1 = active inference, 2 = RL connected (outdated), 3 = RL disconnected
 model = 3; 
 
 %%% Specify 
 IFLAMGDA = false;
 ONEMODEL = false;
 OMEGAPOSINEGA = true;
-OMEGAdiff = 3; % 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (good vs. bad)
+OMEGAdiff = 4; % 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (posi vs. nega), 4 = omega for context (posi vs. nega) and ad (posi vs. nega)
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
@@ -260,6 +260,27 @@ if paramcombi == 1
      end
   end
 
+   elseif OMEGAdiff == 4
+
+    params.omega_d_posi = .2;
+    params.omega_d_nega = .2;
+    params.omega_a_posi = .2;
+    params.omega_a_nega = .2;
+   
+  if model == 1
+    field = {'p_a','inv_temp','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta','state_exploration','Rsensitivity'}; %those are fitted
+    %field = {'reward_value','inv_temp','p_a','omega','eta','Rsensitivity'};
+  elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta','lamgda','Rsensitivity'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','reward_value','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta','Rsensitivity'};
+        %field = {'p_a','inv_temp','l_loss_value','eta','Rsensitivity'};
+     end
+  end
+
  end
 
 elseif paramcombi == 2
@@ -321,6 +342,27 @@ elseif OMEGAdiff == 3
      else
         params.lamgda = 1; %As fixed param
         field = {'p_a','inv_temp','reward_value','omega_d','omega_a_posi','omega_a_nega','eta_d','eta_a','Rsensitivity'};
+        %field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a','Rsensitivity'};
+     end
+ end
+
+elseif OMEGAdiff == 4
+
+    params.omega_d_posi = .2;
+    params.omega_d_nega = .2;
+    params.omega_a_posi = .2;
+    params.omega_a_nega = .2;
+
+ if model == 1
+    field = {'p_a','inv_temp','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta_d','eta_a','state_exploration','Rsensitivity'}; %those are fitted
+    %field = {'p_a','inv_temp','omega','eta_d','eta_a','Rsensitivity','reward_value'};
+ elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta_d','eta_a','lamgda','Rsensitivity'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','reward_value','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta_d','eta_a','Rsensitivity'};
         %field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a','Rsensitivity'};
      end
  end
@@ -391,6 +433,27 @@ elseif OMEGAdiff == 3
      end
  end
 
+elseif OMEGAdiff == 4
+
+    params.omega_d_posi = .2;
+    params.omega_d_nega = .2;
+    params.omega_a_posi = .2;
+    params.omega_a_nega = .2;
+
+ if model == 1
+    field = {'p_a','inv_temp','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta_d_win','eta_d_loss','eta_a','state_exploration','Rsensitivity'}; %those are fitted
+    %field = {'p_a','inv_temp','omega','eta_d_win','eta_d_loss','eta_a','Rsensitivity','reward_value'};
+ elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta_d_win','eta_d_loss','eta_a','lamgda','Rsensitivity'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','reward_value','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta_d_win','eta_d_loss','eta_a','Rsensitivity'};
+        %field = {'p_a','inv_temp','l_loss_value','eta_d_win','eta_d_loss','eta_a','Rsensitivity'};
+     end
+ end
+
 end
 
 
@@ -454,6 +517,27 @@ elseif OMEGAdiff == 3
      else
         params.lamgda = 1; %As fixed param
         field = {'p_a','inv_temp','reward_value','omega_d','omega_a_posi','omega_a_nega','eta_d','eta_a_win','eta_a_loss','Rsensitivity'};
+        %field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a_win','eta_a_loss','Rsensitivity'};
+     end
+  end
+
+ elseif OMEGAdiff == 4
+
+    params.omega_d_posi = .2;
+    params.omega_d_nega = .2;
+    params.omega_a_posi = .2;
+    params.omega_a_nega = .2;
+
+  if model == 1
+    field = {'p_a','inv_temp','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta_d','eta_a_win','eta_a_loss','state_exploration','Rsensitivity'}; %those are fitted
+    %field = {'p_a','inv_temp','omega','eta_d','eta_a_win','eta_a_loss','Rsensitivity','reward_value'}; 
+  elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta_d','eta_a_win','eta_a_loss','lamgda','Rsensitivity'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','reward_value','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta_d','eta_a_win','eta_a_loss','Rsensitivity'};
         %field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a_win','eta_a_loss','Rsensitivity'};
      end
   end
@@ -559,7 +643,40 @@ end
      end
    end
 
+ elseif OMEGAdiff == 4
+
+    params.omega_d_posi = .2;
+    params.omega_d_nega = .2;
+    params.omega_a_posi = .2;
+    params.omega_a_nega = .2;
+
+   if model == 1
+    %field = {'p_a','inv_temp','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','state_exploration','Rsensitivity'}; %those are fitted
+    %field = {'p_a','inv_temp','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','Rsensitivity','reward_value'};
+    field = {'p_a','inv_temp','eta_d_win','eta_d_loss','eta_a_win','eta_a_loss','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','state_exploration','Rsensitivity'};
+   elseif model == 2
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega_d','omega_a_posi','omega_a_nega','eta','lamgda','Rsensitivity'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','reward_value','omega_d','omega_a_posi','omega_a_nega','eta','Rsensitivity'};
+     end
+   elseif model == 3
+     if IFLAMGDA
+        params.lamgda = .5;
+        %field = {'p_a','inv_temp','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','lamgda','Rsensitivity'}; %those are fitted
+        field = {'p_a','inv_temp','l_loss_value','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta_d_win','eta_d_loss','eta_a_win','eta_a_loss','lamgda','Rsensitivity'}; 
+     else
+        params.lamgda = 1; %As fixed param
+        %field = {'p_a','inv_temp','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','Rsensitivity'};
+        field = {'p_a','inv_temp','reward_value','omega_d_posi','omega_d_nega','omega_a_posi','omega_a_nega','eta_d_win','eta_d_loss','eta_a_win','eta_a_loss','Rsensitivity'};
+     end
+   end
+
  end
+
+
 
 end
 
