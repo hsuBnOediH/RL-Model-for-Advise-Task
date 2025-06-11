@@ -111,10 +111,10 @@ single_eta = 0;
 field = fieldnames(params);
 for i = 1:length(field)
     if strcmp(field{i},'omega')
-        params.omega_d_win = params.omega;
-        params.omega_d_loss = params.omega;
-        params.omega_a_win = params.omega;
-        params.omega_a_loss = params.omega;
+        params.omega_d_posi = params.omega;
+        params.omega_d_nega = params.omega;
+        params.omega_a_posi = params.omega;
+        params.omega_a_nega = params.omega;
         params.omega_d = params.omega;
         params.omega_a = params.omega;
         single_omega = 1;
@@ -131,14 +131,14 @@ end
 
 for i = 1:length(field)
     if strcmp(field{i},'omega_d') & single_omega ~= 1
-        params.omega_d_win = params.omega_d;
-        params.omega_d_loss = params.omega_d;
+        params.omega_d_posi = params.omega_d;
+        params.omega_d_nega = params.omega_d;
     elseif strcmp(field{i},'eta_d') & single_eta ~= 1
         params.eta_d_win = params.eta_d;
         params.eta_d_loss = params.eta_d;
     elseif strcmp(field{i},'omega_a') & single_omega ~= 1
-        params.omega_a_win = params.omega_a;
-        params.omega_a_loss = params.omega_a;
+        params.omega_a_posi = params.omega_a;
+        params.omega_a_nega = params.omega_a;
     elseif strcmp(field{i},'eta_a') & single_eta ~= 1
         params.eta_a_win = params.eta_a;
         params.eta_a_loss = params.eta_a;
@@ -428,31 +428,31 @@ context_floor = 1;
         if reward_outcomes(trial) == 1
             if actions(trial,1) == 1 
                 % forgetting part
-                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_win) + a_0;
+                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_posi) + a_0;
                 % learning part
                 a{1}(:,:,trial+1) = a{1}(:,:,trial+1) + params.eta_a_win*(ppp_context(:,trial)*hint_outcome_vector(:,trial)')';
             else
                 %a{1}(:,:,trial+1) = a{1}(:,:,trial);
-                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_win) + a_0;
+                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_posi) + a_0;
             end
     
                 % forgetting part
-                dir_context(:,:,trial+1) = (dir_context(:,:,trial) - d_0)*(1-params.omega_d_win) + d_0;
+                dir_context(:,:,trial+1) = (dir_context(:,:,trial) - d_0)*(1-params.omega_d_posi) + d_0;
                 % learning part
                 dir_context(:,:,trial+1) = dir_context(:,:,trial+1) + params.eta_d_win*ppp_context(:,trial);
         elseif reward_outcomes(trial) == 2
             if actions(trial,1) == 1 
                 % forgetting part
-                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_loss) + a_0;
+                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_nega) + a_0;
                 % learning part
                 a{1}(:,:,trial+1) = a{1}(:,:,trial+1) + params.eta_a_loss*(ppp_context(:,trial)*hint_outcome_vector(:,trial)')';
             else
                 %a{1}(:,:,trial+1) = a{1}(:,:,trial);
-                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_loss) + a_0;
+                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_nega) + a_0;
             end
     
                 % forgetting part
-                dir_context(:,:,trial+1) = (dir_context(:,:,trial) - d_0)*(1-params.omega_d_loss) + d_0;
+                dir_context(:,:,trial+1) = (dir_context(:,:,trial) - d_0)*(1-params.omega_d_nega) + d_0;
                 % learning part
                 dir_context(:,:,trial+1) = dir_context(:,:,trial+1) + params.eta_d_loss*ppp_context(:,trial);
         end

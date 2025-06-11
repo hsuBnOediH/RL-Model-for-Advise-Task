@@ -53,7 +53,7 @@ addpath([root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask']);
 
 
 %%% Specify model 1 = active inference, 2 = RL connected (outdated), 3 = RL disconnected
-model = 3; 
+model = 1; 
 
 %%% Specify 
 IFLAMGDA = false;
