@@ -218,7 +218,7 @@ end
         end
 
         trialinfo = DCM.M.trialinfo;
-
+        L = 0;
 
         % Each block is separate -- effectively resetting beliefs at the start of
         % each block. 
@@ -276,12 +276,14 @@ end
              end
 
              %MDPs_simmed  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 1);
+             DCM.action_probs{idx_block} = MDPs.blockwise.action_probs;
 
              % bandit was chosen
              for j = 1:numel(actions)
                 if actions{j}(2,1) ~= 2
                    %act_prob_time1 = [act_prob_time1 MDPs(j).P(1,actions{j}(2,1),1)];
                    action_prob = MDPs.blockwise.action_probs(actions{j}(2,1)-1,1,j);
+                   L = L + log(action_prob + eps);
                    act_prob_time1 = [act_prob_time1 action_prob]; 
 %                    if MDPs(j).P(1,actions{j}(2,1),1)==max(MDPs(j).P(:,:,1))
 %                        model_acc_time1 = [model_acc_time1 1];
@@ -295,8 +297,10 @@ end
                     end
 
                 else % when advisor was chosen
-                   prob_choose_advisor = MDPs.blockwise.action_probs(1,1,j); 
-                   prob_choose_bandit = MDPs.blockwise.action_probs(actions{j}(2,2)-1,2,j); 
+                   prob_choose_advisor = MDPs.blockwise.action_probs(1,1,j);
+                   L = L + log(prob_choose_advisor + eps);
+                   prob_choose_bandit = MDPs.blockwise.action_probs(actions{j}(2,2)-1,2,j);
+                   L = L + log(prob_choose_bandit + eps);
                    act_prob_time1 = [act_prob_time1 prob_choose_advisor];
                    act_prob_time2 = [act_prob_time2 prob_choose_bandit];
                    
@@ -384,6 +388,7 @@ end
         fit_results.avg_act_prob_time2 = sum(act_prob_time2)/length(act_prob_time2);
         fit_results.avg_model_acc_time1   = sum(model_acc_time1)/length(model_acc_time1);
         fit_results.avg_model_acc_time2   = sum(model_acc_time2)/length(model_acc_time2);
-        fit_results.times_chosen_advisor = length(model_acc_time2);
+        %fit_results.times_chosen_advisor = length(model_acc_time2);
+        fit_results.LL = L;
            
 end
