@@ -2,7 +2,13 @@ function [results] = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, para
 
 %%%Specify forget or non-forget model
 FORGETopposite = true;
-FORGETtoZero = true;
+FORGETtoZero = getenv('FORGETtoZero');
+if isempty(FORGETtoZero)
+    FORGETtoZero = false; % default is no forget to zero
+else
+    FORGETtoZero = strcmpi(FORGETtoZero, 'true'); 
+end
+
 
 % observations.hints = 0 is no hint, 1 is left hint, 2 is right hint
 % observations.rewards(trial) 1 is win, 2 is loss

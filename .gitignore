@@ -9,3 +9,4 @@
 /bms/
 /criteria/*.pickle
 with_without_log.py
+/DataSink/
