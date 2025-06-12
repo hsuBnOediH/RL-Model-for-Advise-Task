@@ -13,6 +13,7 @@ from pathlib import Path
 import pandas as pd
 import time
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def run_matlab_for_subject(subject_id,env):
@@ -40,6 +41,35 @@ def run_matlab_for_subject(subject_id,env):
                           env=env,
                           cwd=str(script_dir))
     return proc.returncode, proc.stdout, proc.stderr
+
+def process_run(row_dict, model, pram_name):
+    # assemble environment
+    env = os.environ.copy()
+    env['SUBJECT_ID'] = row_dict['id']
+    env['RESULTS_DIR'] = f"result/{run_time}/{model}/{pram_name}/"
+    env['PARAMCOMBI'] = pram_name[-1]
+    if model in model_settings:
+        env['OMEGAdiff'] = str(model_settings[model]['OMEGAdiff'])
+        env['OMEGAPOSINEGA'] = str(model_settings[model]['OMEGAPOSINEGA']).lower()
+        env['FORGETtoZero'] = str(model_settings[model]['FORGETtoZero']).lower()
+    # set parameter envs
+    for key, value in row_dict.items():
+        if key in var_to_env:
+            env[var_to_env[key]] = str(value)
+    # run
+    start_time = time.time()
+    code, out, err = run_matlab_for_subject(row_dict['id'], env)
+    pbar.update(1)
+    os.makedirs(env['RESULTS_DIR'], exist_ok=True)
+    # write logs
+    with open(os.path.join(env['RESULTS_DIR'], f"{row_dict['id']}_out.log"), 'w') as f_out:
+        f_out.write(out)
+    with open(os.path.join(env['RESULTS_DIR'], f"{row_dict['id']}_err.log"), 'w') as f_err:
+        f_err.write(err)
+    duration = time.time() - start_time
+    with open(os.path.join(env['RESULTS_DIR'], f"{row_dict['id']}_time.log"), 'w') as f_time:
+        f_time.write(f"{duration}\n")
+    print(f"\t{model}/{pram_name}/{row_dict['id']} took {duration:.2f}s")
 
 # map from stripped variable name → ENV_VAR name
 var_to_env = {
@@ -131,80 +161,17 @@ overall_start = time.time()
 
 
 
-# loop thought model_params_dict to run the matlab script for each subject
 for model, params in model_params_dict.items():
-    # print(f"\n=== Processing model: {model} ===")
-    for pram_name, param_df in params.items():
-        # Convert the DataFrame to a dictionary for MATLAB
-        param_dict = param_df.to_dict(orient='list')
-        # print(f"\t Parameter: {pram_name}")
-        # loop though each row of the DataFrame and convert it to a dictionary
-        # TODO: only loop thought 1st row for now, later we can loop through all rows
-        len_param_df = len(param_df)
-        len_param_df = 1
-        for i in range(len_param_df):
-            row = param_df.iloc[i]
-            # Convert the row to a dictionary
-            row_dict = row.to_dict()
-            # for each key in row_dict, remove the prefix 'fixed_' or 'posterior_'
-            row_dict = {k.replace('fixed_', '').replace('posterior_', ''): v for k, v in row_dict.items()}
-
-            # Set the environment variable for MATLAB
-            # creat a empty environment dictionary
-            env = os.environ.copy()
-            env['SUBJECT_ID'] =  row_dict['id']
-            env['RESULTS_DIR'] = f"result/{run_time}/{model}/{pram_name}/"
-            # get the last digt of string param_name
-            env['PARAMCOMBI'] = pram_name[-1]
-            # Add model specific settings to the environment
-            if model in model_settings:
-                env['OMEGAdiff'] = str(model_settings[model]['OMEGAdiff'])
-                env['OMEGAPOSINEGA'] = str(model_settings[model]['OMEGAPOSINEGA']).lower()
-                env['FORGETtoZero'] = str(model_settings[model]['FORGETtoZero']).lower()
-            else:
-                print(f"[WARNING] Model {model} not found in model_settings, using default settings.")
-                raise ValueError(f"Model {model} not found in model_settings. Please check the model name.")
-
-            # Set the environment variables for each parameter
-            for key, value in row_dict.items():
-                if key in var_to_env:
-                    env[var_to_env[key]] = str(value)
-                else:
-                    if key in ['id', 'lamgda']:
-                        continue
-                    print(f"[WARNING] {key} not found in var_to_env, skipping.")
-                    # warning
-                    raise ValueError(f"Variable {key} not found in var_to_env mapping. Please check the variable names.")
-
-            # use the env to run the MATLAB command
-            # print(f"\n=== Processing {row_dict['id']} with model {model} and parameters {pram_name} ===")
-            # print(f"Environment variables: {env}")
-            # start timing this run
-            start_time = time.time()
-            code, out, err = run_matlab_for_subject(row_dict['id'], env)
-            if code != 0:
-                print(f"[ERROR] MATLAB run for model {model} with parameters {pram_name} and subject {row_dict['id']} failed with code {code}.")
-            pbar.update(1)
-            # ensure result directory exists
-            os.makedirs(env['RESULTS_DIR'], exist_ok=True)
-            # write stdout and stderr to log files
-            out_log_folder_path = os.path.join(env['RESULTS_DIR'], 'logs/out')
-            err_log_folder_path = os.path.join(env['RESULTS_DIR'], 'logs/err')
-            if not os.path.exists(out_log_folder_path):
-                os.makedirs(out_log_folder_path)
-            if not os.path.exists(err_log_folder_path):
-                os.makedirs(err_log_folder_path)
-            duration = time.time() - start_time
-            with open(os.path.join(out_log_folder_path, f"{row_dict['id']}_out.log"), 'w') as f_out:
-                for key,value in env.items():
-                    f_out.write(f"{key}={value}\n")
-                f_out.write("" + "="*40 + "\n")
-                f_out.write(out)
-                f_out.write("" + "=" * 40 + "\n")
-                f_out.write(f"duration: {duration:.2f} seconds\n")
-            with open(os.path.join(err_log_folder_path, f"{row_dict['id']}_err.log"), 'w') as f_err:
-                f_err.write(err)
-            print(f"\t duration: {duration:.2f} seconds")
+    # collect all tasks for this model
+    tasks = []
+    with ThreadPoolExecutor(max_workers=min(sum(len(df) for df in params.values()), os.cpu_count() or 1)) as executor:
+        for pram_name, param_df in params.items():
+            for _, row in param_df.iterrows():
+                row_dict = {k.replace('fixed_', '').replace('posterior_', ''): v for k, v in row.to_dict().items()}
+                tasks.append(executor.submit(process_run, row_dict, model, pram_name))
+        # wait for completion
+        for _ in as_completed(tasks):
+            pass
 
 
 # close progress bar after all models processed
