@@ -12,7 +12,8 @@ import os
 from pathlib import Path
 import pandas as pd
 import time
-#TODO  FORGETtoZero = false and True for all the six models
+from tqdm import tqdm
+
 
 def run_matlab_for_subject(subject_id,env):
 
@@ -122,18 +123,24 @@ for subfolder in models_subfolders:
 
         model_params_dict[subfolder_last][file_name_last] = df
 
+# compute total number of MATLAB runs
+total_runs = sum(len(df) for params in model_params_dict.values() for df in params.values())
+pbar = tqdm(total=total_runs, desc="Running MATLAB subjects")
+# record overall start time
+overall_start = time.time()
+
 
 
 # loop thought model_params_dict to run the matlab script for each subject
 for model, params in model_params_dict.items():
-    print(f"\n=== Processing model: {model} ===")
-    # TODO refactor param Name
+    # print(f"\n=== Processing model: {model} ===")
     for pram_name, param_df in params.items():
         # Convert the DataFrame to a dictionary for MATLAB
         param_dict = param_df.to_dict(orient='list')
-        print(f"\t Parameter: {pram_name}")
+        # print(f"\t Parameter: {pram_name}")
         # loop though each row of the DataFrame and convert it to a dictionary
         # TODO: only loop thought 1st row for now, later we can loop through all rows
+        len_param_df = len(param_df)
         len_param_df = 1
         for i in range(len_param_df):
             row = param_df.iloc[i]
@@ -170,17 +177,40 @@ for model, params in model_params_dict.items():
                     raise ValueError(f"Variable {key} not found in var_to_env mapping. Please check the variable names.")
 
             # use the env to run the MATLAB command
-            print(f"\n=== Processing {row_dict['id']} with model {model} and parameters {pram_name} ===")
-            print(f"Environment variables: {env}")
+            # print(f"\n=== Processing {row_dict['id']} with model {model} and parameters {pram_name} ===")
+            # print(f"Environment variables: {env}")
+            # start timing this run
+            start_time = time.time()
             code, out, err = run_matlab_for_subject(row_dict['id'], env)
             if code != 0:
-                print(f"[ERROR] MATLAB exited with code {code} for {row_dict['id']}")
-                print("--- STDOUT ---")
-                print(out.strip())
-                print("--- STDERR ---")
-                print(err.strip())
-            else:
-                print(f"[OK] Finished {row_dict['id']} with model {model} and parameters {pram_name}")
-                # Optionally, print out for debugging:
-                # print(out.strip())
+                print(f"[ERROR] MATLAB run for model {model} with parameters {pram_name} and subject {row_dict['id']} failed with code {code}.")
+            pbar.update(1)
+            # ensure result directory exists
+            os.makedirs(env['RESULTS_DIR'], exist_ok=True)
+            # write stdout and stderr to log files
+            out_log_folder_path = os.path.join(env['RESULTS_DIR'], 'logs/out')
+            err_log_folder_path = os.path.join(env['RESULTS_DIR'], 'logs/err')
+            if not os.path.exists(out_log_folder_path):
+                os.makedirs(out_log_folder_path)
+            if not os.path.exists(err_log_folder_path):
+                os.makedirs(err_log_folder_path)
+            duration = time.time() - start_time
+            with open(os.path.join(out_log_folder_path, f"{row_dict['id']}_out.log"), 'w') as f_out:
+                for key,value in env.items():
+                    f_out.write(f"{key}={value}\n")
+                f_out.write("" + "="*40 + "\n")
+                f_out.write(out)
+                f_out.write("" + "=" * 40 + "\n")
+                f_out.write(f"duration: {duration:.2f} seconds\n")
+            with open(os.path.join(err_log_folder_path, f"{row_dict['id']}_err.log"), 'w') as f_err:
+                f_err.write(err)
+            print(f"\t duration: {duration:.2f} seconds")
 
+
+# close progress bar after all models processed
+pbar.close()
+
+# print total runtime
+overall_end = time.time()
+total_duration = overall_end - overall_start
+print(f"Total runtime: {total_duration:.2f} seconds")
