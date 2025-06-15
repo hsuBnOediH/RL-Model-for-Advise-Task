@@ -52,6 +52,8 @@ def process_run(row_dict, model, pram_name):
         env['OMEGAdiff'] = str(model_settings[model]['OMEGAdiff'])
         env['OMEGAPOSINEGA'] = str(model_settings[model]['OMEGAPOSINEGA']).lower()
         env['FORGETtoZero'] = str(model_settings[model]['FORGETtoZero']).lower()
+
+
     # set parameter envs
     for key, value in row_dict.items():
         if key in var_to_env:
@@ -126,6 +128,16 @@ model_settings = {
         "OMEGAdiff": 3,
         "OMEGAPOSINEGA": True,
         "FORGETtoZero": True
+    },
+    "outputMerged_ActiveinferenceSecondisRforgetadviceUnchosen":{
+        "OMEGAdiff": 1,
+        "OMEGAPOSINEGA": True,
+        "FORGETtoZero": False
+    },
+    "outputMerged_ActiveinferenceSecondisRforgetadviceUnchosenFRtozero": {
+        "OMEGAdiff": 1,
+        "OMEGAPOSINEGA": True,
+        "FORGETtoZero": True
     }
 }
 
@@ -137,6 +149,8 @@ matlab_executable = os.environ.get('MATLAB_CMD', '/Applications/MATLAB_R2024a.ap
 
 preprocess_folder_path = "preprocessed/"
 models_subfolders = [f.path for f in os.scandir(preprocess_folder_path) if f.is_dir()]
+# run for Active inference models only
+models_subfolders = [f for f in models_subfolders if f.split('/')[-1].startswith("outputMerged_Act")]
 
 model_params_dict = {}
 for subfolder in models_subfolders:
@@ -162,7 +176,7 @@ overall_start = time.time()
 
 
 for model, params in model_params_dict.items():
-    # collect all tasks for this model
+    # collect all tasks for this model, subproecess code
     tasks = []
     with ThreadPoolExecutor(max_workers=min(sum(len(df) for df in params.values()), os.cpu_count() or 1)) as executor:
         for pram_name, param_df in params.items():
