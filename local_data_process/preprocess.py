@@ -3,9 +3,13 @@ import os
 import datetime
 from tqdm import tqdm
 
-subjects_folder_path = "../inputs/local"
-subjects_id_file_path =os.path.join(subjects_folder_path,  "coop_local_Ids.csv")
-result_folder_path = f"../outputs/local/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+# subjects_folder_path = "../inputs/local"
+subjects_folder_path = "/mnt/dell_storage/labs/rsmith/wellbeing/data/raw"
+subjects_id_file_path =os.path.join(subjects_folder_path,  "coop_local_ids.csv")
+
+
+# result_folder_path = f"../outputs/local/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+result_folder_path = f"/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/local_data/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
 # create the result folder if not exists
 if not os.path.exists(result_folder_path):
     os.makedirs(result_folder_path)
@@ -95,11 +99,9 @@ for id in tqdm(ids, desc="Processing subjects"):
         trial_number = advice_onset_rows.iloc[advice_rows_idx]["trial_number"]
         trial_number = int(trial_number)  # Convert to integer
         if trial_number != idx:
-            print(f"Trial number mismatch: expected {trial_number}, got {idx}. Skipping this trial.")
             # didn't take advice for this trial,
             continue
         advice = advice_onset_rows.iloc[advice_rows_idx]["response"]
-        print(f"Trial {idx +1} advice: {advice}, idx: {idx}")
         result_dicts[idx + 1]["advice"] = advice
         advice_rows_idx += 1
         if advice_rows_idx >= len(advice_onset_rows):
