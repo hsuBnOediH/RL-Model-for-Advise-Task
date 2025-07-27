@@ -1,0 +1,14 @@
+[
+    ('INSTRUCT_ONSET', 1), 
+    ('TASK_ONSET', 2), 
+    ('BLOCK_ONSET', 3), 
+    ('TRIAL_ONSET', 4), 
+    ('CHOICE_ONSET', 5), 
+    ('ADVICE_ONSET', 6), 
+    ('ADVICE_TYPE', 7), 
+    ('CHOICE', 8), 
+    ('FEEDBACK_ONSET', 9), 
+    ('FIXATION_ONSET', 10), 
+    ('EYE_DELAY', 11), 
+    ('TASK_END', 99)
+]
