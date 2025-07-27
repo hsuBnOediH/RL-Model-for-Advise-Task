@@ -1,7 +1,7 @@
 % Samuel Taylor and Ryan Smith, 2021
 
 
-function [fit_results, DCM] = advise_sim_fitTT(subject, folder, sim_data, field, params, plot, model)
+function [fit_results, DCM] = advise_sim_fitTT(subject, folder, sim_data, field, params, plot, model, OMEGAPOSINEGA, MODELBASED)
 %      load('trialinfo.mat');
 %      num_trials = size(sim_data,1);
 %      trialinfo = trialinfo(1:num_trials,:);
@@ -28,7 +28,7 @@ function [fit_results, DCM] = advise_sim_fitTT(subject, folder, sim_data, field,
 
 
     % Model inversion
-    DCM        = advice_inversionTT(DCM, model);   % Invert the model
+    DCM        = advice_inversionTT(DCM, model, OMEGAPOSINEGA, MODELBASED);   % Invert the model
 
     %% 6.3 Check deviation of prior and posterior means & posterior covariance:
     %==========================================================================
@@ -46,7 +46,7 @@ function [fit_results, DCM] = advise_sim_fitTT(subject, folder, sim_data, field,
             field = fields{i};
             if ismember(field, {'p_right', 'p_a', 'eta', 'omega', 'eta_a_win', 'omega_a_win',...
                     'eta_a','omega_a','eta_d','omega_d','eta_a_loss','omega_a_loss','eta_d_win',...
-                    'omega_d_win', 'eta_d_loss', 'omega_d_loss', 'lamgda'})
+                    'omega_d_win', 'eta_d_loss', 'omega_d_loss', 'omega_d_posi', 'omega_d_nega', 'omega_a_posi', 'omega_a_nega', 'lamgda'})
                 params.(field) = 1/(1+exp(-DCM.Ep.(field)));
             elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value', 'state_exploration',...
                     'parameter_exploration','Rsensitivity'})
@@ -130,7 +130,11 @@ function [fit_results, DCM] = advise_sim_fitTT(subject, folder, sim_data, field,
              elseif model == 2
               MDPs  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
              elseif model == 3
-              MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+                 if OMEGAPOSINEGA
+                     MDPs  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
+                 else
+                     MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
+                 end
              end
 
  % bandit was chosen

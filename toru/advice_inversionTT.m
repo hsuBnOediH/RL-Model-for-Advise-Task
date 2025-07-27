@@ -1,6 +1,6 @@
 % Samuel Taylor and Ryan Smith, 2021
 % Model inversion script
-function [DCM] = advice_inversionTT(DCM, model, OMEGAPOSINEGA)
+function [DCM] = advice_inversionTT(DCM, model, OMEGAPOSINEGA, MODELBASED)
 
 % MDP inversion using Variational Bayes
 % FORMAT [DCM] = spm_dcm_mdp(DCM)
@@ -81,6 +81,7 @@ pC      = spm_cat(pC);
 %--------------------------------------------------------------------------
 M.model = model;
 M.OMEGAPOSINEGA = OMEGAPOSINEGA;
+M.MODELBASED = MODELBASED;
 M.L     = @(P,M,U,Y)spm_mdp_L(P,M,U,Y);  % log-likelihood function
 M.pE    = pE;                            % prior means (parameters)
 M.pC    = pC;                            % prior variance (parameters)
@@ -207,7 +208,11 @@ for idx_block = 1:num_blocks
      MDP  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
     elseif M.model == 3
         if M.OMEGAPOSINEGA
-            MDP  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
+            if M.MODELBASED
+                MDP  = ModelBasedRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
+            else
+                MDP  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
+            end
         else
             MDP  = ModelFreeRLModeldisconnect_TT(task, MDP, params, 0);
         end

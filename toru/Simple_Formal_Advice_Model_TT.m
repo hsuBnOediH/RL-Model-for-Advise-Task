@@ -77,6 +77,8 @@
 
 function [results] = Simple_Formal_Advice_Model_TT(task, MDP, params, sim)
 
+FORGETtoZero = true;
+
 % observations.hints = 0 is no hint, 1 is left hint, 2 is right hint
 % observations.rewards(trial) 1 is win, 2 is loss
 % choices : 1 is advisor, 2 is left, 3 is right
@@ -423,32 +425,54 @@ context_floor = 1;
              end
 
         end   
-             
+            
+        if FORGETtoZero
+                a_zero =  [.5 .5; % "try left"
+                           .5 .5];% "try right"
+        end
+
             
         if reward_outcomes(trial) == 1
             if actions(trial,1) == 1 
                 % forgetting part
-                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_posi) + a_0;
+                if FORGETtoZero
+                    a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_zero)*(1-params.omega_a_posi) + a_zero;
+                else
+                    a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_posi) + a_0;
+                end
                 % learning part
                 a{1}(:,:,trial+1) = a{1}(:,:,trial+1) + params.eta_a_win*(ppp_context(:,trial)*hint_outcome_vector(:,trial)')';
             else
                 %a{1}(:,:,trial+1) = a{1}(:,:,trial);
-                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_posi) + a_0;
+                if FORGETtoZero
+                    a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_zero)*(1-params.omega_a_posi) + a_zero;
+                else
+                    a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_posi) + a_0;
+                end
             end
     
                 % forgetting part
                 dir_context(:,:,trial+1) = (dir_context(:,:,trial) - d_0)*(1-params.omega_d_posi) + d_0;
                 % learning part
                 dir_context(:,:,trial+1) = dir_context(:,:,trial+1) + params.eta_d_win*ppp_context(:,trial);
+
         elseif reward_outcomes(trial) == 2
             if actions(trial,1) == 1 
                 % forgetting part
-                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_nega) + a_0;
+                if FORGETtoZero
+                    a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_zero)*(1-params.omega_a_nega) + a_zero;
+                else
+                    a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_nega) + a_0;
+                end
                 % learning part
                 a{1}(:,:,trial+1) = a{1}(:,:,trial+1) + params.eta_a_loss*(ppp_context(:,trial)*hint_outcome_vector(:,trial)')';
             else
                 %a{1}(:,:,trial+1) = a{1}(:,:,trial);
-                a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_nega) + a_0;
+                if FORGETtoZero
+                    a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_zero)*(1-params.omega_a_nega) + a_zero;
+                else
+                    a{1}(:,:,trial+1) = (a{1}(:,:,trial) - a_0)*(1-params.omega_a_nega) + a_0;
+                end
             end
     
                 % forgetting part

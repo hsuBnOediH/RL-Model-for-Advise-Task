@@ -1,4 +1,4 @@
-function [fit_results, DCM] = Advice_fit_prolificTT(subject,folder,params,field, plot, model, OMEGAPOSINEGA)
+function [fit_results, DCM] = Advice_fit_prolificTT(subject,folder,params,field, plot, model, OMEGAPOSINEGA, MODELBASED)
 % initialize has_practice_effects to false, tracking if this participant's
 % first complete behavioral file came after they played the task a little
 % bit
@@ -168,7 +168,7 @@ actualrewards = actualrewards(:).'; % Reshape into a row
 
 
 
-        DCM        = advice_inversionTT(DCM, model, OMEGAPOSINEGA);   % Invert the model
+        DCM        = advice_inversionTT(DCM, model, OMEGAPOSINEGA, MODELBASED);   % Invert the model
         break;
 end
      %% 6.3 Check deviation of prior and posterior means & posterior covariance:
@@ -269,7 +269,11 @@ end
               MDPs  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
              elseif model == 3
                  if OMEGAPOSINEGA
-                     MDPs  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
+                     if MODELBASED
+                         MDPs  = ModelBasedRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
+                     else
+                         MDPs  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
+                     end
                  else
                      MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP, params, 0);
                  end
