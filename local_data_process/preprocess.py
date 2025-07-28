@@ -71,19 +71,23 @@ for id in tqdm(ids, desc="Processing subjects"):
     # extract the data from the task_df that "event_code" is "4" and "trial_number" is trial_idx +1
     trial_info_rows = task_df[task_df["event_code"] == "4"]
 
-    # for idx in range(360):
-    #     # read each row "trial_type" and "response"
-    #     trial_type = trial_info_rows.iloc[idx]["trial_type"]
-    #     response = trial_info_rows.iloc[idx]["response"]
-    #
-    #     probs = response.split("_")
-    #     trial_info_1 = float(probs[-1])
-    #     trial_info_2 = float(probs[0])
-    #     trial_info_3 = 40 if trial_type.startswith("sm") else 80
-    #
-    #     result_dicts[idx + 1]["trial_info_1"] = trial_info_1
-    #     result_dicts[idx + 1]["trial_info_2"] = trial_info_2
-    #     result_dicts[idx + 1]["trial_info_3"] = trial_info_3
+
+    for idx in range(360):
+        # read each row "trial_type" and "response"
+        trial_type = trial_info_rows.iloc[idx]["trial_type"]
+        response = trial_info_rows.iloc[idx]["response"]
+
+        if response is None or pd.isna(response):
+            # print(f"Subject {id}, Trial {idx + 1} has no response. Skipping this trial.")
+            continue
+        probs = response.split("_")
+        trial_info_1 = float(probs[-1])
+        trial_info_2 = float(probs[0])
+        trial_info_3 = 40 if trial_type.startswith("sm") else 80
+
+        result_dicts[idx + 1]["trial_info_1"] = trial_info_1
+        result_dicts[idx + 1]["trial_info_2"] = trial_info_2
+        result_dicts[idx + 1]["trial_info_3"] = trial_info_3
 
     # extract the final choice and reward from the task_df where "event_code" is "8"
     final_choice_rows = task_df[task_df["event_code"] == "8"]
