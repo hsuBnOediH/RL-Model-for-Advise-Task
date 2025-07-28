@@ -3,13 +3,13 @@ import os
 import datetime
 from tqdm import tqdm
 
-# subjects_folder_path = "../inputs/local"
-subjects_folder_path = "/mnt/dell_storage/labs/rsmith/wellbeing/data/raw"
+subjects_folder_path = "../inputs/raw"
+# subjects_folder_path = "/mnt/dell_storage/labs/rsmith/wellbeing/data/raw"
 subjects_id_file_path =os.path.join(subjects_folder_path,  "coop_local_ids.csv")
 
 
-# result_folder_path = f"../outputs/local/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
-result_folder_path = f"/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/local_data/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+result_folder_path = f"../outputs/local/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+# result_folder_path = f"/mnt/dell_storage/labs/rsmith/lab-members/fli/advise_task/local_data/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
 # create the result folder if not exists
 if not os.path.exists(result_folder_path):
     os.makedirs(result_folder_path)
@@ -27,6 +27,7 @@ with open(subjects_id_file_path, "r") as f:
 
 # the subjects folder path find according subject folder the format is f"sub-{id}"
 for id in tqdm(ids, desc="Processing subjects"):
+    print(f"Processing subject {id}...")
     subject_folder_path = os.path.join(subjects_folder_path, f"sub-{id}")
     if not os.path.exists(subject_folder_path):
         print(f"Subject folder {subject_folder_path} does not exist.")
@@ -70,42 +71,49 @@ for id in tqdm(ids, desc="Processing subjects"):
     # extract the data from the task_df that "event_code" is "4" and "trial_number" is trial_idx +1
     trial_info_rows = task_df[task_df["event_code"] == "4"]
 
-    for idx in range(360):
-        # read each row "trial_type" and "response"
-        trial_type = trial_info_rows.iloc[idx]["trial_type"]
-        response = trial_info_rows.iloc[idx]["response"]
-
-        probs = response.split("_")
-        trial_info_1 = float(probs[-1])
-        trial_info_2 = float(probs[0])
-        trial_info_3 = 40 if trial_type.startswith("sm") else 80
-
-        result_dicts[idx + 1]["trial_info_1"] = trial_info_1
-        result_dicts[idx + 1]["trial_info_2"] = trial_info_2
-        result_dicts[idx + 1]["trial_info_3"] = trial_info_3
+    # for idx in range(360):
+    #     # read each row "trial_type" and "response"
+    #     trial_type = trial_info_rows.iloc[idx]["trial_type"]
+    #     response = trial_info_rows.iloc[idx]["response"]
+    #
+    #     probs = response.split("_")
+    #     trial_info_1 = float(probs[-1])
+    #     trial_info_2 = float(probs[0])
+    #     trial_info_3 = 40 if trial_type.startswith("sm") else 80
+    #
+    #     result_dicts[idx + 1]["trial_info_1"] = trial_info_1
+    #     result_dicts[idx + 1]["trial_info_2"] = trial_info_2
+    #     result_dicts[idx + 1]["trial_info_3"] = trial_info_3
 
     # extract the final choice and reward from the task_df where "event_code" is "8"
     final_choice_rows = task_df[task_df["event_code"] == "8"]
     for idx in range(360):
         final_choice = final_choice_rows.iloc[idx]["response"]
         reward = final_choice_rows.iloc[idx]["result"]
-
         result_dicts[idx + 1]["final_choice"] = final_choice
         result_dicts[idx + 1]["reward"] = float(reward)
 
     advice_onset_rows = task_df[task_df["event_code"] == "6"]
     advice_rows_idx = 0
-    for idx in range(360):
-        trial_number = advice_onset_rows.iloc[advice_rows_idx]["trial_number"]
-        trial_number = int(trial_number)  # Convert to integer
-        if trial_number != idx:
-            # didn't take advice for this trial,
-            continue
-        advice = advice_onset_rows.iloc[advice_rows_idx]["response"]
-        result_dicts[idx + 1]["advice"] = advice
-        advice_rows_idx += 1
-        if advice_rows_idx >= len(advice_onset_rows):
-            break
+    if advice_onset_rows.empty:
+        print(f"Subject {id} has no advice onset rows!!! Consider removing this subject???")
+        # if there is no advice onset, set all advice to None
+        for idx in range(360):
+            result_dicts[idx + 1]["advice"] = None
+        # continue to the next subject
+        continue
+    else:
+        for idx in range(360):
+            trial_number = advice_onset_rows.iloc[advice_rows_idx]["trial_number"]
+            trial_number = int(trial_number)  # Convert to integer
+            if trial_number != idx:
+                # didn't take advice for this trial,
+                continue
+            advice = advice_onset_rows.iloc[advice_rows_idx]["response"]
+            result_dicts[idx + 1]["advice"] = advice
+            advice_rows_idx += 1
+            if advice_rows_idx >= len(advice_onset_rows):
+                break
 
 
 
