@@ -43,7 +43,7 @@ end
 
 % SETTINGS
 % Subject identifier for the test or experiment, if on cluster read from ENV var
-FIT_SUBJECT = 'AA003';
+FIT_SUBJECT = 'FENGTEST';
 if ON_CLUSTER
     FIT_SUBJECT = getenv('FIT_SUBJECT');
 end
@@ -69,8 +69,8 @@ end
 % INPUT_PATH:
 % The folder path where the subject file is located. If INPUT_PATH is a relative path,
 % it will be appended to the ROOT path.
-% INPUT_PATH = '../../inputs/';
-INPUT_PATH = '../../inputs/raw';
+INPUT_PATH = '../../inputs/';
+% INPUT_PATH = '../../inputs/raw';
 if ON_CLUSTER
     INPUT_PATH = getenv('INPUT_PATH');
 end
@@ -308,7 +308,7 @@ for paramcombi = 1:5
             [fit_results, DCM] = advise_sim_fit_uni(FIT_SUBJECT, INPUT_DIRECTORYforSIM, gen_data, field, params, plot, MODEL_IDX);
         else
             % [fit_results, DCM] = advice_fit_prolific_uni(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot, MODEL_IDX);
-            res = Advice_fit_CG(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot);
+            res = advice_fit_prolific_uni(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot);
             model_free_results = advise_mf_uni(fit_results.file);
             mf_fields = fieldnames(model_free_results);
             for i=1:length(mf_fields)

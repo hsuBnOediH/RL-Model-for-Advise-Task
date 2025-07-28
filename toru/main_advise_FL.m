@@ -21,7 +21,8 @@ if ispc
 elseif ismac
    root = '';
    results_dir ='../outputs/model_free/debug/';
-   FIT_SUBJECT = 'AA003'; %  6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
+   FIT_SUBJECT = 'AA003'; 
+   % FIT_SUBJECT = 'AP232'; 
    %INPUT_DIRECTORY = [root '/rsmith/wellbeing/tasks/AdviceTask/behavioral_files_2-6-24'];  % Where the subject file is located
    INPUT_DIRECTORY = '../inputs/local/local_data_without_trial_info';  % Where the subject file is located
    INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/RLdisconnectedwolamgdarsallfreeRoneomegaFRtozeroSR/paramcombi4'];  % Where the subject file is located
@@ -707,11 +708,13 @@ end
     
         if ~local
             [fit_results, DCM] = Advice_fit_prolificTT(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot, model, OMEGAPOSINEGA, MODELBASED);
+            model_free_results = advise_mf_TT(fit_results.file);
         else
-            [fit_results, DCM] = Advice_fit_FL(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot, model);
+            [fit_results, DCM] = Advice_fit_FL(FIT_SUBJECT, INPUT_DIRECTORY, params, field, plot, model, OMEGAPOSINEGA, MODELBASED);
+            model_free_results = advise_mf_FL(fit_results.file);
         end
         
-        model_free_results = advise_mf_TT(fit_results.file);
+        
         
         
         mf_fields = fieldnames(model_free_results);
