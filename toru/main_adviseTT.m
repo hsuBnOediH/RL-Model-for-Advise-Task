@@ -20,12 +20,16 @@ if ispc
     INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/RLdisconnectedwolamgdarsallfreeRoneomegaFRtozeroSR/paramcombi4'];  % Where the subject file is located
                                                                                                                 
 else
-    root = '/media/labs';
+    root = '/mnt/dell_storage/labs';
+%    results_dir = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/ATresults'];
+%    FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88'; %  6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
     FIT_SUBJECT = getenv('SUBJECT');
     results_dir = getenv('RESULTS');
     if ~SIM
+%       INPUT_DIRECTORY = [root '/NPC/DataSink/StimTool_Online/WB_Advice'];  % Where the subject file is located
       INPUT_DIRECTORY = getenv('INPUT_DIRECTORY');  % Where the subject file is located
     elseif SIM
+%       INPUT_DIRECTORYforSIM = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/RLdisconnectedwolamgdarsallfreeRoneomegaFRtozeroSR/paramcombi4'];  % Where the subject file is located
       INPUT_DIRECTORYforSIM = getenv('INPUT_DIRECTORYforSIM');
     end
 
@@ -88,10 +92,16 @@ paramsim.parameter_exploration = 0;
 
 paramsim.p_a = subdatsim.posterior_p_a;
 paramsim.inv_temp = subdatsim.posterior_inv_temp;
-%paramsim.reward_value = subdatsim.posterior_reward_value;  % 4 in the original model
-paramsim.reward_value = 1;  % 4 in the original model
-%paramsim.l_loss_value = 4; % RL
-paramsim.l_loss_value = 1;  % 4 in the original model
+
+
+ if model == 1 %for Active inference
+     paramsim.reward_value = 1; % 4 in the original model
+     paramsim.l_loss_value = 1; % 4 in the original model
+ elseif model ~= 1 % for RL
+     paramsim.reward_value = subdatsim.posterior_reward_value; % 1 in the previous model as outcome sensitivity 
+     paramsim.l_loss_value = 4; % 8 in the original model
+ end
+
 
 paramsim.omega = subdatsim.posterior_omega;
 %paramsim.omega_d = subdatsim.posterior_omega_d;

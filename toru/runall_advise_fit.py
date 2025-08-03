@@ -1,6 +1,6 @@
 import sys, os, re, subprocess
 
-subject_list_path = '/media/labs/rsmith/lab-members/cgoldman/Wellbeing/advise_task/fitting_actual_data/advise_subject_IDs_prolific.csv'
+subject_list_path = '/mnt/dell_storage/labs/rsmith/lab-members/cgoldman/Wellbeing/advise_task/fitting_actual_data/advise_subject_IDs_prolific.csv'
 input_directory = sys.argv[1]
 results = sys.argv[2]
 
@@ -18,7 +18,7 @@ with open(subject_list_path) as infile:
     for line in infile:
         subjects.append(line.strip())
 
-ssub_path = '/media/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/RLmodel/toru/run_advise_fit.ssub'
+ssub_path = '/mnt/dell_storage/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/RLmodel/toru/run_advise_fit.ssub'
 
 for subject in subjects:
     stdout_name = f"{results}/logs/{subject}-%J.stdout"
@@ -30,5 +30,5 @@ for subject in subjects:
     print(f"SUBMITTED JOB [{jobname}]")
 
 
-    ###python3 /media/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/RLmodel/toru/runall_advise_fit.py /media/labs/NPC/DataSink/StimTool_Online/WB_Advice /media/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/RLdisconnectedwolamgdarsallfreeRoneomegaFRtozeroSR4sim
+    ###python3 /mnt/dell_storage/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/RLmodel/toru/runall_advise_fit.py /mnt/dell_storage/labs/NPC/DataSink/StimTool_Online/WB_Advice /mnt/dell_storage/labs/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/resultsforallmodels/RLdisconnectedwolamgdarsallfreeRoneomegaFRtozeroSR4sim
     #squeue -o "%.18i %.9P %.100j %.8u %.2t %.10M %.6D %R"
