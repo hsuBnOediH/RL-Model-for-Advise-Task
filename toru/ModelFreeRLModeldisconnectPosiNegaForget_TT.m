@@ -119,9 +119,9 @@ elseif task.block_type == "LL"
 end
 
 %Initialization of q table (column: start, advised left, advised right; row: take advice, left, right)
-qvalue(:, :, 1) = [(params.reward_value/2)*params.p_a-loss*(1-params.p_a),     0,                                                      0;
-                   params.reward_value*.5-loss*.5,                             (params.reward_value/2)*params.p_a-loss*(1-params.p_a), (params.reward_value/2)*(1-params.p_a)-loss*params.p_a;
-                   params.reward_value*.5-loss*.5,                             (params.reward_value/2)*(1-params.p_a)-loss*params.p_a, (params.reward_value/2)*params.p_a-loss*(1-params.p_a)];
+qvalue(:, :, 1) = [(params.reward_value/2)*params.p_a-loss*(1-params.p_a),          0,                                                      0;
+                   (params.reward_value + params.self_reliance_bonus)*.5-loss*.5,   (params.reward_value/2)*params.p_a-loss*(1-params.p_a), (params.reward_value/2)*(1-params.p_a)-loss*params.p_a;
+                   (params.reward_value + params.self_reliance_bonus)*.5-loss*.5,   (params.reward_value/2)*(1-params.p_a)-loss*params.p_a, (params.reward_value/2)*params.p_a-loss*(1-params.p_a)];
 
 %qvalue(:, :, 1) = qvalue(:, :, 1)*params.reward_value;
 
@@ -288,7 +288,7 @@ for t = 1:task.num_trials
 
     % Update for the selected choice
     qvalue(selected, 1, t+1) = qvalue(selected, 1, t) + ...
-        params.eta_d_loss * ((-loss + params.self_reliance_bonus) - qvalue(selected, 1, t));
+        params.eta_d_loss * (-loss - qvalue(selected, 1, t));
     
     % Forget the opposite choice
     opposite = 5 - selected; % If selected is 2, opposite is 3; if selected is 3, opposite is 2

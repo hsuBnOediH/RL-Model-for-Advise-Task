@@ -4,7 +4,7 @@ dbstop if error
 rng('default');
 cd(fileparts(mfilename('fullpath')));
 
-SIM = true; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
+SIM = false; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
 FIT = true; % Fit example subject data 'BBBBB' or fit simulated behavior (if SIM == true)
 plot = true;
 %indicate if prolific or local
@@ -72,8 +72,8 @@ OMEGAdiff = 1; % 1 = oneomega, 2 = omega for context and ad, 3 = omega for conte
 
 %for paramcombi = 1:4 %for connected, or posi nega forgetting version
 
-%for paramcombi = 1:5
-for paramcombi = 4
+for paramcombi = 1:5
+%for paramcombi = 4
 
 if SIM
 
