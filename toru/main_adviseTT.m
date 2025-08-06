@@ -22,7 +22,7 @@ if ispc
 else
     root = '/mnt/dell_storage/labs';
 %    results_dir = [root '/rsmith/lab-members/ttakahashi/WellbeingTasks/AdviceTask/ATresults'];
-%    FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88'; %  6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
+%    FIT_SUBJECT = '5a5ec79cacc75b00017aa095'; % 6544b95b7a6b86a8cd8feb88  6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
     FIT_SUBJECT = getenv('SUBJECT');
     results_dir = getenv('RESULTS');
     if ~SIM
