@@ -131,7 +131,11 @@ function [fit_results, DCM] = advise_sim_fitTT(subject, folder, sim_data, field,
               MDPs  = ModelFreeRLModelconnect_TT(task, MDP,params, 0);
              elseif model == 3
                  if OMEGAPOSINEGA
-                     MDPs  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
+                     if MODELBASED
+                         MDPs  = ModelBasedRLModelconnectPosiNegaForget_TT(task, MDP, params, 0);
+                     else
+                         MDPs  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
+                     end
                  else
                      MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP,params, 0);
                  end

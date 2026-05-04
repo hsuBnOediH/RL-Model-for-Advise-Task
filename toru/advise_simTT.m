@@ -1,5 +1,5 @@
 %% Step by step introduction to building and using active inference models
-function [gen_data] = advise_simTT(params, plot, model, OMEGAPOSINEGA)
+function [gen_data] = advise_simTT(params, plot, model, OMEGAPOSINEGA, MODELBASED)
 
 % rng('shuffle') % This sets the random number generator to produce a different 
 %                % random sequence each time, which leads to variability in 
@@ -39,7 +39,11 @@ load('trialinfo_forty_eighty.mat');
               MDPs  = ModelFreeRLModelconnect_TT(task, MDP, params, sim);
         elseif model == 3
             if OMEGAPOSINEGA
-              MDPs  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, sim);
+                     if MODELBASED
+                         MDPs  = ModelBasedRLModelconnectPosiNegaForget_TT(task, MDP, params, sim);
+                     else
+                         MDPs  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, sim);
+                     end
             else
               MDPs  = ModelFreeRLModeldisconnect_TT(task, MDP, params, sim);
             end

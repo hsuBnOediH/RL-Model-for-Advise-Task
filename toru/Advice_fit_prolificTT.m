@@ -6,10 +6,30 @@ has_practice_effects = false;
 % Manipulate Data
 directory = dir(folder);
 
-% sort by date
-dates = datetime({directory.date}, 'InputFormat', 'dd-MMM-yyyy HH:mm:ss');
+% Exclude directories themselves (isdir=true), just in case
+directory = directory(~[directory.isdir]);
+
+if ispc
+    % ---- Windows: extract datetime from filename ----
+    dates = NaT(numel(directory), 1);
+    for ii = 1:numel(directory)
+        dates(ii) = extract_datetime_from_filename(directory(ii).name);
+
+        % If the pattern does not match, fall back to file modification datetime
+        if isnat(dates(ii))
+            dates(ii) = datetime(directory(ii).datenum, 'ConvertFrom', 'datenum');
+        end
+    end
+else
+    % ---- Non-Windows: same as before (fix Locale to en_US if necessary) ----
+    dates = datetime({directory.date}, ...
+        'InputFormat', 'dd-MMM-yyyy HH:mm:ss', ...
+        'Locale', 'en_US');
+end
+
 % Sort the dates and get the sorted indices
-[~, sortedIndices] = sort(dates);
+[~, sortedIndices] = sort(dates, 'ascend');
+
 % Use the sorted indices to sort the structure array
 sortedDirectory = directory(sortedIndices);
 
@@ -270,7 +290,7 @@ end
              elseif model == 3
                  if OMEGAPOSINEGA
                      if MODELBASED
-                         MDPs  = ModelBasedRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
+                         MDPs  = ModelBasedRLModelconnectPosiNegaForget_TT(task, MDP, params, 0);
                      else
                          MDPs  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
                      end
@@ -395,4 +415,18 @@ end
         %fit_results.times_chosen_advisor = length(model_acc_time2);
         fit_results.LL = L;
            
+end
+
+function dt = extract_datetime_from_filename(fname)
+    dt = NaT;
+    pat = '_(\d{4}-\d{2}-\d{2})_(\d{1,2})h(\d{2})(?:\.(\d{2})(?:\.(\d{1,3}))?)?';
+    tok = regexp(fname, pat, 'tokens', 'once');
+    if isempty(tok), return; end
+    ymd = tok{1};
+    HH  = str2double(tok{2});
+    MM  = str2double(tok{3});
+    if numel(tok) >= 4 && ~isempty(tok{4}), SS = str2double(tok{4}); else, SS = 0; end
+    if numel(tok) >= 5 && ~isempty(tok{5}), ms = str2double(tok{5}); else, ms = 0; end
+    base = datetime(ymd, 'InputFormat','yyyy-MM-dd');
+    dt = base + hours(HH) + minutes(MM) + seconds(SS) + milliseconds(ms);
 end

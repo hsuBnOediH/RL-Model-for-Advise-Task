@@ -1,4 +1,4 @@
-function Q = advise_plot_cmg(whole_MDP)
+function Q = advise_plot_tt(whole_MDP)
 % auxiliary plotting routine for spm_MDP_VB - multiple trials
 % FORMAT Q = spm_MDP_VB_game(MDP)
 %
