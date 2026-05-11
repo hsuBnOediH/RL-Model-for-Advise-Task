@@ -76,7 +76,7 @@ IFLAMGDA = false;
 ONEMODEL = false;
 OMEGAPOSINEGA = true;
 MODELBASED = true;
-OMEGAdiff = 1; % 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (posi vs. nega), 4 = omega for context (posi vs. nega) and ad (posi vs. nega)
+OMEGAdiff = 4; % 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (posi vs. nega), 4 = omega for context (posi vs. nega) and ad, 5 = omega for context (posi vs. nega) and ad (posi vs. nega)
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
@@ -84,7 +84,7 @@ OMEGAdiff = 1; % 1 = oneomega, 2 = omega for context and ad, 3 = omega for conte
 
 %for paramcombi = 1:4 %for connected, or posi nega forgetting version
 
-for paramcombi = 1:5
+for paramcombi = 1
 %for paramcombi = 4
 
 if SIM
@@ -288,6 +288,24 @@ if paramcombi == 1
 
     params.omega_d_posi = .2;
     params.omega_d_nega = .2;
+    params.omega_a = .2;
+   
+  if model == 1
+    field = {'p_a','inv_temp','l_loss_value','omega_d_posi','omega_d_nega','omega_a','eta','state_exploration','Rsensitivity'}; %those are fitted
+  elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','omega_d_posi','omega_d_nega','omega_a','eta','lamgda','Rsensitivity'}; %those are fitted
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','reward_value','omega_d_posi','omega_d_nega','omega_a','eta','Rsensitivity'};
+     end
+  end
+
+   elseif OMEGAdiff == 5
+
+    params.omega_d_posi = .2;
+    params.omega_d_nega = .2;
     params.omega_a_posi = .2;
     params.omega_a_nega = .2;
    
@@ -370,7 +388,7 @@ elseif OMEGAdiff == 3
      end
  end
 
-elseif OMEGAdiff == 4
+elseif OMEGAdiff == 5
 
     params.omega_d_posi = .2;
     params.omega_d_nega = .2;
@@ -457,7 +475,7 @@ elseif OMEGAdiff == 3
      end
  end
 
-elseif OMEGAdiff == 4
+elseif OMEGAdiff == 5
 
     params.omega_d_posi = .2;
     params.omega_d_nega = .2;
@@ -545,7 +563,7 @@ elseif OMEGAdiff == 3
      end
   end
 
- elseif OMEGAdiff == 4
+ elseif OMEGAdiff == 5
 
     params.omega_d_posi = .2;
     params.omega_d_nega = .2;
@@ -667,7 +685,7 @@ end
      end
    end
 
- elseif OMEGAdiff == 4
+ elseif OMEGAdiff == 5
 
     params.omega_d_posi = .2;
     params.omega_d_nega = .2;
