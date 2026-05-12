@@ -76,7 +76,7 @@ IFLAMGDA = false;
 ONEMODEL = false;
 OMEGAPOSINEGA = true;
 MODELBASED = true;
-OMEGAdiff = 4; % 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (posi vs. nega), 4 = omega for context (posi vs. nega) and ad, 5 = omega for context (posi vs. nega) and ad (posi vs. nega)
+OMEGAdiff = 0; % 0 = no forgetting rate, 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (posi vs. nega), 4 = omega for context (posi vs. nega) and ad, 5 = omega for context (posi vs. nega) and ad (posi vs. nega)
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
@@ -227,8 +227,26 @@ if paramcombi == 1
 
  params.eta = .5;
 
- if OMEGAdiff == 1
-    
+if OMEGAdiff == 0
+
+    % No forgetting-rate model
+    % omega is fixed to zero and not estimated
+    params.omega = 0;
+
+  if model == 1
+    field = {'p_a','inv_temp','l_loss_value','eta','state_exploration','Rsensitivity'};
+  elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','eta','lamgda','Rsensitivity'};
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','reward_value','eta','Rsensitivity'};
+     end
+  end
+
+elseif OMEGAdiff == 1
+   
     params.omega = .2;
    
   if model == 1
