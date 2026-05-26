@@ -4,7 +4,7 @@ dbstop if error
 rng('default');
 cd(fileparts(mfilename('fullpath')));
 
-SIM = false; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
+SIM = true; % Generate simulated behavior (if false and FIT == true, will fit to subject file data instead)
 FIT = true; % Fit example subject data 'BBBBB' or fit simulated behavior (if SIM == true)
 plot = true;
 %indicate if prolific or local
@@ -23,7 +23,8 @@ if ispc
     results_dir = [root '/ATresults'];
     FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88'; %  6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
     INPUT_DIRECTORY = [root '/Advicedata/WB_Advice'];  % Where the subject file is located
-    INPUT_DIRECTORYforSIM = [root '/ATresults/ForSIM'];  % Where the subject file is located
+    %INPUT_DIRECTORYforSIM = [root '/ATresults/ForSIM'];  % Where the subject file is located
+    INPUT_DIRECTORYforSIM = 'C:/Users/Toru Takahashi/Dropbox/TakahashiDesktop/AdviceResults/Activeinference20260506loss2lessconstraint/paramcombi5';
                                                                                                                                                                                                                             
 else
     root = '/mnt/dell_storage/labs';
@@ -76,7 +77,7 @@ IFLAMGDA = false;
 ONEMODEL = false;
 OMEGAPOSINEGA = true;
 MODELBASED = true;
-OMEGAdiff = 0; % 0 = no forgetting rate, 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (posi vs. nega), 4 = omega for context (posi vs. nega) and ad, 5 = omega for context (posi vs. nega) and ad (posi vs. nega)
+OMEGAdiff = 1; % 0 = no forgetting rate, 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (posi vs. nega), 4 = omega for context (posi vs. nega) and ad, 5 = omega for context (posi vs. nega) and ad (posi vs. nega)
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
@@ -84,7 +85,7 @@ OMEGAdiff = 0; % 0 = no forgetting rate, 1 = oneomega, 2 = omega for context and
 
 %for paramcombi = 1:4 %for connected, or posi nega forgetting version
 
-for paramcombi = 1
+for paramcombi = 5
 %for paramcombi = 4
 
 if SIM
@@ -108,24 +109,25 @@ paramsim.inv_temp = subdatsim.posterior_inv_temp;
 
  if model == 1 %for Active inference
      paramsim.reward_value = 1; % 4 in the original model
-     paramsim.l_loss_value = 1; % 4 in the original model
+     paramsim.l_loss_value = subdatsim.posterior_l_loss_value; % 4 in the original model
+     paramsim.state_exploration = subdatsim.posterior_state_exploration;
  elseif model ~= 1 % for RL
-     paramsim.reward_value = subdatsim.posterior_reward_value; % 1 in the previous model as outcome sensitivity 
+     paramsim.reward_value = 4; % 1 in the previous model as outcome sensitivity 
      paramsim.l_loss_value = 4; % 8 in the original model
  end
 
 
-%paramsim.omega = subdatsim.posterior_omega;
-paramsim.omega_d = subdatsim.posterior_omega_d;
+paramsim.omega = subdatsim.posterior_omega;
+%paramsim.omega_d = subdatsim.posterior_omega_d;
 %paramsim.omega_d_win = subdatsim.posterior_omega_d_win;
 %paramsim.omega_d_loss = subdatsim.posterior_omega_d_loss;
 %paramsim.omega_a = subdatsim.posterior_omega_a;
-paramsim.omega_a_posi = subdatsim.posterior_omega_a_posi;
-paramsim.omega_a_nega = subdatsim.posterior_omega_a_nega;
+%paramsim.omega_a_posi = subdatsim.posterior_omega_a_posi;
+%paramsim.omega_a_nega = subdatsim.posterior_omega_a_nega;
 %paramsim.eta = subdatsim.posterior_eta;
-paramsim.eta_d = subdatsim.posterior_eta_d;
-%paramsim.eta_d_win = subdatsim.posterior_eta_d_win;
-%paramsim.eta_d_loss = subdatsim.posterior_eta_d_loss;
+%paramsim.eta_d = subdatsim.posterior_eta_d;
+paramsim.eta_d_win = subdatsim.posterior_eta_d_win;
+paramsim.eta_d_loss = subdatsim.posterior_eta_d_loss;
 %paramsim.eta_a = subdatsim.posterior_eta_a;
 paramsim.eta_a_win = subdatsim.posterior_eta_a_win;
 paramsim.eta_a_loss = subdatsim.posterior_eta_a_loss;

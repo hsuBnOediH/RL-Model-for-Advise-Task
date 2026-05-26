@@ -34,7 +34,8 @@ load('trialinfo_forty_eighty.mat');
         sim = 1;
         
         if    model == 1
-              MDPs  = Simple_Advice_Model_TT(task, MDP, params, sim);
+              %MDPs  = Simple_Advice_Model_TT(task, MDP, params, sim);
+              MDPs  = Simple_Formal_Advice_Model_TT(task, MDP, params, sim);
         elseif model == 2
               MDPs  = ModelFreeRLModelconnect_TT(task, MDP, params, sim);
         elseif model == 3
