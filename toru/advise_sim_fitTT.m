@@ -54,7 +54,7 @@ for i = 1:length(fields)
 
         params.(field) = 1/(1+exp(-DCM.Ep.(field)));
 
-    elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value', 'Rsensitivity'}) || ...
+    elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value', 'Rsensitivity','self_reliance_bonus'}) || ...
             (model == 1 && ismember(field, eta_fields))
 
         params.(field) = exp(DCM.Ep.(field));

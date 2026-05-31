@@ -77,6 +77,7 @@ IFLAMGDA = false;
 ONEMODEL = false;
 OMEGAPOSINEGA = true;
 MODELBASED = true;
+ADVICECOST = true;
 OMEGAdiff = 1; % 0 = no forgetting rate, 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (posi vs. nega), 4 = omega for context (posi vs. nega) and ad, 5 = omega for context (posi vs. nega) and ad (posi vs. nega)
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
@@ -113,7 +114,7 @@ paramsim.inv_temp = subdatsim.posterior_inv_temp;
      paramsim.state_exploration = subdatsim.posterior_state_exploration;
  elseif model ~= 1 % for RL
      paramsim.reward_value = 4; % 1 in the previous model as outcome sensitivity 
-     paramsim.l_loss_value = 4; % 8 in the original model
+     paramsim.l_loss_value = 1; % 8 in the original model
  end
 
 
@@ -180,7 +181,7 @@ params.state_exploration = 1;
 params.parameter_exploration = 0;
 params.Rsensitivity = 2;
 
-params.self_reliance_bonus = 0;
+params.self_reliance_bonus = 0.2;
 
  if model == 1 %for Active inference
 params.reward_value = 1; % 4 in the original model

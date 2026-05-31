@@ -38,16 +38,21 @@ function [results] = rl_v3_adaptedTT(task, MDP, params, sim)
 nTrials = 30;
 
 % --- Reward structure ---
-game.winDirect    = 40;
-game.winAfterHint = 20;
+% Subjective utility scale for choice model
+game.winDirect    = 1;
+game.winAfterHint = 0.5;
+
+% Actual point scale for output
+game.actualWinDirect    = 40;
+game.actualWinAfterHint = 20;
 
 if task.block_type == "SL" % small loss room
-    game.lossAmount = -40;
+    game.lossAmount = -1;
+    game.actualLossAmount = -40;
 elseif task.block_type == "LL" % large loss room
-    game.lossAmount = -80;
+    game.lossAmount = -2;
+    game.actualLossAmount = -80;
 end
-
-valueScale = 40;
 
 % --- Map params to internal variables ---
 beliefRight_init = 0.5;          % fixed prior (not fitted)
@@ -97,7 +102,7 @@ else
 end
 
 % Optional advice cost (self-reliance bonus)
-if isfield(params, 'self_reliance_bonus')
+if isfield(params, 'self_reliance_bonus') 
     adviceCost = params.self_reliance_bonus;
 else
     adviceCost = 0;
@@ -180,13 +185,13 @@ for t = 1:nTrials
         computeActionValues(currentBeliefRight, currentBeliefTrust, game, agent);
 
     % --- Softmax policies ---
-    policyStart(t,:) = spm_softmax((invTemp1 / valueScale) * ...
+    policyStart(t,:) = spm_softmax(invTemp1 * ...
     [valueAsk; valueLeftDirect; valueRightDirect])';
 
-    policyAfterLeft(t,:) = spm_softmax((invTemp2 / valueScale) * ...
+    policyAfterLeft(t,:) = spm_softmax(invTemp2 * ...
     [vIfLeftHint_chooseLeft; vIfLeftHint_chooseRight])';
 
-    policyAfterRight(t,:) = spm_softmax((invTemp2 / valueScale) * ...
+    policyAfterRight(t,:) = spm_softmax(invTemp2 * ...
     [vIfRightHint_chooseLeft; vIfRightHint_chooseRight])';
 
     % Store stage-1 probabilities
@@ -249,11 +254,11 @@ for t = 1:nTrials
             wonTrial(t) = (observations.rewards(t) == 1);
         end
 
-        if wonTrial(t)
-            rewardReceived(t) = game.winAfterHint;
-        else
-            rewardReceived(t) = game.lossAmount;
-        end
+    if wonTrial(t)
+        rewardReceived(t) = game.actualWinAfterHint;
+    else
+        rewardReceived(t) = game.actualLossAmount;
+    end
 
         % Did participant follow the hint?
         followedHint = (finalChoice(t) == hintWasRight(t));
@@ -293,11 +298,11 @@ for t = 1:nTrials
             wonTrial(t) = (observations.rewards(t) == 1);
         end
 
-        if wonTrial(t)
-            rewardReceived(t) = game.winDirect;
-        else
-            rewardReceived(t) = game.lossAmount;
-        end
+    if wonTrial(t)
+        rewardReceived(t) = game.actualWinDirect;
+    else
+        rewardReceived(t) = game.actualLossAmount;
+    end
 
         % --- Belief updates ---
 
@@ -380,7 +385,7 @@ function u = utilityOfReward(r, lossAversion)
     if r >= 0
         u = r;
     else
-        u = -lossAversion * 40;
+        u = -lossAversion;
     end
 end
 

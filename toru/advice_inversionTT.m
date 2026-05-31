@@ -72,7 +72,7 @@ for i = 1:length(DCM.field)
             pE.(field) = log(DCM.params.(field)/(1-DCM.params.(field)));  % bound between 0 and 1
             pC{i,i}    = prior_variance;
         
-        elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value','Rsensitivity'}) || ...
+        elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value','Rsensitivity','self_reliance_bonus'}) || ...
             (model == 1 && ismember(field, eta_fields))
 
             pE.(field) = log(DCM.params.(field));               % in log-space (to keep positive)
@@ -144,7 +144,7 @@ for i = 1:length(fields)
 
         params.(field) = 1/(1+exp(-P.(field)));
 
-    elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value', 'Rsensitivity'}) || ...
+    elseif ismember(field, {'inv_temp', 'reward_value', 'l_loss_value', 'Rsensitivity','self_reliance_bonus'}) || ...
         (M.model == 1 && ismember(field, eta_fields))
 
         params.(field) = exp(P.(field));
