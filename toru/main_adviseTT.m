@@ -77,7 +77,7 @@ IFLAMGDA = false;
 ONEMODEL = false;
 OMEGAPOSINEGA = true;
 MODELBASED = true;
-ADVICECOST = true;
+ADVICECOST = false;
 OMEGAdiff = 1; % 0 = no forgetting rate, 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (posi vs. nega), 4 = omega for context (posi vs. nega) and ad, 5 = omega for context (posi vs. nega) and ad (posi vs. nega)
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
@@ -261,7 +261,12 @@ elseif OMEGAdiff == 1
         field = {'p_a','inv_temp','l_loss_value','omega','eta','lamgda','Rsensitivity'}; %those are fitted
      else
         params.lamgda = 1; %As fixed param
-        field = {'p_a','inv_temp','l_loss_value','omega','eta','Rsensitivity','self_reliance_bonus'};
+        if ADVICECOST
+            field = {'p_a','inv_temp','l_loss_value','omega','eta','Rsensitivity','self_reliance_bonus'};
+        else
+            params.self_reliance_bonus = 0;
+            field = {'p_a','inv_temp','l_loss_value','omega','eta','Rsensitivity'};
+        end
         %field = {'p_a','inv_temp','l_loss_value','eta','Rsensitivity'};
      end
   end
@@ -364,7 +369,12 @@ if OMEGAdiff == 1
         field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a','lamgda','Rsensitivity'}; %those are fitted
      else
         params.lamgda = 1; %As fixed param
-        field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a','Rsensitivity','self_reliance_bonus'};
+        if ADVICECOST
+            field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a','Rsensitivity','self_reliance_bonus'};
+        else
+            params.self_reliance_bonus = 0;
+            field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a','Rsensitivity'};
+        end
         %field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a','Rsensitivity'};
      end
  end
@@ -452,7 +462,12 @@ if OMEGAdiff == 1
         field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a','lamgda','Rsensitivity'}; %those are fitted
      else
         params.lamgda = 1; %As fixed param
-        field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a','Rsensitivity','self_reliance_bonus'};
+        if ADVICECOST
+            field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a','Rsensitivity','self_reliance_bonus'};
+        else
+            params.self_reliance_bonus = 0;
+            field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a','Rsensitivity'};
+        end
         %field = {'p_a','inv_temp','l_loss_value','eta_d_win','eta_d_loss','eta_a','Rsensitivity'};
      end
  end
@@ -540,7 +555,12 @@ elseif paramcombi == 4
         field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss','lamgda','Rsensitivity'}; %those are fitted
      else
         params.lamgda = 1; %As fixed param
-        field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss','Rsensitivity','self_reliance_bonus'};
+        if ADVICECOST
+            field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss','Rsensitivity','self_reliance_bonus'};
+        else
+            params.self_reliance_bonus = 0;
+            field = {'p_a','inv_temp','l_loss_value','omega','eta_d','eta_a_win','eta_a_loss','Rsensitivity'};
+        end
         %field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a_win','eta_a_loss','Rsensitivity'};
      end
   end
@@ -642,8 +662,13 @@ end
         field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a_win','eta_a_loss','lamgda','Rsensitivity'}; 
      else
         params.lamgda = 1; %As fixed param
+        if ADVICECOST
         %field = {'p_a','inv_temp','l_loss_value','omega_d_win','omega_d_loss','omega_a_win','omega_a_loss','eta','Rsensitivity'};
-        field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a_win','eta_a_loss','Rsensitivity','self_reliance_bonus'};
+            field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a_win','eta_a_loss','Rsensitivity','self_reliance_bonus'};
+        else
+            params.self_reliance_bonus = 0;
+            field = {'p_a','inv_temp','l_loss_value','omega','eta_d_win','eta_d_loss','eta_a_win','eta_a_loss','Rsensitivity'};
+        end
      end
  end
 
