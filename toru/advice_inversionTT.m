@@ -227,7 +227,8 @@ for idx_block = 1:num_blocks
     elseif M.model == 3
         if M.OMEGAPOSINEGA
             if M.MODELBASED
-                MDP  = ModelBasedRLModelconnectPosiNegaForget_TT(task, MDP, params, 0);
+                %MDP  = ModelBasedRLModelconnectPosiNegaForget_TT(task, MDP, params, 0);
+                MDP  = rl_v3_adaptedTT(task, MDP, params, 0);
             else
                 MDP  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
             end

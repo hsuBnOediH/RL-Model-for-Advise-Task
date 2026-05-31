@@ -141,7 +141,8 @@ end
              elseif model == 3
                  if OMEGAPOSINEGA
                      if MODELBASED
-                         MDPs  = ModelBasedRLModelconnectPosiNegaForget_TT(task, MDP, params, 0);
+                         %MDPs  = ModelBasedRLModelconnectPosiNegaForget_TT(task, MDP, params, 0);
+                         MDPs  = rl_v3_adaptedTT(task, MDP, params, 0);
                      else
                          MDPs  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, 0);
                      end

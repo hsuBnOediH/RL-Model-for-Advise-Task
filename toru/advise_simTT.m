@@ -41,7 +41,8 @@ load('trialinfo_forty_eighty.mat');
         elseif model == 3
             if OMEGAPOSINEGA
                      if MODELBASED
-                         MDPs  = ModelBasedRLModelconnectPosiNegaForget_TT(task, MDP, params, sim);
+                         %MDPs  = ModelBasedRLModelconnectPosiNegaForget_TT(task, MDP, params, sim);
+                         MDPs  = rl_v3_adaptedTT(task, MDP, params, sim);
                      else
                          MDPs  = ModelFreeRLModeldisconnectPosiNegaForget_TT(task, MDP, params, sim);
                      end
