@@ -24,7 +24,7 @@ if ispc
     FIT_SUBJECT = '6544b95b7a6b86a8cd8feb88'; %  6550ea5723a7adbcc422790b 5afa19a4f856320001cf920f(No advice participant)  TORUTEST
     INPUT_DIRECTORY = [root '/Advicedata/WB_Advice'];  % Where the subject file is located
     %INPUT_DIRECTORYforSIM = [root '/ATresults/ForSIM'];  % Where the subject file is located
-    INPUT_DIRECTORYforSIM = 'C:/Users/Toru Takahashi/Dropbox/TakahashiDesktop/AdviceResults/rl_v3_adaptedTT/paramcombi4';
+    INPUT_DIRECTORYforSIM = 'C:/Users/Toru Takahashi/Dropbox/TakahashiDesktop/AdviceResults/Activeinferenceloss2lessconstomega025/paramcombi5';
                                                                                                                                                                                                                             
 else
     root = '/mnt/dell_storage/labs';
@@ -70,7 +70,7 @@ end
 
 
 %%% Specify model 1 = active inference, 2 = RL connected (outdated), 3 = RL disconnected
-model = 3;
+model = 1;
 
 %%% Specify 
 IFLAMGDA = false;
@@ -87,7 +87,7 @@ OMEGAdiff = 1; % 0 = no forgetting rate, 1 = oneomega, 2 = omega for context and
 %for paramcombi = 1:4 %for connected, or posi nega forgetting version
 
 %for paramcombi = 1:5
-for paramcombi = 4
+for paramcombi = 5
 
 if SIM
 
@@ -126,16 +126,16 @@ paramsim.omega = subdatsim.posterior_omega;
 %paramsim.omega_a_posi = subdatsim.posterior_omega_a_posi;
 %paramsim.omega_a_nega = subdatsim.posterior_omega_a_nega;
 %paramsim.eta = subdatsim.posterior_eta;
-paramsim.eta_d = subdatsim.posterior_eta_d;
-%paramsim.eta_d_win = subdatsim.posterior_eta_d_win;
-%paramsim.eta_d_loss = subdatsim.posterior_eta_d_loss;
+%paramsim.eta_d = subdatsim.posterior_eta_d;
+paramsim.eta_d_win = subdatsim.posterior_eta_d_win;
+paramsim.eta_d_loss = subdatsim.posterior_eta_d_loss;
 %paramsim.eta_a = subdatsim.posterior_eta_a;
 paramsim.eta_a_win = subdatsim.posterior_eta_a_win;
 paramsim.eta_a_loss = subdatsim.posterior_eta_a_loss;
 %paramsim.lamgda = subdatsim.posterior_lamgda;
 paramsim.lamgda = 1;
 paramsim.Rsensitivity = subdatsim.posterior_Rsensitivity;
-paramsim.self_reliance_bonus = subdatsim.posterior_self_reliance_bonus;
+%paramsim.self_reliance_bonus = subdatsim.posterior_self_reliance_bonus;
 
 %%%to play around
 % paramsim.state_exploration = 1;
