@@ -77,8 +77,8 @@ IFLAMGDA = false;
 ONEMODEL = false;
 OMEGAPOSINEGA = true;
 MODELBASED = true;
-ADVICECOST = false;
-OMEGAdiff = 1; % 0 = no forgetting rate, 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (posi vs. nega), 4 = omega for context (posi vs. nega) and ad, 5 = omega for context (posi vs. nega) and ad (posi vs. nega)
+ADVICECOST = true;
+OMEGAdiff = 0; % 0 = no forgetting rate, 1 = oneomega, 2 = omega for context and ad, 3 = omega for context and ad (posi vs. nega), 4 = omega for context (posi vs. nega) and ad, 5 = omega for context (posi vs. nega) and ad (posi vs. nega)
 
 % fit reward value and loss value, fix explore weight to 1, fix novelty
 % weight to 0
@@ -242,10 +242,15 @@ if OMEGAdiff == 0
      if IFLAMGDA
         params.lamgda = .5;
         field = {'p_a','inv_temp','l_loss_value','eta','lamgda','Rsensitivity'};
-     else
-        params.lamgda = 1; %As fixed param
-        field = {'p_a','inv_temp','l_loss_value','eta','Rsensitivity'};
-     end
+      else
+         params.lamgda = 1; %As fixed param
+         if ADVICECOST
+             field = {'p_a','inv_temp','l_loss_value','eta','Rsensitivity','self_reliance_bonus'};
+         else
+             params.self_reliance_bonus = 0;
+             field = {'p_a','inv_temp','l_loss_value','eta','Rsensitivity'};
+         end
+      end
   end
 
 elseif OMEGAdiff == 1
@@ -356,7 +361,29 @@ elseif paramcombi == 2
     params.eta_d = .5;
     params.eta_a = .5;
 
-if OMEGAdiff == 1
+if OMEGAdiff == 0
+
+    % No forgetting-rate model
+    params.omega = 0;
+
+ if model == 1
+    field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a','state_exploration','Rsensitivity'};
+ elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a','lamgda','Rsensitivity'};
+     else
+        params.lamgda = 1; %As fixed param
+        if ADVICECOST
+            field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a','Rsensitivity','self_reliance_bonus'};
+        else
+            params.self_reliance_bonus = 0;
+            field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a','Rsensitivity'};
+        end
+     end
+ end
+
+elseif OMEGAdiff == 1
     
     params.omega = .25;
 
@@ -449,7 +476,29 @@ elseif paramcombi == 3
     params.eta_d_loss = .5;
     params.eta_a = .5;
 
-if OMEGAdiff == 1
+if OMEGAdiff == 0
+
+    % No forgetting-rate model
+    params.omega = 0;
+
+ if model == 1
+    field = {'p_a','inv_temp','l_loss_value','eta_d_win','eta_d_loss','eta_a','state_exploration','Rsensitivity'};
+ elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','eta_d_win','eta_d_loss','eta_a','lamgda','Rsensitivity'};
+     else
+        params.lamgda = 1; %As fixed param
+        if ADVICECOST
+            field = {'p_a','inv_temp','l_loss_value','eta_d_win','eta_d_loss','eta_a','Rsensitivity','self_reliance_bonus'};
+        else
+            params.self_reliance_bonus = 0;
+            field = {'p_a','inv_temp','l_loss_value','eta_d_win','eta_d_loss','eta_a','Rsensitivity'};
+        end
+     end
+ end
+
+elseif OMEGAdiff == 1
     
     params.omega = .25;
 
@@ -542,7 +591,29 @@ elseif paramcombi == 4
     params.eta_a_win = .5;
     params.eta_a_loss = .5;
 
- if OMEGAdiff == 1
+if OMEGAdiff == 0
+
+    % No forgetting-rate model
+    params.omega = 0;
+
+  if model == 1
+    field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a_win','eta_a_loss','state_exploration','Rsensitivity'};
+  elseif model ~= 1
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a_win','eta_a_loss','lamgda','Rsensitivity'};
+     else
+        params.lamgda = 1; %As fixed param
+        if ADVICECOST
+            field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a_win','eta_a_loss','Rsensitivity','self_reliance_bonus'};
+        else
+            params.self_reliance_bonus = 0;
+            field = {'p_a','inv_temp','l_loss_value','eta_d','eta_a_win','eta_a_loss','Rsensitivity'};
+        end
+     end
+  end
+
+elseif OMEGAdiff == 1
     
     params.omega = .25;
 
@@ -639,7 +710,37 @@ end
     params.eta_a_win = .5;
     params.eta_a_loss = .5;
 
- if OMEGAdiff == 1
+if OMEGAdiff == 0
+
+    % No forgetting-rate model
+    params.omega = 0;
+
+ if model == 1
+    field = {'p_a','inv_temp','l_loss_value','eta_d_win','eta_d_loss','eta_a_win','eta_a_loss','state_exploration','Rsensitivity'};
+ elseif model == 2
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','eta','lamgda','Rsensitivity'};
+     else
+        params.lamgda = 1; %As fixed param
+        field = {'p_a','inv_temp','l_loss_value','eta','Rsensitivity'};
+     end
+ elseif model == 3
+     if IFLAMGDA
+        params.lamgda = .5;
+        field = {'p_a','inv_temp','l_loss_value','eta_d_win','eta_d_loss','eta_a_win','eta_a_loss','lamgda','Rsensitivity'};
+     else
+        params.lamgda = 1; %As fixed param
+        if ADVICECOST
+            field = {'p_a','inv_temp','l_loss_value','eta_d_win','eta_d_loss','eta_a_win','eta_a_loss','Rsensitivity','self_reliance_bonus'};
+        else
+            params.self_reliance_bonus = 0;
+            field = {'p_a','inv_temp','l_loss_value','eta_d_win','eta_d_loss','eta_a_win','eta_a_loss','Rsensitivity'};
+        end
+     end
+ end
+
+elseif OMEGAdiff == 1
    
     params.omega = .25;
 
